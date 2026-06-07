@@ -203,6 +203,7 @@ textarea { resize: vertical; line-height: 1.5; }
       <div class="nav-section">
         <div class="nav-label">Sistema</div>
         <button class="nav-item" onclick="showPage('cuentas')"><span class="icon">💼</span> Mis Cuentas</button>
+        <button class="nav-item" onclick="showPage('movimientos')"><span class="icon">💸</span> Movimientos</button>
         <button class="nav-item" onclick="showPage('reglas')"><span class="icon">⚖</span> Reglas</button>
         <button class="nav-item" onclick="showPage('semanal')"><span class="icon">📊</span> Revisión Semanal</button>
       </div>
@@ -390,6 +391,26 @@ textarea { resize: vertical; line-height: 1.5; }
         </div>
       </div>
 
+      <!-- MOVIMIENTOS -->
+      <div class="page" id="page-movimientos">
+        <div class="form-section">
+          <div class="form-section-title">Nuevo Movimiento</div>
+          <div class="form-grid">
+            <div class="form-group"><label>Fecha</label><input type="date" id="m_mov_date"/></div>
+            <div class="form-group"><label>Tipo</label>
+              <select id="m_mov_type">
+                <option value="Depósito">Depósito</option>
+                <option value="Retiro">Retiro</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Monto ($)</label><input type="number" id="m_mov_amount" placeholder="ej. 1000"/></div>
+          </div>
+          <div class="form-group" style="margin-top:14px"><label>Notas</label><textarea id="m_mov_notes" rows="2" placeholder="ej. Retiro mensual, depósito inicial..."></textarea></div>
+          <div class="form-actions"><button type="button" class="btn-primary" onclick="saveMovement()">Guardar Movimiento</button></div>
+        </div>
+        <div id="movementsList"></div>
+      </div>
+
       <!-- REVISIÓN SEMANAL -->
       <div class="page" id="page-semanal">
         <div class="form-section">
@@ -451,6 +472,7 @@ const pages = {
   cuentas: { title: 'Mis Cuentas', subtitle: 'Gestiona tus cuentas y metas' },
   reglas: { title: 'Reglas del Sistema', subtitle: 'Estas reglas son ley' },
   semanal: { title: 'Revisión Semanal', subtitle: 'Análisis y mejora continua' },
+  movimientos: { title: 'Movimientos', subtitle: 'Depósitos y retiros de la cuenta' },
 };
 
 function showPage(id) {
@@ -466,6 +488,7 @@ function showPage(id) {
   if (id === 'bitacora') renderBitacora();
   if (id === 'cuentas') renderAccounts();
   if (id === 'semanal') renderWeekly();
+  if (id === 'movimientos') { renderMovimientos(); document.getElementById('m_mov_date').value = new Date().toISOString().split('T')[0]; }
   if (window.innerWidth < 768) document.getElementById('sidebar').classList.remove('open');
 }
 
@@ -509,7 +532,7 @@ function calcStats() {
   return { wins: wins.length, losses: losses.length, total: trades.length, totalPnl, winRate: trades.length ? Math.round(wins.length/trades.length*100) : 0, avgScore, avgWin, avgLoss };
 }
 
-function renderDashboard() {
+async function renderDashboard() {
   const s = calcStats(), acc = getAccount();
   document.getElementById('statsGrid').innerHTML = `
     <div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-value ${s.winRate>=50?'text-success':'text-danger'}">${s.winRate}%</div><div class="stat-sub">${s.wins}W · ${s.losses}L · ${s.total} trades</div></div>
@@ -522,7 +545,10 @@ function renderDashboard() {
 
   // Progress bars from account goals
   const goals = acc?.goals ? (typeof acc.goals === 'string' ? JSON.parse(acc.goals) : acc.goals) : [];
-  const balance = acc ? (acc.current_balance||0) + s.totalPnl : 0;
+  const movements = await loadMovements();
+  const totalDeposits = movements.filter(m => m.type === 'Depósito').reduce((s,m) => s+m.amount, 0);
+  const totalWithdrawals = movements.filter(m => m.type === 'Retiro').reduce((s,m) => s+m.amount, 0);
+  const balance = acc ? (acc.current_balance||0) + s.totalPnl + totalDeposits - totalWithdrawals : 0;
   const psec = document.getElementById('progressSection');
   if (goals && goals.length) {
     psec.innerHTML = `<div class="progress-title">Metas — ${acc?.name || ''}</div>` +
@@ -703,6 +729,62 @@ async function saveWeeklyReview() {
   const p = { account_id:currentAccountId, week_start:document.getElementById('w_start').value, week_end:document.getElementById('w_end').value, market_regime:document.getElementById('w_regime').value, rules_compliance:document.getElementById('w_compliance').value, most_repeated_error:document.getElementById('w_error').value, strategy_adjustments:document.getElementById('w_adjustments').value, notes:document.getElementById('w_notes').value };
   if (!p.week_start||!p.week_end) { alert('Selecciona el rango'); return; }
   await sb.from('weekly_reviews').insert(p); showToast('✦ Revisión guardada'); renderWeekly();
+}
+
+async function loadMovements() {
+  if (!currentAccountId) return [];
+  const { data } = await sb.from('movements').select('*').eq('account_id', currentAccountId).order('movement_date', { ascending: false });
+  return data || [];
+}
+
+async function saveMovement() {
+  const date = document.getElementById('m_mov_date').value;
+  const type = document.getElementById('m_mov_type').value;
+  const amount = parseFloat(document.getElementById('m_mov_amount').value);
+  const notes = document.getElementById('m_mov_notes').value;
+  if (!date || !amount) { alert('Fecha y monto son obligatorios'); return; }
+  await sb.from('movements').insert({ account_id: currentAccountId, movement_date: date, type, amount, notes });
+  showToast('✦ Movimiento guardado');
+  document.getElementById('m_mov_amount').value = '';
+  document.getElementById('m_mov_notes').value = '';
+  renderMovimientos();
+  renderDashboard();
+}
+
+async function renderMovimientos() {
+  const movements = await loadMovements();
+  const totalDeposits = movements.filter(m => m.type === 'Depósito').reduce((s,m) => s+m.amount, 0);
+  const totalWithdrawals = movements.filter(m => m.type === 'Retiro').reduce((s,m) => s+m.amount, 0);
+  const container = document.getElementById('movementsList');
+  if (!movements.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">💸</div><div class="empty-title">No hay movimientos registrados</div></div>';
+    return;
+  }
+  container.innerHTML = `
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card"><div class="stat-label">Total Depósitos</div><div class="stat-value text-success">+$${totalDeposits.toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>
+      <div class="stat-card"><div class="stat-label">Total Retiros</div><div class="stat-value text-danger">-$${totalWithdrawals.toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>
+      <div class="stat-card"><div class="stat-label">Neto Movimientos</div><div class="stat-value ${totalDeposits-totalWithdrawals>=0?'text-success':'text-danger'}">${totalDeposits-totalWithdrawals>=0?'+':''} $${(totalDeposits-totalWithdrawals).toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>
+    </div>
+    ${movements.map(m => `
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-header">
+        <div><div class="card-title">${m.type}</div><div class="card-meta">${m.movement_date}</div></div>
+        <div class="badges">
+          <span class="badge ${m.type==='Depósito'?'badge-green':'badge-red'}">${m.type==='Depósito'?'+':'-'}$${Number(m.amount).toLocaleString()}</span>
+          <button class="btn-danger" onclick="deleteMovement('${m.id}')">✕</button>
+        </div>
+      </div>
+      ${m.notes?`<div class="notes-box">${m.notes}</div>`:''}
+    </div>`).join('')}`;
+}
+
+async function deleteMovement(id) {
+  if (!confirm('¿Eliminar este movimiento?')) return;
+  await sb.from('movements').delete().eq('id', id);
+  showToast('Movimiento eliminado');
+  renderMovimientos();
+  renderDashboard();
 }
 
 async function renderWeekly() {
