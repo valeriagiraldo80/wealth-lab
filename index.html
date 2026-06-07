@@ -277,8 +277,10 @@ textarea { resize: vertical; line-height: 1.5; }
             <div class="form-grid">
               <div class="form-group"><label>Strikes</label><input type="text" id="f_strikes" placeholder="ej. 5480/5500/5520" style="font-family:'Josefin Sans',sans-serif"/></div>
               <div class="form-group"><label>Ancho de alas (pts)</label><input type="number" id="f_wing_width" placeholder="ej. 20"/></div>
+              <div class="form-group"><label>Cantidad de contratos</label><input type="number" id="f_contracts" placeholder="ej. 1" min="1" oninput="calcPremiumTotal()"/></div>
               <div class="form-group"><label>DTE</label><input type="number" id="f_dte" placeholder="ej. 0"/></div>
-              <div class="form-group"><label>Prima cobrada ($)</label><input type="number" id="f_premium" placeholder="ej. 350"/></div>
+              <div class="form-group"><label>Prima por contrato ($)</label><input type="number" id="f_premium" placeholder="ej. 350" oninput="calcPremiumTotal()"/></div>
+              <div class="form-group"><label>Prima total ($)</label><input type="number" id="f_premium_total" placeholder="Auto" style="background:var(--bg4);color:var(--gold-light)" readonly/></div>
               <div class="form-group"><label>Target de ganancia ($)</label><input type="number" id="f_target" placeholder="ej. 200"/></div>
               <div class="form-group"><label>Stop loss ($)</label><input type="number" id="f_stop" placeholder="ej. -150"/></div>
             </div>
@@ -296,7 +298,9 @@ textarea { resize: vertical; line-height: 1.5; }
               <div class="form-group"><label>Tipo de cierre</label><select id="f_close_type"><option value="">Seleccionar...</option><option value="Target">Target alcanzado</option><option value="Stop Loss">Stop loss</option><option value="Cierre Parcial">Cierre parcial</option><option value="Expiró">Expiró sin valor</option><option value="Cambió Tesis">Cambió la tesis</option><option value="Manual">Cierre manual</option></select></div>
               <div class="form-group" id="partialGroup" style="display:none"><label>% cerrado</label><input type="number" id="f_partial_pct" placeholder="ej. 50"/></div>
               <div class="form-group" id="partialPnlGroup" style="display:none"><label>P&L parcial ($)</label><input type="number" id="f_partial_pnl"/></div>
-              <div class="form-group"><label>P&L realizado ($)</label><input type="number" id="f_pnl" placeholder="ej. 350 o -150" required/></div>
+              <div class="form-group"><label>P&L bruto ($)</label><input type="number" id="f_pnl_gross" placeholder="ej. 350" oninput="calcNetPnl()"/></div>
+              <div class="form-group"><label>Fees del broker ($)</label><input type="number" id="f_fees" placeholder="ej. 2.50" oninput="calcNetPnl()"/></div>
+              <div class="form-group"><label>P&L neto ($)</label><input type="number" id="f_pnl" placeholder="Auto" style="background:var(--bg4);color:var(--gold-light)" readonly required/></div>
               <div class="form-group"><label>¿Seguí mis reglas?</label><select id="f_followed_rules"><option value="Sí">Sí</option><option value="No">No</option><option value="Parcialmente">Parcialmente</option></select></div>
               <div class="form-group full" id="rulesBrokenGroup" style="display:none"><label>¿Cuál regla rompí?</label><input type="text" id="f_rules_broken"/></div>
             </div>
@@ -672,7 +676,7 @@ document.getElementById('f_followed_rules')?.addEventListener('change',function(
 async function saveTrade(e) {
   e.preventDefault();
   const g = id => document.getElementById(id)?.value||null;
-  const payload = { account_id:currentAccountId, trade_date:g('f_date'), entry_time:g('f_entry_time'), exit_time:g('f_exit_time'), asset:g('f_asset')||'SPX', trade_type:g('f_trade_type'), strategy:g('f_strategy'), direction:g('f_direction'), market_condition:g('f_market_condition'), gex_context:g('f_gex_context'), mvc:g('f_mvc'), vix_level:g('f_vix_level'), mag7_sentiment:g('f_mag7_sentiment'), thesis:g('f_thesis'), strikes:g('f_strikes'), wing_width:g('f_wing_width')?parseInt(g('f_wing_width')):null, dte:g('f_dte')?parseInt(g('f_dte')):null, premium_collected:g('f_premium')?parseFloat(g('f_premium')):null, profit_target:g('f_target')?parseFloat(g('f_target')):null, stop_loss:g('f_stop')?parseFloat(g('f_stop')):null, max_risk_usd:g('f_max_risk')?parseFloat(g('f_max_risk')):null, risk_pct:g('f_risk_pct')?parseFloat(g('f_risk_pct')):null, close_type:g('f_close_type'), partial_pct:g('f_partial_pct')?parseInt(g('f_partial_pct')):null, partial_pnl:g('f_partial_pnl')?parseFloat(g('f_partial_pnl')):null, pnl:g('f_pnl')?parseFloat(g('f_pnl')):null, followed_rules:g('f_followed_rules'), rules_broken:g('f_rules_broken'), execution_score:selectedScore, what_went_well:g('f_well'), what_to_improve:g('f_improve'), errors:selectedErrors.length?selectedErrors:null, quality_trade:selectedQuality, notes:g('f_notes') };
+  const payload = { account_id:currentAccountId, trade_date:g('f_date'), entry_time:g('f_entry_time'), exit_time:g('f_exit_time'), asset:g('f_asset')||'SPX', trade_type:g('f_trade_type'), strategy:g('f_strategy'), direction:g('f_direction'), market_condition:g('f_market_condition'), gex_context:g('f_gex_context'), mvc:g('f_mvc'), vix_level:g('f_vix_level'), mag7_sentiment:g('f_mag7_sentiment'), thesis:g('f_thesis'), strikes:g('f_strikes'), wing_width:g('f_wing_width')?parseInt(g('f_wing_width')):null, dte:g('f_dte')?parseInt(g('f_dte')):null, premium_collected:g('f_premium')?parseFloat(g('f_premium')):null, profit_target:g('f_target')?parseFloat(g('f_target')):null, stop_loss:g('f_stop')?parseFloat(g('f_stop')):null, max_risk_usd:g('f_max_risk')?parseFloat(g('f_max_risk')):null, risk_pct:g('f_risk_pct')?parseFloat(g('f_risk_pct')):null, close_type:g('f_close_type'), partial_pct:g('f_partial_pct')?parseInt(g('f_partial_pct')):null, partial_pnl:g('f_partial_pnl')?parseFloat(g('f_partial_pnl')):null, pnl:g('f_pnl')?parseFloat(g('f_pnl')):null, pnl_gross:g('f_pnl_gross')?parseFloat(g('f_pnl_gross')):null, broker_fees:g('f_fees')?parseFloat(g('f_fees')):null, contracts:g('f_contracts')?parseInt(g('f_contracts')):null, premium_total:g('f_premium_total')?parseFloat(g('f_premium_total')):null, followed_rules:g('f_followed_rules'), rules_broken:g('f_rules_broken'), execution_score:selectedScore, what_went_well:g('f_well'), what_to_improve:g('f_improve'), errors:selectedErrors.length?selectedErrors:null, quality_trade:selectedQuality, notes:g('f_notes') };
   const {error} = await sb.from('trades').insert(payload);
   if (error) { alert('Error: '+error.message); return; }
   showToast('✦ Trade guardado'); resetForm(); await loadTrades(); showPage('bitacora');
@@ -682,6 +686,9 @@ function resetForm() {
   document.getElementById('tradeForm').reset();
   document.getElementById('f_date').value = new Date().toISOString().split('T')[0];
   document.getElementById('f_asset').value = 'SPX';
+  if(document.getElementById('f_premium_total')) document.getElementById('f_premium_total').value='';
+  if(document.getElementById('f_pnl_gross')) document.getElementById('f_pnl_gross').value='';
+  if(document.getElementById('f_fees')) document.getElementById('f_fees').value='';
   selectedScore=null; selectedErrors=[]; selectedQuality=null;
   document.querySelectorAll('.score-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('#errorsGroup .toggle-btn').forEach(b=>b.classList.remove('active'));
@@ -702,6 +709,23 @@ async function renderWeekly() {
   const {data} = await sb.from('weekly_reviews').select('*').eq('account_id',currentAccountId).order('week_start',{ascending:false});
   const reviews = data||[];
   document.getElementById('weeklyReviewsList').innerHTML = reviews.map(r=>`<div class="card" style="margin-top:16px"><div class="card-header"><div><div class="card-title">Semana ${r.week_start} → ${r.week_end}</div><div class="card-meta">${r.market_regime||'—'}</div></div><span class="badge badge-gold">${r.rules_compliance||'—'}</span></div>${r.most_repeated_error?`<div class="card-field" style="margin-bottom:8px"><div class="field-label">Error más repetido</div><div class="field-value">${r.most_repeated_error}</div></div>`:''}${r.notes?`<div class="notes-box">${r.notes}</div>`:''}</div>`).join('');
+}
+
+
+function calcPremiumTotal() {
+  const contracts = parseFloat(document.getElementById('f_contracts')?.value) || 0;
+  const premium = parseFloat(document.getElementById('f_premium')?.value) || 0;
+  if (contracts && premium) {
+    document.getElementById('f_premium_total').value = (contracts * premium * 100).toFixed(2);
+  }
+}
+
+function calcNetPnl() {
+  const gross = parseFloat(document.getElementById('f_pnl_gross')?.value) || 0;
+  const fees = parseFloat(document.getElementById('f_fees')?.value) || 0;
+  if (gross !== 0) {
+    document.getElementById('f_pnl').value = (gross - fees).toFixed(2);
+  }
 }
 
 async function init() {
