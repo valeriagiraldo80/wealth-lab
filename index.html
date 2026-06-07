@@ -545,17 +545,17 @@ async function renderDashboard() {
 
   // Progress bars from account goals
   const goals = acc?.goals ? (typeof acc.goals === 'string' ? JSON.parse(acc.goals) : acc.goals) : [];
-  const movements = await loadMovements();
-  const totalDeposits = movements.filter(m => m.type === 'Depósito').reduce((s,m) => s+m.amount, 0);
-  const totalWithdrawals = movements.filter(m => m.type === 'Retiro').reduce((s,m) => s+m.amount, 0);
-  const balance = acc ? (acc.current_balance||0) + s.totalPnl + totalDeposits - totalWithdrawals : 0;
+  const movData = await loadMovements();
+  const totalDeposits = movData.filter(m => m.type === 'Depósito').reduce((s,m) => s+(parseFloat(m.amount)||0), 0);
+  const totalWithdrawals = movData.filter(m => m.type === 'Retiro').reduce((s,m) => s+(parseFloat(m.amount)||0), 0);
+  const balance = acc ? (parseFloat(acc.current_balance)||0) + s.totalPnl + totalDeposits - totalWithdrawals : 0;
   const psec = document.getElementById('progressSection');
   if (goals && goals.length) {
     psec.innerHTML = `<div class="progress-title">Metas — ${acc?.name || ''}</div>` +
       goals.filter(g => g.amount).map(g => {
         const pct = Math.min(Math.round(balance/g.amount*100), 100);
         return `<div class="progress-item">
-          <div class="progress-header"><span class="progress-label">${g.name} → $${Number(g.amount).toLocaleString()}</span><span class="progress-pct">${pct}%</span></div>
+          <div class="progress-header"><span class="progress-label">${g.name} → <span style="font-family:'Josefin Sans',sans-serif">$${Number(g.amount).toLocaleString()}</span></span><span class="progress-pct" style="font-family:'Josefin Sans',sans-serif">${pct}%</span></div>
           <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
         </div>`;
       }).join('');
