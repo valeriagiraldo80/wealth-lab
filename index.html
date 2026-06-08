@@ -534,21 +534,24 @@ function calcStats() {
 
 async function renderDashboard() {
   const s = calcStats(), acc = getAccount();
+  
+  // Calculate balance FIRST before rendering anything
+  const movData = await loadMovements();
+  const totalDeposits = movData.filter(m => m.type === 'Depósito').reduce((s,m) => s+(parseFloat(m.amount)||0), 0);
+  const totalWithdrawals = movData.filter(m => m.type === 'Retiro').reduce((s,m) => s+(parseFloat(m.amount)||0), 0);
+  const balance = acc ? (parseFloat(acc.current_balance)||0) + s.totalPnl + totalDeposits - totalWithdrawals : 0;
+
   document.getElementById('statsGrid').innerHTML = `
     <div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-value ${s.winRate>=50?'text-success':'text-danger'}">${s.winRate}%</div><div class="stat-sub">${s.wins}W · ${s.losses}L · ${s.total} trades</div></div>
     <div class="stat-card"><div class="stat-label">P&L Total</div><div class="stat-value ${s.totalPnl>=0?'text-success':'text-danger'}">${s.totalPnl>=0?'+':''}$${s.totalPnl.toFixed(0)}</div><div class="stat-sub">USD acumulado</div></div>
     <div class="stat-card"><div class="stat-label">Ganancia Prom.</div><div class="stat-value text-success">+$${s.avgWin.toFixed(0)}</div><div class="stat-sub">por trade ganador</div></div>
     <div class="stat-card"><div class="stat-label">Pérdida Prom.</div><div class="stat-value text-danger">$${s.avgLoss.toFixed(0)}</div><div class="stat-sub">por trade perdedor</div></div>
     <div class="stat-card"><div class="stat-label">Calidad Prom.</div><div class="stat-value text-gold">${s.avgScore.toFixed(1)}<span style="font-size:1rem">/10</span></div><div class="stat-sub">ejecución promedio</div></div>
-    <div class="stat-card"><div class="stat-label">Capital Est.</div><div class="stat-value text-gold">$${acc ? ((acc.current_balance||0)+s.totalPnl).toLocaleString('en-US',{maximumFractionDigits:0}) : '—'}</div><div class="stat-sub">balance estimado</div></div>
+    <div class="stat-card"><div class="stat-label">Balance Total</div><div class="stat-value text-gold">$${balance.toLocaleString('en-US',{maximumFractionDigits:0})}</div><div class="stat-sub">capital actual de la cuenta</div></div>
   `;
 
   // Progress bars from account goals
   const goals = acc?.goals ? (typeof acc.goals === 'string' ? JSON.parse(acc.goals) : acc.goals) : [];
-  const movData = await loadMovements();
-  const totalDeposits = movData.filter(m => m.type === 'Depósito').reduce((s,m) => s+(parseFloat(m.amount)||0), 0);
-  const totalWithdrawals = movData.filter(m => m.type === 'Retiro').reduce((s,m) => s+(parseFloat(m.amount)||0), 0);
-  const balance = acc ? (parseFloat(acc.current_balance)||0) + s.totalPnl + totalDeposits - totalWithdrawals : 0;
   const psec = document.getElementById('progressSection');
   if (goals && goals.length) {
     psec.innerHTML = `<div class="progress-title">Metas — ${acc?.name || ''}</div>` +
@@ -627,7 +630,8 @@ async function deleteTrade(id) {
   if (active==='bitacora') renderBitacora();
 }
 
-function renderAccounts() {
+async function renderAccounts() {
+  const allMovements = await loadMovements();
   const c = document.getElementById('accountsList');
   if (!accounts.length) {
     c.innerHTML = `<div class="empty-state"><div class="empty-icon">💼</div><div class="empty-title">No tienes cuentas aún</div><div class="empty-sub">Crea tu primera cuenta arriba</div></div>`;
@@ -635,9 +639,13 @@ function renderAccounts() {
   }
   c.innerHTML = accounts.map(a => {
     const goals = a.goals ? (typeof a.goals==='string'?JSON.parse(a.goals):a.goals) : [];
+    const acctMovs = allMovements.filter(m => m.account_id === a.id);
+    const acctDeps = acctMovs.filter(m => m.type === 'Depósito').reduce((s,m) => s+(parseFloat(m.amount)||0), 0);
+    const acctWiths = acctMovs.filter(m => m.type === 'Retiro').reduce((s,m) => s+(parseFloat(m.amount)||0), 0);
+    const accountBalance = (parseFloat(a.current_balance)||0) + acctDeps - acctWiths;
     return `<div class="card">
       <div class="card-header">
-        <div><div class="card-title">${a.name}</div><div class="card-meta">Balance inicial: $${Number(a.initial_balance||0).toLocaleString()} · Actual: $${Number(a.current_balance||0).toLocaleString()}</div></div>
+        <div><div class="card-title">${a.name}</div><div class="card-meta">Balance inicial: <span style="font-family:'Josefin Sans',sans-serif">$${Number(a.initial_balance||0).toLocaleString()}</span> · Balance actual: <span style="font-family:'Josefin Sans',sans-serif">$${accountBalance.toLocaleString('en-US',{maximumFractionDigits:0})}</span></div></div>
         <div class="badges">
           <button class="btn-gold-sm" onclick="editAccount('${a.id}')">Editar</button>
           <button class="btn-danger" onclick="deleteAccount('${a.id}')">✕</button>
@@ -645,9 +653,9 @@ function renderAccounts() {
       </div>
       ${goals.filter(g=>g.amount).map(g=>`
         <div class="progress-item" style="margin-bottom:10px">
-          <div class="progress-header"><span class="progress-label">${g.name} → $${Number(g.amount).toLocaleString()}</span>
-          <span class="progress-pct">${Math.min(Math.round(a.current_balance/g.amount*100),100)}%</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(Math.round(a.current_balance/g.amount*100),100)}%"></div></div>
+          <div class="progress-header"><span class="progress-label">${g.name} → <span style="font-family:'Josefin Sans',sans-serif">$${Number(g.amount).toLocaleString()}</span></span>
+          <span class="progress-pct" style="font-family:'Josefin Sans',sans-serif">${Math.min(Math.round(accountBalance/g.amount*100),100)}%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(Math.round(accountBalance/g.amount*100),100)}%"></div></div>
         </div>`).join('')}
     </div>`;
   }).join('');
@@ -772,11 +780,45 @@ async function renderMovimientos() {
         <div><div class="card-title">${m.type}</div><div class="card-meta">${m.movement_date}</div></div>
         <div class="badges">
           <span class="badge ${m.type==='Depósito'?'badge-green':'badge-red'}">${m.type==='Depósito'?'+':'-'}$${Number(m.amount).toLocaleString()}</span>
+          <button class="btn-gold-sm" onclick="editMovement('${m.id}')">Editar</button>
           <button class="btn-danger" onclick="deleteMovement('${m.id}')">✕</button>
         </div>
       </div>
       ${m.notes?`<div class="notes-box">${m.notes}</div>`:''}
     </div>`).join('')}`;
+}
+
+function editMovement(id) {
+  const movements = Array.from(document.querySelectorAll('.card'));
+  // Load movement data and populate form
+  sb.from('movements').select('*').eq('id', id).single().then(({data}) => {
+    if (!data) return;
+    document.getElementById('m_mov_date').value = data.movement_date;
+    document.getElementById('m_mov_type').value = data.type;
+    document.getElementById('m_mov_amount').value = data.amount;
+    document.getElementById('m_mov_notes').value = data.notes || '';
+    // Change save button to update
+    const btn = document.querySelector('[onclick="saveMovement()"]');
+    if (btn) {
+      btn.textContent = 'Actualizar Movimiento';
+      btn.onclick = async () => {
+        await sb.from('movements').update({
+          movement_date: document.getElementById('m_mov_date').value,
+          type: document.getElementById('m_mov_type').value,
+          amount: parseFloat(document.getElementById('m_mov_amount').value),
+          notes: document.getElementById('m_mov_notes').value
+        }).eq('id', id);
+        btn.textContent = 'Guardar Movimiento';
+        btn.onclick = saveMovement;
+        document.getElementById('m_mov_amount').value = '';
+        document.getElementById('m_mov_notes').value = '';
+        showToast('✦ Movimiento actualizado');
+        renderMovimientos();
+        renderDashboard();
+      };
+    }
+    window.scrollTo(0, 0);
+  });
 }
 
 async function deleteMovement(id) {
