@@ -180,6 +180,52 @@ textarea { resize: vertical; line-height: 1.5; }
   .content { padding: 20px 16px; } .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .review-grid { grid-template-columns: 1fr; } .topbar { padding: 16px 20px; }
 }
+
+/* CICLOS */
+#page-ciclos .stat-value,
+#page-ciclos .progress-pct,
+#page-ciclos .rueda-dates,
+#page-ciclos .cal-event-date,
+#page-ciclos .season-val,
+#page-ciclos .master-val,
+#page-ciclos .cycle-bar,
+#page-ciclos td,
+#page-ciclos .master-card div:not(.master-num) {
+  font-family: 'Josefin Sans', sans-serif !important;
+}
+.ciclo-tab { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); padding: 8px 14px; border-radius: 8px; font-family: 'Cocogoose', serif; font-size: 0.65rem; font-weight: 300; cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em; }
+.ciclo-tab.active { background: var(--green); color: var(--gold-light); border-color: var(--green); }
+.ciclo-tab:hover:not(.active) { border-color: var(--gold); color: var(--text); }
+.ciclo-panel { display: none; }
+.ciclo-panel.active { display: block; }
+.gann-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 0.7rem; }
+.gann-table th { background: var(--green); color: var(--gold-light); padding: 8px 10px; text-align: center; font-weight: 500; letter-spacing: 0.08em; font-size: 0.6rem; text-transform: uppercase; }
+.gann-table td { padding: 7px 10px; text-align: center; border-bottom: 1px solid var(--border); font-family: 'Josefin Sans', sans-serif; color: var(--text2); }
+.gann-table tr:hover td { background: var(--bg3); }
+.gann-table .cardinal td { color: var(--gold-light); font-weight: 600; }
+.gann-table .nearest td { background: rgba(170,146,82,0.15) !important; color: var(--gold-light) !important; font-weight: 700; }
+.gann-label-bull { color: var(--success); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; }
+.gann-label-bear { color: var(--danger); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; }
+.cycle-bar { height: 32px; border-radius: 6px; display: flex; align-items: center; padding: 0 12px; margin-bottom: 8px; font-size: 0.65rem; font-family: 'Josefin Sans', sans-serif; justify-content: space-between; }
+.season-bar { height: 40px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; margin-bottom: 6px; }
+.season-name { font-size: 0.65rem; font-weight: 500; color: var(--text); min-width: 80px; }
+.season-val { font-size: 0.7rem; font-family: 'Josefin Sans', sans-serif; font-weight: 700; }
+.cal-event { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; }
+.cal-event-date { font-family: 'Josefin Sans', sans-serif; font-size: 0.7rem; color: var(--gold); min-width: 100px; }
+.cal-event-type { font-size: 0.6rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; }
+.cal-event-desc { font-size: 0.72rem; color: var(--text2); flex: 1; padding: 0 12px; }
+.master-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 16px; }
+.master-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+.master-num { font-size: 0.6rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.master-val { font-size: 1.1rem; font-family: 'Josefin Sans', sans-serif; color: var(--gold-light); font-weight: 700; }
+.rueda-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top:16px; }
+.rueda-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+.rueda-item.today { border-color: var(--gold); background: rgba(170,146,82,0.08); }
+.rueda-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+.rueda-item.today .rueda-dot { background: var(--gold); }
+.rueda-dates { font-size: 0.65rem; font-family: 'Josefin Sans', sans-serif; color: var(--gold); }
+.rueda-label { font-size: 0.7rem; color: var(--text2); }
+
 </style>
 </head>
 <body>
@@ -204,6 +250,7 @@ textarea { resize: vertical; line-height: 1.5; }
         <div class="nav-label">Sistema</div>
         <button class="nav-item" onclick="showPage('cuentas')"><span class="icon">💼</span> Mis Cuentas</button>
         <button class="nav-item" onclick="showPage('movimientos')"><span class="icon">💸</span> Movimientos</button>
+        <button class="nav-item" onclick="showPage('ciclos')"><span class="icon">🌀</span> Ciclos</button>
         <button class="nav-item" onclick="showPage('reglas')"><span class="icon">⚖</span> Reglas</button>
         <button class="nav-item" onclick="showPage('semanal')"><span class="icon">📊</span> Revisión Semanal</button>
       </div>
@@ -411,6 +458,214 @@ textarea { resize: vertical; line-height: 1.5; }
         <div id="movementsList"></div>
       </div>
 
+
+      <!-- CICLOS -->
+      <div class="page" id="page-ciclos">
+
+        <!-- INTRO BOX -->
+        <div style="background:rgba(170,146,82,0.06);border:1px solid rgba(170,146,82,0.2);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+          <div style="font-size:0.65rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:8px">✦ Geometría del Mercado — W.D. Gann</div>
+          <p style="font-size:0.72rem;color:var(--text2);line-height:1.7;margin-bottom:8px">Gann descubrió que el precio y el tiempo se mueven en ciclos matemáticos predecibles. La clave es partir siempre desde el <strong style="color:var(--gold-light)">punto de origen correcto</strong> — un mínimo o máximo significativo desde donde comenzó un movimiento importante.</p>
+          <p style="font-size:0.72rem;color:var(--text2);line-height:1.7"><strong style="color:var(--gold-light)">Pivote:</strong> el mínimo o máximo desde donde comenzó el movimiento que estudias. <strong style="color:var(--gold-light)">Precio actual:</strong> el precio del instrumento en este momento. <strong style="color:var(--gold-light)">Fecha de origen:</strong> la fecha exacta en que se formó ese pivote.</p>
+          <div style="margin-top:12px;padding:10px 14px;background:rgba(40,63,50,0.5);border-left:2px solid var(--gold);border-radius:0 8px 8px 0">
+            <p style="font-size:0.7rem;color:var(--gold-light);font-style:italic;line-height:1.7">"Usa el mínimo o máximo más reciente y significativo para análisis de corto y mediano plazo. Usa mínimos históricos para análisis de largo plazo. Siempre en el timeframe que estás operando." — W.D. Gann</p>
+          </div>
+        </div>
+
+        <!-- PIVOTE GLOBAL COMPARTIDO -->
+        <div style="background:var(--bg2);border:1px solid var(--gold-dark);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end">
+          <div style="display:flex;align-items:center;gap:8px;margin-right:8px">
+            <span style="font-size:0.7rem;color:var(--gold);font-weight:700;letter-spacing:0.1em">◈ PIVOTE GLOBAL</span>
+            <span style="font-size:0.6rem;color:var(--text3)">— todos los cálculos usan estos valores</span>
+          </div>
+          <div class="form-group" style="margin:0;min-width:150px">
+            <label>Pivote (mín/máx)</label>
+            <input type="number" id="global_pivot" placeholder="ej. 5400" style="padding:7px 10px;font-size:0.72rem" oninput="syncGlobalPivot()"/>
+          </div>
+          <div class="form-group" style="margin:0;min-width:150px">
+            <label>Precio actual</label>
+            <input type="number" id="global_price" placeholder="ej. 5600" style="padding:7px 10px;font-size:0.72rem" oninput="syncGlobalPivot()"/>
+          </div>
+          <div class="form-group" style="margin:0;min-width:150px">
+            <label>Fecha de origen</label>
+            <input type="date" id="global_date" style="padding:7px 10px;font-size:0.72rem" oninput="syncGlobalPivot()"/>
+          </div>
+        </div>
+
+        <!-- Tab navigation -->
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:16px">
+          <button class="ciclo-tab active" onclick="switchTab('mapa')">🌀 Mapa de Ciclos</button>
+          <button class="ciclo-tab" onclick="switchTab('angulos')">📐 Ángulos</button>
+          <button class="ciclo-tab" onclick="switchTab('rueda')">☯ Rueda de <span style="font-family:'Josefin Sans',sans-serif">24</span></button>
+          <button class="ciclo-tab" onclick="switchTab('maestros')">✦ Números Maestros</button>
+          <button class="ciclo-tab" onclick="switchTab('rango')">📊 Rango de Apertura</button>
+          <button class="ciclo-tab" onclick="switchTab('temporales')">⏱ Ciclos Temporales</button>
+          <button class="ciclo-tab" onclick="switchTab('vibracion')">〰 Vibración</button>
+          <button class="ciclo-tab" onclick="switchTab('calendario')">📅 Calendario</button>
+          <button class="ciclo-tab" onclick="switchTab('estacionalidad')">🌿 Estacionalidad</button>
+        </div>
+
+        <!-- 1. MAPA DE CICLOS - Square of Nine -->
+        <div class="ciclo-panel active" id="tab-mapa">
+          <div class="form-section">
+            <div class="form-section-title">Mapa de Ciclos — Espiral de Precio</div>
+            <div class="form-grid" style="max-width:400px;margin-bottom:20px">
+              <div class="form-group">
+                <label>Pivote (mínimo o máximo)</label>
+                <input type="number" id="gann_pivot" placeholder="ej. 5400" oninput="calcGann()"/>
+              </div>
+              <div class="form-group">
+                <label>Precio actual</label>
+                <input type="number" id="gann_price" placeholder="ej. 5600" oninput="calcGann()"/>
+              </div>
+            </div>
+            <div id="gann_result"></div>
+          </div>
+        </div>
+
+        <!-- 2. ÁNGULOS DE GANN -->
+        <div class="ciclo-panel" id="tab-angulos">
+          <div class="form-section">
+            <div class="form-section-title">Ángulos de Gann</div>
+            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">La línea <span style="font-family:'Josefin Sans',sans-serif">1x1</span> es la línea de equilibrio perfecta. Por encima = alcista. Por debajo = bajista.</p>
+            <div class="form-grid" style="max-width:500px;margin-bottom:20px">
+              <div class="form-group">
+                <label>Precio de origen</label>
+                <input type="number" id="ang_origin_price" placeholder="ej. 5400" oninput="calcAngulos()"/>
+              </div>
+              <div class="form-group">
+                <label>Días desde origen</label>
+                <input type="number" id="ang_days" placeholder="ej. 30" oninput="calcAngulos()"/>
+              </div>
+              <div class="form-group">
+                <label>Unidad de precio (pts/día)</label>
+                <input type="number" id="ang_unit" placeholder="ej. 10" oninput="calcAngulos()"/>
+              </div>
+            </div>
+            <div id="angulos_result"></div>
+          </div>
+        </div>
+
+        <!-- 3. RUEDA DE 24 -->
+        <div class="ciclo-panel" id="tab-rueda">
+          <div class="form-section">
+            <div class="form-section-title">Rueda de <span style="font-family:'Josefin Sans',sans-serif">24</span> — El Año en Ciclos</div>
+            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:20px;line-height:1.6">Gann dividía el año en <span style="font-family:'Josefin Sans',sans-serif">24</span> segmentos de ~<span style="font-family:'Josefin Sans',sans-serif">15</span> días. Cada punto de inflexión del año está marcado aquí.</p>
+            <div id="rueda_result"></div>
+          </div>
+        </div>
+
+        <!-- 4. NÚMEROS MAESTROS -->
+        <div class="ciclo-panel" id="tab-maestros">
+          <div class="form-section">
+            <div class="form-section-title">Números Maestros de Gann</div>
+            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6"><span style="font-family:'Josefin Sans',sans-serif">144 · 90 · 45 · 360 · 30 · 120</span> — estos números aparecen constantemente como niveles de soporte, resistencia y tiempo.</p>
+            <div class="form-grid" style="max-width:400px;margin-bottom:20px">
+              <div class="form-group">
+                <label>Precio o nivel base</label>
+                <input type="number" id="master_price" placeholder="ej. 5400" oninput="calcMaestros()"/>
+              </div>
+            </div>
+            <div id="maestros_result"></div>
+          </div>
+        </div>
+
+        <!-- 5. RANGO DE APERTURA -->
+        <div class="ciclo-panel" id="tab-rango">
+          <div class="form-section">
+            <div class="form-section-title">Rango de Apertura</div>
+            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">El rango del primer día del año, mes o semana proyecta el movimiento futuro según Gann.</p>
+            <div class="form-grid" style="max-width:500px;margin-bottom:20px">
+              <div class="form-group"><label>Máximo del período</label><input type="number" id="rango_high" placeholder="ej. 5450" oninput="calcRango()"/></div>
+              <div class="form-group"><label>Mínimo del período</label><input type="number" id="rango_low" placeholder="ej. 5380" oninput="calcRango()"/></div>
+              <div class="form-group full">
+                <label>Tipo de período</label>
+                <div class="toggle-group">
+                  <button type="button" class="toggle-btn active" onclick="setRangoTipo(this,'Año')">Año</button>
+                  <button type="button" class="toggle-btn" onclick="setRangoTipo(this,'Mes')">Mes</button>
+                  <button type="button" class="toggle-btn" onclick="setRangoTipo(this,'Semana')">Semana</button>
+                </div>
+              </div>
+            </div>
+            <div id="rango_result"></div>
+          </div>
+        </div>
+
+        <!-- 6. CICLOS TEMPORALES -->
+        <div class="ciclo-panel" id="tab-temporales">
+          <div class="form-section">
+            <div class="form-section-title">Ciclos Temporales</div>
+            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Gann identificó ciclos de <span style="font-family:'Josefin Sans',sans-serif">90, 144, 365</span> días y <span style="font-family:'Josefin Sans',sans-serif">10</span> años como los más importantes en el mercado.</p>
+            <div class="form-grid" style="max-width:400px;margin-bottom:20px">
+              <div class="form-group full">
+                <label>Fecha de inicio del ciclo</label>
+                <input type="date" id="ciclo_start" oninput="calcTemporales()"/>
+              </div>
+            </div>
+            <div id="temporales_result"></div>
+          </div>
+        </div>
+
+        <!-- 7. VIBRACIÓN DEL PRECIO -->
+        <div class="ciclo-panel" id="tab-vibracion">
+          <div class="form-section">
+            <div class="form-section-title">Vibración del Precio</div>
+            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">"Cada instrumento tiene su propia vibración natural. Si encuentras el número correcto, el mercado te dirá exactamente a dónde va." — W.D. Gann</p>
+            <div class="form-grid" style="max-width:400px;margin-bottom:20px">
+              <div class="form-group">
+                <label>Mínimo histórico o precio de origen</label>
+                <input type="number" id="vib_origin" placeholder="ej. 666" oninput="calcVibracion()"/>
+              </div>
+              <div class="form-group">
+                <label>Precio actual</label>
+                <input type="number" id="vib_current" placeholder="ej. 5400" oninput="calcVibracion()"/>
+              </div>
+            </div>
+            <div id="vibracion_result"></div>
+          </div>
+        </div>
+
+        <!-- 8. CALENDARIO DE CICLOS -->
+        <div class="ciclo-panel" id="tab-calendario">
+          <div class="form-section">
+            <div class="form-section-title">Calendario de Fechas Clave</div>
+            <div class="form-grid" style="margin-bottom:16px">
+              <div class="form-group"><label>Fecha</label><input type="date" id="cal_date"/></div>
+              <div class="form-group"><label>Tipo</label>
+                <select id="cal_type">
+                  <option>OPEX</option>
+                  <option>Triple Witching</option>
+                  <option>Fed / FOMC</option>
+                  <option>NFP</option>
+                  <option>CPI</option>
+                  <option>Luna Nueva</option>
+                  <option>Luna Llena</option>
+                  <option>Equinoccio</option>
+                  <option>Solsticio</option>
+                  <option>Rueda de 24</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Descripción</label><input type="text" id="cal_desc" placeholder="ej. OPEX Junio" style="font-family:'Josefin Sans',sans-serif"/></div>
+            </div>
+            <div class="form-actions" style="justify-content:flex-start;margin-top:0;margin-bottom:20px">
+              <button class="btn-primary" onclick="saveCalEvent()">+ Agregar Fecha</button>
+            </div>
+            <div id="calendario_result"></div>
+          </div>
+        </div>
+
+        <!-- 9. ESTACIONALIDAD -->
+        <div class="ciclo-panel" id="tab-estacionalidad">
+          <div class="form-section">
+            <div class="form-section-title">Estacionalidad del SPX</div>
+            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:20px;line-height:1.6">Comportamiento histórico promedio del SPX por mes. El tiempo tiene memoria.</p>
+            <div id="estacionalidad_result"></div>
+          </div>
+        </div>
+
+      </div>
+
       <!-- REVISIÓN SEMANAL -->
       <div class="page" id="page-semanal">
         <div class="form-section">
@@ -473,6 +728,7 @@ const pages = {
   reglas: { title: 'Reglas del Sistema', subtitle: 'Estas reglas son ley' },
   semanal: { title: 'Revisión Semanal', subtitle: 'Análisis y mejora continua' },
   movimientos: { title: 'Movimientos', subtitle: 'Depósitos y retiros de la cuenta' },
+  ciclos: { title: 'Ciclos', subtitle: 'Geometría del mercado · Herramientas de W.D. Gann' },
 };
 
 function showPage(id) {
@@ -488,6 +744,7 @@ function showPage(id) {
   if (id === 'bitacora') renderBitacora();
   if (id === 'cuentas') renderAccounts();
   if (id === 'semanal') renderWeekly();
+  if (id === 'ciclos') { initCiclos(); }
   if (id === 'movimientos') { renderMovimientos(); document.getElementById('m_mov_date').value = new Date().toISOString().split('T')[0]; }
   if (window.innerWidth < 768) document.getElementById('sidebar').classList.remove('open');
 }
@@ -851,6 +1108,555 @@ function calcNetPnl() {
     document.getElementById('f_pnl').value = (gross - fees).toFixed(2);
   }
 }
+
+
+// ===== CICLOS =====
+let rangoTipo = 'Año';
+let calEvents = [];
+
+
+
+function wrapNumbersJosefin(el) {
+  if (!el) return;
+  el.querySelectorAll('td, .master-val, .rueda-dates, .cal-event-date, .season-val, .stat-value, .stat-sub, p, div').forEach(node => {
+    if (node.children.length === 0 && node.textContent.match(/\d/)) {
+      node.innerHTML = node.innerHTML.replace(/(\d[\d.,x%$+\-\/]*)/g, '<span style="font-family:Josefin Sans,sans-serif">$1</span>');
+    }
+  });
+}
+
+function syncGlobalPivot() {
+  const pivot = document.getElementById('global_pivot').value;
+  const price = document.getElementById('global_price').value;
+  const date = document.getElementById('global_date').value;
+
+  // Sync to Mapa de Ciclos
+  if (pivot && document.getElementById('gann_pivot')) {
+    document.getElementById('gann_pivot').value = pivot;
+  }
+  if (price && document.getElementById('gann_price')) {
+    document.getElementById('gann_price').value = price;
+  }
+  // Sync to Angulos
+  if (pivot && document.getElementById('ang_origin_price')) {
+    document.getElementById('ang_origin_price').value = pivot;
+  }
+  // Sync to Vibracion
+  if (pivot && document.getElementById('vib_origin')) {
+    document.getElementById('vib_origin').value = pivot;
+  }
+  if (price && document.getElementById('vib_current')) {
+    document.getElementById('vib_current').value = price;
+  }
+  // Sync to Maestros
+  if (pivot && document.getElementById('master_price')) {
+    document.getElementById('master_price').value = pivot;
+  }
+  // Sync to Temporales
+  if (date && document.getElementById('ciclo_start')) {
+    document.getElementById('ciclo_start').value = date;
+  }
+
+  // Auto-calculate all
+  calcGann();
+  calcAngulos();
+  calcVibracion();
+  calcMaestros();
+  calcTemporales();
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.ciclo-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ciclo-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function initCiclos() {
+  renderRueda();
+  renderEstacionalidad();
+  loadCalEvents();
+  const today = new Date().toISOString().split('T')[0];
+  if (document.getElementById('ciclo_start')) document.getElementById('ciclo_start').value = today;
+  if (document.getElementById('global_date')) document.getElementById('global_date').value = today;
+  if (document.getElementById('cal_date')) document.getElementById('cal_date').value = today;
+}
+
+// 1. MAPA DE CICLOS - Square of Nine
+function calcGann() {
+  const pivot = parseFloat(document.getElementById('gann_pivot').value);
+  const price = parseFloat(document.getElementById('gann_price').value);
+  const el = document.getElementById('gann_result');
+  if (!pivot || pivot <= 0) { el.innerHTML = ''; return; }
+
+  const angles = [
+    { label: 'Q1 0°–90°', angle: '0°', dir: 'E', type: 'Cardinal', inc: 0.000 },
+    { label: 'Q1 0°–90°', angle: '45°', dir: 'NE', type: 'Diagonal', inc: 0.125 },
+    { label: 'Q2 90°–180°', angle: '90°', dir: 'N', type: 'Cardinal', inc: 0.250 },
+    { label: 'Q2 90°–180°', angle: '135°', dir: 'NO', type: 'Diagonal', inc: 0.375 },
+    { label: 'Q3 180°–270°', angle: '180°', dir: 'O', type: 'Cardinal', inc: 0.500 },
+    { label: 'Q3 180°–270°', angle: '225°', dir: 'SO', type: 'Diagonal', inc: 0.625 },
+    { label: 'Q4 270°–360°', angle: '270°', dir: 'S', type: 'Cardinal', inc: 0.750 },
+    { label: 'Q4 270°–360°', angle: '315°', dir: 'SE', type: 'Diagonal', inc: 0.875 },
+  ];
+
+  const rings = [1,2,3,4,5,6,7,8,9,10];
+  const sqrtP = Math.sqrt(pivot);
+
+  // Build bull levels
+  const bullLevels = angles.map(a => ({
+    ...a,
+    levels: rings.map(r => Math.pow(sqrtP + a.inc + (r-1), 2))
+  }));
+
+  // Build bear levels  
+  const bearLevels = angles.map(a => ({
+    ...a,
+    levels: rings.map(r => {
+      const val = sqrtP - a.inc - (r-1) * 1 + a.inc;
+      return Math.pow(sqrtP - (a.inc + (r-1)), 2);
+    })
+  }));
+
+  // Find nearest level to price
+  let allBullLevels = [];
+  bullLevels.forEach(a => a.levels.forEach((l,i) => allBullLevels.push({price: l, angle: a.angle, ring: i+1, type: a.type})));
+  
+  let nearest = null;
+  let minDist = Infinity;
+  if (price) {
+    allBullLevels.forEach(l => {
+      const d = Math.abs(l.price - price);
+      if (d < minDist) { minDist = d; nearest = l; }
+    });
+  }
+
+  // Current quadrant
+  let quadrant = '';
+  if (nearest) {
+    const pct = (nearest.ring - 1) / 10;
+    if (pct < 0.25) quadrant = 'Q1 · Expansión';
+    else if (pct < 0.5) quadrant = 'Q2 · Consolidación';
+    else if (pct < 0.75) quadrant = 'Q3 · Contracción';
+    else quadrant = 'Q4 · Reversión';
+  }
+
+  let html = '';
+  
+  if (price && nearest) {
+    html += `<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+      <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Nivel más cercano</div><div class="stat-value text-gold">${nearest.price.toFixed(0)}</div><div class="stat-sub">${nearest.angle} · Anillo ${nearest.ring}</div></div>
+      <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Distancia</div><div class="stat-value ${price > nearest.price ? 'text-success' : 'text-danger'}">${Math.abs(price - nearest.price).toFixed(0)} pts</div><div class="stat-sub">${price > nearest.price ? 'Por encima' : 'Por debajo'}</div></div>
+      <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Fase del ciclo</div><div class="stat-value text-gold" style="font-size:1rem">${quadrant}</div></div>
+    </div>`;
+  }
+
+  // Bull table
+  html += `<div style="margin-bottom:8px"><span class="gann-label-bull">▲ NIVELES ALCISTAS — Fórmula: (√Pivote + inc)²</span></div>`;
+  html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Cuadrante</th><th>Ángulo</th><th>Dir</th><th>Tipo</th>`;
+  rings.forEach(r => html += `<th>Anillo ${r}</th>`);
+  html += `</tr></thead><tbody>`;
+  
+  bullLevels.forEach(a => {
+    const isCardinal = a.type === 'Cardinal';
+    const rowClass = isCardinal ? 'cardinal' : '';
+    html += `<tr class="${rowClass}"><td>${a.label}</td><td>${a.angle}</td><td>${a.dir}</td><td>${a.type}</td>`;
+    a.levels.forEach((l,i) => {
+      const isNearest = price && nearest && Math.abs(l - price) < 30 && a.angle === nearest.angle;
+      html += `<td class="${isNearest ? 'nearest' : ''}">${l.toFixed(0)}</td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table></div>`;
+
+  // Bear table
+  html += `<div style="margin:20px 0 8px"><span class="gann-label-bear">▼ NIVELES BAJISTAS — Fórmula: (√Pivote − inc)²</span></div>`;
+  html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Cuadrante</th><th>Ángulo</th><th>Dir</th><th>Tipo</th>`;
+  rings.forEach(r => html += `<th>Anillo ${r}</th>`);
+  html += `</tr></thead><tbody>`;
+  
+  bearLevels.forEach(a => {
+    const isCardinal = a.type === 'Cardinal';
+    html += `<tr class="${isCardinal ? 'cardinal' : ''}"><td>${a.label}</td><td>${a.angle}</td><td>${a.dir}</td><td>${a.type}</td>`;
+    a.levels.forEach(l => html += `<td>${l > 0 ? l.toFixed(0) : '—'}</td>`);
+    html += `</tr>`;
+  });
+
+  // Distance row
+  html += `<tr style="background:var(--bg4)"><td colspan="4" style="color:var(--text3);text-align:right">Distancia al precio actual =</td>`;
+  if (price) {
+    bullLevels[0].levels.forEach((l,i) => {
+      const avgLevel = bullLevels.reduce((s,a) => s + a.levels[i], 0) / bullLevels.length;
+      html += `<td style="color:var(--gold-light);font-weight:700">${Math.abs(price - avgLevel).toFixed(0)}</td>`;
+    });
+  }
+  html += `</tr></tbody></table></div>`;
+
+  html += `<div style="display:flex;gap:20px;margin-top:16px;flex-wrap:wrap;font-size:0.65rem">
+    <div style="color:var(--gold-light);font-weight:700">CARDINAL = FUERTE</div>
+    <div style="color:var(--text2)">DIAGONAL = SECUNDARIO</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;font-size:0.68rem">
+    <div style="color:#fbbf24">Q1 0° — Expansión</div><div style="color:var(--text2)">Q1 45° — Expansión</div>
+    <div style="color:#86efac">Q2 90° — Consolidación</div><div style="color:var(--text2)">Q2 135° — Consolidación</div>
+    <div style="color:#93c5fd">Q3 180° — Contracción</div><div style="color:var(--text2)">Q3 225° — Contracción</div>
+    <div style="color:#f9a8d4">Q4 270° — Reversión</div><div style="color:var(--text2)">Q4 315° — Reversión</div>
+  </div>`;
+
+  el.innerHTML = html;
+  wrapNumbersJosefin(el);
+}
+
+// 2. ÁNGULOS DE GANN
+function calcAngulos() {
+  const origin = parseFloat(document.getElementById('ang_origin_price').value);
+  const days = parseFloat(document.getElementById('ang_days').value);
+  const unit = parseFloat(document.getElementById('ang_unit').value) || 1;
+  const el = document.getElementById('angulos_result');
+  if (!origin || !days) { el.innerHTML = ''; return; }
+
+  const angles = [
+    { ratio: '1x8', mult: 0.125, label: '1x8 — muy bajista' },
+    { ratio: '1x4', mult: 0.25, label: '1x4 — débil' },
+    { ratio: '1x3', mult: 0.333, label: '1x3 — moderado' },
+    { ratio: '1x2', mult: 0.5, label: '1x2 — neutral' },
+    { ratio: '1x1', mult: 1, label: '1x1 — Línea de equilibrio ★' },
+    { ratio: '2x1', mult: 2, label: '2x1 — fuerte' },
+    { ratio: '3x1', mult: 3, label: '3x1 — muy fuerte' },
+    { ratio: '4x1', mult: 4, label: '4x1 — impulso extremo' },
+  ];
+
+  let html = `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Ángulo</th><th>Descripción</th><th>Nivel en día ${days}</th><th>Estado</th></tr></thead><tbody>`;
+  
+  angles.forEach(a => {
+    const level = origin + (days * unit * a.mult);
+    const is1x1 = a.ratio === '1x1';
+    html += `<tr class="${is1x1 ? 'cardinal' : ''}">
+      <td>${a.ratio}</td>
+      <td style="text-align:left">${a.label}</td>
+      <td>${level.toFixed(2)}</td>
+      <td>${is1x1 ? '⚖ Equilibrio' : level > origin + days ? '↑' : '↓'}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>
+  <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;border-left:2px solid var(--gold)">
+    <p style="font-size:0.72rem;color:var(--text2);line-height:1.6">Si el precio actual está <strong style="color:var(--success)">por encima</strong> de la línea 1x1 = tendencia alcista dominante. <strong style="color:var(--danger)">Por debajo</strong> = tendencia bajista. El precio tiende a volver a la 1x1.</p>
+  </div>`;
+
+  el.innerHTML = html;
+  wrapNumbersJosefin(el);
+}
+
+// 3. RUEDA DE 24
+function renderRueda() {
+  const today = new Date();
+  const year = today.getFullYear();
+  
+  const segments = [
+    { start: `${year}-01-01`, end: `${year}-01-15`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">1</span>', note: 'Inicio del año — Reversión potencial' },
+    { start: `${year}-01-16`, end: `${year}-01-31`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">2</span>', note: '' },
+    { start: `${year}-02-01`, end: `${year}-02-15`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">3</span>', note: '' },
+    { start: `${year}-02-16`, end: `${year}-02-28`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">4</span>', note: '' },
+    { start: `${year}-03-01`, end: `${year}-03-15`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">5</span>', note: '' },
+    { start: `${year}-03-21`, end: `${year}-03-21`, label: 'Equinoccio de Primavera', note: '★ Fecha de reversión Gann' },
+    { start: `${year}-04-01`, end: `${year}-04-15`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">7</span>', note: '' },
+    { start: `${year}-04-16`, end: `${year}-04-30`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">8</span>', note: '' },
+    { start: `${year}-05-01`, end: `${year}-05-15`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">9</span>', note: 'Sell in May — Inicio período débil' },
+    { start: `${year}-05-16`, end: `${year}-05-31`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">10</span>', note: '' },
+    { start: `${year}-06-01`, end: `${year}-06-15`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">11</span>', note: '' },
+    { start: `${year}-06-21`, end: `${year}-06-21`, label: 'Solsticio de Verano', note: '★ Fecha de reversión Gann' },
+    { start: `${year}-07-01`, end: `${year}-07-15`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">13</span>', note: '' },
+    { start: `${year}-07-16`, end: `${year}-07-31`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">14</span>', note: '' },
+    { start: `${year}-08-01`, end: `${year}-08-15`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">15</span>', note: '' },
+    { start: `${year}-08-16`, end: `${year}-08-31`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">16</span>', note: 'Agosto — mes volátil históricamente' },
+    { start: `${year}-09-01`, end: `${year}-09-15`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">17</span>', note: 'Septiembre — mes más débil del año' },
+    { start: `${year}-09-22`, end: `${year}-09-22`, label: 'Equinoccio de Otoño', note: '★ Fecha de reversión Gann' },
+    { start: `${year}-10-01`, end: `${year}-10-15`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">19</span>', note: 'Octubre — reversiones históricas' },
+    { start: `${year}-10-16`, end: `${year}-10-31`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">20</span>', note: '' },
+    { start: `${year}-11-01`, end: `${year}-11-15`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">21</span>', note: '' },
+    { start: `${year}-11-16`, end: `${year}-11-30`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">22</span>', note: 'Inicio rally de fin de año' },
+    { start: `${year}-12-01`, end: `${year}-12-15`, label: 'Seg <span style="font-family:Josefin Sans,sans-serif">23</span>', note: '' },
+    { start: `${year}-12-21`, end: `${year}-12-21`, label: 'Solsticio de Invierno', note: '★ Fecha de reversión Gann · Rally de Santa Claus' },
+  ];
+
+  const todayStr = today.toISOString().split('T')[0];
+  
+  let html = `<div class="rueda-grid">`;
+  segments.forEach(s => {
+    const isToday = todayStr >= s.start && todayStr <= s.end;
+    const isSpecial = s.note.includes('★');
+    html += `<div class="rueda-item ${isToday ? 'today' : ''}">
+      <div class="rueda-dot" style="${isSpecial ? 'background:var(--gold)' : ''}"></div>
+      <div>
+        <div class="rueda-dates">${s.start === s.end ? s.start : s.start + ' → ' + s.end}</div>
+        <div class="rueda-label" style="${isSpecial ? 'color:var(--gold-light);font-weight:500' : ''}">${s.label} ${isToday ? '← HOY' : ''}</div>
+        ${s.note ? `<div style="font-size:0.6rem;color:var(--text3);margin-top:2px">${s.note}</div>` : ''}
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+  
+  const el = document.getElementById('rueda_result');
+  if (el) el.innerHTML = html;
+  wrapNumbersJosefin(el);
+}
+
+// 4. NÚMEROS MAESTROS
+function calcMaestros() {
+  const price = parseFloat(document.getElementById('master_price').value);
+  const el = document.getElementById('maestros_result');
+  if (!price) { el.innerHTML = ''; return; }
+
+  const masters = [30, 45, 90, 120, 144, 180, 270, 360];
+  
+  let html = `<div class="master-grid">`;
+  masters.forEach(m => {
+    html += `<div class="master-card">
+      <div class="master-num">${m}° / ${m} días</div>
+      <div class="master-val">${(price * m / 100).toFixed(0)}</div>
+      <div style="font-size:0.58rem;color:var(--text3);margin-top:2px">+${m}%: ${(price * (1 + m/100)).toFixed(0)}</div>
+      <div style="font-size:0.58rem;color:var(--text3)">−${m}%: ${(price * (1 - m/100)).toFixed(0)}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  html += `<div style="margin-top:20px;overflow-x:auto"><table class="gann-table"><thead><tr><th>Número Maestro</th><th>Precio × Factor</th><th>Precio + Factor</th><th>Precio − Factor</th><th>Fecha +N días</th></tr></thead><tbody>`;
+  const today = new Date();
+  masters.forEach(m => {
+    const futureDate = new Date(today.getTime() + m * 24*60*60*1000);
+    html += `<tr>
+      <td style="color:var(--gold-light);font-weight:600">${m}</td>
+      <td>${(price * m).toFixed(0)}</td>
+      <td style="color:var(--success)">${(price + m).toFixed(0)}</td>
+      <td style="color:var(--danger)">${(price - m).toFixed(0)}</td>
+      <td>${futureDate.toLocaleDateString('es-PA')}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+
+  el.innerHTML = html;
+  wrapNumbersJosefin(el);
+}
+
+// 5. RANGO DE APERTURA
+function setRangoTipo(btn, tipo) {
+  document.querySelectorAll('#tab-rango .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  rangoTipo = tipo;
+  calcRango();
+}
+
+function calcRango() {
+  const high = parseFloat(document.getElementById('rango_high').value);
+  const low = parseFloat(document.getElementById('rango_low').value);
+  const el = document.getElementById('rango_result');
+  if (!high || !low) { el.innerHTML = ''; return; }
+
+  const range = high - low;
+  const mid = (high + low) / 2;
+  const multipliers = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3];
+
+  let html = `<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+    <div class="stat-card" style="flex:1"><div class="stat-label">Rango ${rangoTipo}</div><div class="stat-value text-gold">${range.toFixed(0)} pts</div></div>
+    <div class="stat-card" style="flex:1"><div class="stat-label">Punto Medio</div><div class="stat-value text-gold">${mid.toFixed(0)}</div></div>
+  </div>`;
+
+  html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Multiplicador</th><th>Target Alcista</th><th>Target Bajista</th><th>Puntos</th></tr></thead><tbody>`;
+  multipliers.forEach(m => {
+    html += `<tr class="${m === 1 ? 'cardinal' : ''}">
+      <td style="color:var(--gold-light)">${m}x</td>
+      <td style="color:var(--success)">${(high + range * m).toFixed(0)}</td>
+      <td style="color:var(--danger)">${(low - range * m).toFixed(0)}</td>
+      <td>${(range * m).toFixed(0)}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+
+  el.innerHTML = html;
+  wrapNumbersJosefin(el);
+}
+
+// 6. CICLOS TEMPORALES
+function calcTemporales() {
+  const startStr = document.getElementById('ciclo_start').value;
+  const el = document.getElementById('temporales_result');
+  if (!startStr) { el.innerHTML = ''; return; }
+
+  const start = new Date(startStr);
+  const today = new Date();
+  const daysPassed = Math.floor((today - start) / (24*60*60*1000));
+
+  const cycles = [
+    { days: 30, label: 'Ciclo Mensual', desc: 'Ciclo base de corto plazo' },
+    { days: 45, label: 'Ciclo 45 días', desc: 'Número maestro de Gann' },
+    { days: 90, label: 'Ciclo Trimestral', desc: 'Cuarto de año — muy importante' },
+    { days: 120, label: 'Ciclo 120 días', desc: 'Número maestro de Gann' },
+    { days: 144, label: 'Ciclo 144 días', desc: 'Número maestro — 12×12' },
+    { days: 180, label: 'Ciclo Semestral', desc: 'Medio año' },
+    { days: 270, label: 'Ciclo 270 días', desc: 'Tres cuartos de año' },
+    { days: 365, label: 'Ciclo Anual', desc: 'El ciclo más importante para Gann' },
+    { days: 3650, label: 'Ciclo Decenal', desc: 'Los grandes ciclos de mercado' },
+  ];
+
+  let html = `<div style="margin-bottom:16px;padding:12px 16px;background:var(--bg3);border-radius:8px">
+    <span style="font-size:0.65rem;color:var(--text3)">Días transcurridos desde inicio: </span>
+    <span style="font-family:'Josefin Sans',sans-serif;color:var(--gold-light);font-weight:700">${daysPassed} días</span>
+  </div>`;
+
+  cycles.forEach(c => {
+    const completed = Math.floor(daysPassed / c.days);
+    const remaining = c.days - (daysPassed % c.days);
+    const pct = Math.round((daysPassed % c.days) / c.days * 100);
+    const nextDate = new Date(today.getTime() + remaining * 24*60*60*1000);
+    
+    html += `<div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div>
+          <span style="font-size:0.72rem;color:var(--text)">${c.label}</span>
+          <span style="font-size:0.6rem;color:var(--text3);margin-left:8px">${c.desc}</span>
+        </div>
+        <div style="text-align:right">
+          <span style="font-size:0.65rem;font-family:'Josefin Sans',sans-serif;color:var(--gold)">${pct}%</span>
+          <span style="font-size:0.6rem;color:var(--text3);margin-left:6px">próximo: ${nextDate.toLocaleDateString('es-PA')}</span>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${pct}%"></div>
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+  wrapNumbersJosefin(el);
+}
+
+// 7. VIBRACIÓN DEL PRECIO
+function calcVibracion() {
+  const origin = parseFloat(document.getElementById('vib_origin').value);
+  const current = parseFloat(document.getElementById('vib_current').value);
+  const el = document.getElementById('vibracion_result');
+  if (!origin) { el.innerHTML = ''; return; }
+
+  const sqrtOrigin = Math.sqrt(origin);
+  const levels = [];
+  
+  for (let i = 0; i <= 20; i++) {
+    const level = Math.pow(sqrtOrigin + i, 2);
+    levels.push(level);
+  }
+
+  let html = `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Vibración</th><th>Nivel de Precio</th><th>Distancia desde origen</th>${current ? '<th>Distancia al precio actual</th>' : ''}</tr></thead><tbody>`;
+  
+  levels.forEach((l, i) => {
+    const isNearest = current && levels.reduce((prev, curr) => 
+      Math.abs(curr - current) < Math.abs(prev - current) ? curr : prev
+    ) === l;
+    html += `<tr class="${isNearest ? 'nearest' : i === 0 ? 'cardinal' : ''}">
+      <td style="color:var(--gold-light)">${i === 0 ? 'Origen ★' : `+${i} vibración`}</td>
+      <td>${l.toFixed(2)}</td>
+      <td>${(l - origin).toFixed(2)} pts</td>
+      ${current ? `<td style="color:${Math.abs(l-current) < 50 ? 'var(--gold-light)' : 'var(--text2)'}">${Math.abs(l - current).toFixed(2)}</td>` : ''}
+    </tr>`;
+  });
+  html += `</tbody></table></div>
+  <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;border-left:2px solid var(--gold)">
+    <p style="font-size:0.72rem;color:var(--text2);line-height:1.6;font-style:italic">"Los participantes en el mercado no reaccionan a 100 puntos — reaccionan al porcentaje. La raíz cuadrada traduce el precio al lenguaje natural del mercado." — W.D. Gann</p>
+  </div>`;
+
+  el.innerHTML = html;
+  wrapNumbersJosefin(el);
+}
+
+// 8. CALENDARIO
+async function loadCalEvents() {
+  const { data } = await sb.from('calendar_events').select('*').order('event_date');
+  calEvents = data || [];
+  renderCalEvents();
+}
+
+async function saveCalEvent() {
+  const date = document.getElementById('cal_date').value;
+  const type = document.getElementById('cal_type').value;
+  const desc = document.getElementById('cal_desc').value;
+  if (!date) { alert('Selecciona una fecha'); return; }
+  await sb.from('calendar_events').insert({ event_date: date, event_type: type, description: desc });
+  showToast('✦ Fecha agregada');
+  document.getElementById('cal_desc').value = '';
+  loadCalEvents();
+}
+
+async function deleteCalEvent(id) {
+  await sb.from('calendar_events').delete().eq('id', id);
+  loadCalEvents();
+}
+
+function renderCalEvents() {
+  const el = document.getElementById('calendario_result');
+  if (!el) return;
+  if (!calEvents.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">No hay fechas registradas</div></div>';
+    return;
+  }
+  const today = new Date().toISOString().split('T')[0];
+  const typeColors = {
+    'OPEX': 'badge-gold', 'Triple Witching': 'badge-red', 'Fed / FOMC': 'badge-blue',
+    'NFP': 'badge-blue', 'CPI': 'badge-blue', 'Luna Nueva': 'badge-gray',
+    'Luna Llena': 'badge-gray', 'Equinoccio': 'badge-green', 'Solsticio': 'badge-green',
+    'Rueda de 24': 'badge-warning', 'Otro': 'badge-gray'
+  };
+  const calHtml = calEvents.map(e => `
+    <div class="cal-event" style="${e.event_date === today ? 'border-color:var(--gold)' : ''}">
+      <div class="cal-event-date">${e.event_date} ${e.event_date === today ? '← HOY' : ''}</div>
+      <span class="badge ${typeColors[e.event_type] || 'badge-gray'}">${e.event_type}</span>
+      <div class="cal-event-desc">${e.description || ''}</div>
+      <button class="btn-danger" onclick="deleteCalEvent('${e.id}')">✕</button>
+    </div>`).join('');
+}
+
+// 9. ESTACIONALIDAD
+function renderEstacionalidad() {
+  const months = [
+    { m: 'Enero', avg: 1.2, note: 'January Effect — pequeñas caps lideran' },
+    { m: 'Febrero', avg: -0.1, note: 'Neutral — consolidación post-enero' },
+    { m: 'Marzo', avg: 1.3, note: 'Fuerte — fin de Q<span style="font-family:Josefin Sans,sans-serif">1</span>' },
+    { m: 'Abril', avg: 1.8, note: 'Históricamente el mes más alcista del año' },
+    { m: 'Mayo', avg: 0.3, note: '"Sell in May" — inicio período débil' },
+    { m: 'Junio', avg: 0.1, note: 'Débil — OPEX de verano' },
+    { m: 'Julio', avg: 1.4, note: 'Fuerte — rally de verano' },
+    { m: 'Agosto', avg: -0.5, note: 'Volátil — baja liquidez' },
+    { m: 'Septiembre', avg: -1.2, note: 'El mes más bajista históricamente' },
+    { m: 'Octubre', avg: 0.8, note: 'Reversiones históricas — "octubre effect"' },
+    { m: 'Noviembre', avg: 1.7, note: 'Muy fuerte — rally de fin de año comienza' },
+    { m: 'Diciembre', avg: 1.5, note: 'Rally de Santa Claus — últimas <span style="font-family:Josefin Sans,sans-serif">2</span> semanas' },
+  ];
+
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const maxVal = Math.max(...months.map(m => Math.abs(m.avg)));
+
+  let html = months.map((m, i) => {
+    const isCurrentMonth = i === currentMonth;
+    const bull = m.avg >= 0;
+    const barWidth = Math.abs(m.avg) / maxVal * 60;
+    return `<div class="season-bar" style="background:${isCurrentMonth ? 'rgba(170,146,82,0.1)' : 'var(--bg3)'};border:1px solid ${isCurrentMonth ? 'var(--gold)' : 'var(--border)'};border-radius:8px;margin-bottom:6px">
+      <div class="season-name" style="${isCurrentMonth ? 'color:var(--gold-light);font-weight:500' : ''}">${m.m} ${isCurrentMonth ? '← HOY' : ''}</div>
+      <div style="flex:1;display:flex;align-items:center;gap:8px">
+        <div style="height:16px;width:${barWidth}%;background:${bull ? 'rgba(74,222,128,0.4)' : 'rgba(248,113,113,0.4)'};border-radius:4px;min-width:4px"></div>
+        <span class="season-val" style="color:${bull ? 'var(--success)' : 'var(--danger)'}">${bull ? '+' : ''}${m.avg}%</span>
+      </div>
+      <div style="font-size:0.6rem;color:var(--text3);text-align:right;max-width:200px">${m.note}</div>
+    </div>`;
+  }).join('');
+
+  html += `<div style="margin-top:16px;padding:12px 16px;background:var(--bg3);border-radius:8px;font-size:0.65rem;color:var(--text3)">
+    Promedios históricos aproximados del SPX. Pasado no garantiza resultados futuros.
+  </div>`;
+
+  const el = document.getElementById('estacionalidad_result');
+  if (el) { el.innerHTML = html; wrapNumbersJosefin(el); }
+  wrapNumbersJosefin(el);
+}
+
 
 async function init() {
   document.getElementById('todayDate').textContent = new Date().toLocaleDateString('es-PA',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
