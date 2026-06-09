@@ -1245,16 +1245,16 @@ function calcGann() {
   
   if (price && nearest) {
     html += `<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-      <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Nivel más cercano</div><div class="stat-value text-gold">${nearest.price.toFixed(0)}</div><div class="stat-sub">${nearest.angle} · Anillo ${nearest.ring}</div></div>
+      <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Nivel más cercano</div><div class="stat-value text-gold">${nearest.price.toFixed(0)}</div><div class="stat-sub">${nearest.angle} · Anillo <span style="font-family:Josefin Sans,sans-serif">${nearest.ring}</span></div></div>
       <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Distancia</div><div class="stat-value ${price > nearest.price ? 'text-success' : 'text-danger'}">${Math.abs(price - nearest.price).toFixed(0)} pts</div><div class="stat-sub">${price > nearest.price ? 'Por encima' : 'Por debajo'}</div></div>
       <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Fase del ciclo</div><div class="stat-value text-gold" style="font-size:1rem">${quadrant}</div></div>
     </div>`;
   }
 
   // Bull table
-  html += `<div style="margin-bottom:8px"><span class="gann-label-bull">▲ NIVELES ALCISTAS — Fórmula: (√Pivote + inc)²</span></div>`;
+  html += `<div style="margin-bottom:8px"><span class="gann-label-bull">▲ NIVELES ALCISTAS — Fórmula: (√Pivote + inc)<span style="font-family:'Josefin Sans',sans-serif">²</span></span></div>`;
   html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Cuadrante</th><th>Ángulo</th><th>Dir</th><th>Tipo</th>`;
-  rings.forEach(r => html += `<th>Anillo ${r}</th>`);
+  rings.forEach(r => html += `<th>Anillo <span style="font-family:Josefin Sans,sans-serif">${r}</span></th>`);
   html += `</tr></thead><tbody>`;
   
   bullLevels.forEach(a => {
@@ -1270,9 +1270,9 @@ function calcGann() {
   html += `</tbody></table></div>`;
 
   // Bear table
-  html += `<div style="margin:20px 0 8px"><span class="gann-label-bear">▼ NIVELES BAJISTAS — Fórmula: (√Pivote − inc)²</span></div>`;
+  html += `<div style="margin:20px 0 8px"><span class="gann-label-bear">▼ NIVELES BAJISTAS — Fórmula: (√Pivote − inc)<span style="font-family:'Josefin Sans',sans-serif">²</span></span></div>`;
   html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Cuadrante</th><th>Ángulo</th><th>Dir</th><th>Tipo</th>`;
-  rings.forEach(r => html += `<th>Anillo ${r}</th>`);
+  rings.forEach(r => html += `<th>Anillo <span style="font-family:Josefin Sans,sans-serif">${r}</span></th>`);
   html += `</tr></thead><tbody>`;
   
   bearLevels.forEach(a => {
@@ -1316,14 +1316,14 @@ function calcAngulos() {
   if (!origin || !days) { el.innerHTML = ''; return; }
 
   const angles = [
-    { ratio: '1x8', mult: 0.125, label: '1x8 — muy bajista' },
-    { ratio: '1x4', mult: 0.25, label: '1x4 — débil' },
-    { ratio: '1x3', mult: 0.333, label: '1x3 — moderado' },
-    { ratio: '1x2', mult: 0.5, label: '1x2 — neutral' },
-    { ratio: '1x1', mult: 1, label: '1x1 — Línea de equilibrio ★' },
-    { ratio: '2x1', mult: 2, label: '2x1 — fuerte' },
-    { ratio: '3x1', mult: 3, label: '3x1 — muy fuerte' },
-    { ratio: '4x1', mult: 4, label: '4x1 — impulso extremo' },
+    { ratio: '<span style="font-family:Josefin Sans,sans-serif">1x8</span>', mult: 0.125, label: '1x8 — muy bajista' },
+    { ratio: '<span style="font-family:Josefin Sans,sans-serif">1x4</span>', mult: 0.25, label: '1x4 — débil' },
+    { ratio: '<span style="font-family:Josefin Sans,sans-serif">1x3</span>', mult: 0.333, label: '1x3 — moderado' },
+    { ratio: '<span style="font-family:Josefin Sans,sans-serif">1x2</span>', mult: 0.5, label: '1x2 — neutral' },
+    { ratio: '<span style="font-family:Josefin Sans,sans-serif">1x1</span>', mult: 1, label: '1x1 — Línea de equilibrio ★' },
+    { ratio: '<span style="font-family:Josefin Sans,sans-serif">2x1</span>', mult: 2, label: '2x1 — fuerte' },
+    { ratio: '<span style="font-family:Josefin Sans,sans-serif">3x1</span>', mult: 3, label: '3x1 — muy fuerte' },
+    { ratio: '<span style="font-family:Josefin Sans,sans-serif">4x1</span>', mult: 4, label: '4x1 — impulso extremo' },
   ];
 
   let html = `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Ángulo</th><th>Descripción</th><th>Nivel en día ${days}</th><th>Estado</th></tr></thead><tbody>`;
@@ -1486,14 +1486,15 @@ function calcTemporales() {
   const today = new Date();
   const daysPassed = Math.floor((today - start) / (24*60*60*1000));
 
+  const jss = "font-family:'Josefin Sans',sans-serif";
   const cycles = [
     { days: 30, label: 'Ciclo Mensual', desc: 'Ciclo base de corto plazo' },
-    { days: 45, label: 'Ciclo 45 días', desc: 'Número maestro de Gann' },
+    { days: 45, label: `Ciclo <span style="${jss}">45</span> días`, desc: 'Número maestro de Gann' },
     { days: 90, label: 'Ciclo Trimestral', desc: 'Cuarto de año — muy importante' },
-    { days: 120, label: 'Ciclo 120 días', desc: 'Número maestro de Gann' },
-    { days: 144, label: 'Ciclo 144 días', desc: 'Número maestro — 12×12' },
+    { days: 120, label: `Ciclo <span style="${jss}">120</span> días`, desc: 'Número maestro de Gann' },
+    { days: 144, label: `Ciclo <span style="${jss}">144</span> días`, desc: `Número maestro — <span style="${jss}">12×12</span>` },
     { days: 180, label: 'Ciclo Semestral', desc: 'Medio año' },
-    { days: 270, label: 'Ciclo 270 días', desc: 'Tres cuartos de año' },
+    { days: 270, label: `Ciclo <span style="${jss}">270</span> días`, desc: 'Tres cuartos de año' },
     { days: 365, label: 'Ciclo Anual', desc: 'El ciclo más importante para Gann' },
     { days: 3650, label: 'Ciclo Decenal', desc: 'Los grandes ciclos de mercado' },
   ];
@@ -1517,7 +1518,7 @@ function calcTemporales() {
         </div>
         <div style="text-align:right">
           <span style="font-size:0.65rem;font-family:'Josefin Sans',sans-serif;color:var(--gold)">${pct}%</span>
-          <span style="font-size:0.6rem;color:var(--text3);margin-left:6px">próximo: ${nextDate.toLocaleDateString('es-PA')}</span>
+          <span style="font-size:0.6rem;color:var(--text3);margin-left:6px">próximo: <span style="font-family:'Josefin Sans',sans-serif">${nextDate.toLocaleDateString('es-PA')}</span></span>
         </div>
       </div>
       <div class="progress-bar">
