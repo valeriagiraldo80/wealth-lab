@@ -307,7 +307,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
 
     window.location.href = result.url;
   } catch (err) {
-    showError('DEBUG: ' + err.message);
+    showError('Hubo un problema al procesar tu registro. Intenta de nuevo.');
     btn.disabled = false; btn.textContent = 'Continuar al pago';
   }
 });
