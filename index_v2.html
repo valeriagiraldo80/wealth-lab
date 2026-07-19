@@ -179,6 +179,14 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
         <label>Confirma tu contraseña</label>
         <input type="password" id="reg_password_confirm" required minlength="6" autocomplete="new-password">
       </div>
+      <div class="switch-mode" style="margin:0 0 16px;text-align:left">
+        <a onclick="toggleCodeField()" id="codeToggleLink">¿Tienes un código de acceso? Úsalo aquí</a>
+      </div>
+      <div class="form-group hidden" id="codeFieldWrap">
+        <label>Código de acceso</label>
+        <input type="text" id="reg_code" style="text-transform:uppercase" placeholder="Ej: FAMILIA2026">
+      </div>
+      <div id="planSection">
       <label style="margin-bottom:8px">Elige tu plan</label>
       <div class="plan-options">
         <div class="plan-card selected" data-plan="monthly" onclick="selectPlan('monthly')">
@@ -191,6 +199,7 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
           <div class="plan-price">$99</div>
           <div class="plan-period">por año</div>
         </div>
+      </div>
       </div>
       <button type="submit" class="btn-primary" id="registerBtn">Continuar al pago</button>
     </form>
@@ -236,6 +245,16 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Edge Function de checkout (crea la sesión de pago en Stripe)
 const CHECKOUT_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/create-checkout`;
+const REDEEM_CODE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/redeem-code`;
+
+let usingAccessCode = false;
+function toggleCodeField() {
+  usingAccessCode = !usingAccessCode;
+  document.getElementById('codeFieldWrap').classList.toggle('hidden', !usingAccessCode);
+  document.getElementById('planSection').classList.toggle('hidden', usingAccessCode);
+  document.getElementById('registerBtn').textContent = usingAccessCode ? 'Activar mi cuenta' : 'Continuar al pago';
+  document.getElementById('codeToggleLink').textContent = usingAccessCode ? '¿Pagar en vez de usar un código?' : '¿Tienes un código de acceso? Úsalo aquí';
+}
 
 let selectedPlan = 'monthly';
 
@@ -398,11 +417,40 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     return;
   }
 
-  // 2. Cerrar la sesión temporal que Supabase abre automáticamente al registrarse
+  // 2. Si hay código de acceso, activar directo (sin Stripe). Si no, ir a pago.
+  const accessCode = document.getElementById('reg_code').value.trim();
+
+  if (usingAccessCode && accessCode) {
+    btn.textContent = 'Activando tu cuenta...';
+    try {
+      const res = await fetch(REDEEM_CODE_FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: accessCode, user_id: signUpData.user.id, email, full_name })
+      });
+      const result = await res.json();
+
+      if (!res.ok || result.error) {
+        showError(result.error || 'Código inválido.');
+        btn.disabled = false; btn.textContent = 'Activar mi cuenta';
+        return;
+      }
+
+      // Iniciar sesión directamente (ya no necesita pago)
+      isRegistering = false;
+      await sb.auth.signInWithPassword({ email, password });
+      window.location.href = 'app.html';
+    } catch (err) {
+      showError('No se pudo activar el código. Intenta de nuevo.');
+      btn.disabled = false; btn.textContent = 'Activar mi cuenta';
+    }
+    return;
+  }
+
+  // 3. Sin código: cerrar la sesión temporal y redirigir a Stripe Checkout
   //    (la cuenta sigue en estado "pending" hasta que el pago se confirme)
   await sb.auth.signOut();
 
-  // 3. Redirigir a Stripe Checkout
   btn.textContent = 'Redirigiendo a pago...';
   try {
     const res = await fetch(CHECKOUT_FUNCTION_URL, {
