@@ -584,6 +584,13 @@
       } else {
         msg.textContent = '¡Listo! Ya eres parte de la comunidad.';
         newsletterForm.reset();
+
+        // Enviar correo de bienvenida (no bloquea el mensaje de éxito si falla)
+        fetch('https://nidteoxdxmmtupovcxnv.supabase.co/functions/v1/newsletter-welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        }).catch(() => {});
       }
 
       btn.disabled = false;
