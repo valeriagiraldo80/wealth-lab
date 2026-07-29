@@ -246,6 +246,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // Edge Function de checkout (crea la sesión de pago en Stripe)
 const CHECKOUT_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/create-checkout`;
 const REDEEM_CODE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/redeem-code`;
+const VALIDATE_CODE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/validate-code`;
 
 let usingAccessCode = false;
 function toggleCodeField() {
@@ -397,10 +398,41 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     return;
   }
 
+  const accessCode = document.getElementById('reg_code').value.trim();
+
+  // 0. Si el usuario va a usar un código de acceso, lo validamos ANTES de crear
+  //    ninguna cuenta. Así, si el código es inválido, ya fue usado, o está vencido,
+  //    nunca queda un usuario "huérfano" bloqueando ese correo para siempre.
+  if (usingAccessCode) {
+    if (!accessCode) {
+      showError('Escribe tu código de acceso.');
+      return;
+    }
+    btn.disabled = true; btn.textContent = 'Verificando código...';
+    try {
+      const checkRes = await fetch(VALIDATE_CODE_FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: accessCode })
+      });
+      const checkResult = await checkRes.json();
+      if (!checkRes.ok || !checkResult.valid) {
+        showError(checkResult.error || 'Código inválido.');
+        btn.disabled = false; btn.textContent = 'Activar mi cuenta';
+        return;
+      }
+    } catch (err) {
+      showError('No se pudo verificar el código. Intenta de nuevo.');
+      btn.disabled = false; btn.textContent = 'Activar mi cuenta';
+      return;
+    }
+  }
+
   btn.disabled = true; btn.textContent = 'Creando tu cuenta...';
   isRegistering = true;
 
   // 1. Crear el usuario y su contraseña directamente en Supabase
+  //    (para este punto, si había código, ya sabemos que es válido)
   const { data: signUpData, error: signUpError } = await sb.auth.signUp({
     email,
     password,
@@ -414,12 +446,11 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
       showError('No se pudo crear la cuenta. Intenta de nuevo.');
     }
     btn.disabled = false; btn.textContent = 'Continuar al pago';
+    isRegistering = false;
     return;
   }
 
   // 2. Si hay código de acceso, activar directo (sin Stripe). Si no, ir a pago.
-  const accessCode = document.getElementById('reg_code').value.trim();
-
   if (usingAccessCode && accessCode) {
     btn.textContent = 'Activando tu cuenta...';
     try {
