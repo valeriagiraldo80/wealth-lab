@@ -370,6 +370,9 @@ textarea { resize: vertical; line-height: 1.5; }
 
       <!-- NUEVO TRADE -->
       <div class="page" id="page-nuevo">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+          <button type="button" class="btn-secondary" onclick="openCustomOptionsModal()" style="font-size:0.65rem;padding:8px 14px">Gestionar mis opciones personalizadas</button>
+        </div>
         <form id="tradeForm" onsubmit="saveTrade(event)">
           <div class="form-section">
             <div class="form-section-title"><span style="font-family:'Cocogoose',sans-serif">1</span> · Identificación</div>
@@ -877,6 +880,20 @@ function closeConfirmModal(confirmed) {
   if (confirmed && cb) cb();
 }
 </script>
+
+<!-- MODAL GESTIONAR OPCIONES PERSONALIZADAS -->
+<div id="customOptionsModal" class="modal-overlay" style="display:none">
+  <div class="modal" style="max-width:480px;max-height:75vh;overflow-y:auto">
+    <div class="modal-title">Mis opciones personalizadas</div>
+    <p style="font-size:0.7rem;color:var(--text2);line-height:1.5;margin-bottom:16px">
+      Estas son las opciones que has creado escribiendo en "Otra/Otro". Elimina las que no necesites.
+    </p>
+    <div id="customOptionsList"></div>
+    <div class="form-actions" style="margin-top:16px">
+      <button class="btn-secondary" onclick="document.getElementById('customOptionsModal').style.display='none'">Cerrar</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL ITEM PROTOCOLO (Reglas / Checklist / Risk Management) -->
 <div id="disciplineItemModal" class="modal-overlay" style="display:none">
@@ -1620,12 +1637,106 @@ function closeTradeFlow(id) {
   }, 0);
 }
 
+let customOptions = {};
+
+async function loadCustomOptions() {
+  if (!currentUser) return;
+  const { data } = await sb.from('custom_options').select('field_type, value').eq('user_id', currentUser.id).order('value');
+  customOptions = {};
+  (data||[]).forEach(row => {
+    (customOptions[row.field_type] = customOptions[row.field_type] || []).push(row.value);
+  });
+}
+
+function injectCustomOptions(selectId, fieldType, otherValue) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  Array.from(sel.querySelectorAll('option[data-custom="1"]')).forEach(o => o.remove());
+  const existingValues = new Set(Array.from(sel.options).map(o => o.value));
+  const otherOption = Array.from(sel.options).find(o => o.value === otherValue);
+  (customOptions[fieldType] || []).forEach(val => {
+    if (existingValues.has(val)) return;
+    const opt = document.createElement('option');
+    opt.value = val; opt.textContent = val; opt.dataset.custom = '1';
+    if (otherOption) sel.insertBefore(opt, otherOption);
+    else sel.appendChild(opt);
+  });
+}
+
+function renderCustomErrorButtons() {
+  const group = document.getElementById('errorsGroup');
+  if (!group) return;
+  Array.from(group.querySelectorAll('.toggle-btn[data-custom="1"]')).forEach(b => b.remove());
+  const otherBtn = Array.from(group.querySelectorAll('.toggle-btn')).find(b => b.textContent.trim() === 'Otro');
+  (customOptions['error'] || []).forEach(val => {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'toggle-btn'; btn.dataset.custom = '1';
+    btn.textContent = val;
+    btn.onclick = () => toggleError(btn, val);
+    if (otherBtn) group.insertBefore(btn, otherBtn);
+    else group.appendChild(btn);
+  });
+}
+
+function renderCustomOptionsIntoForm() {
+  injectCustomOptions('f_trade_type', 'trade_type', 'Otro');
+  injectCustomOptions('f_strategy', 'strategy', 'Otra');
+  injectCustomOptions('f_direction', 'direction', 'Otra');
+  injectCustomOptions('f_market_condition', 'market_condition', 'Otra');
+  injectCustomOptions('f_close_type', 'close_type', 'Otro');
+  renderCustomErrorButtons();
+}
+
+async function saveNewCustomOptions(items) {
+  if (!items.length) return;
+  const rows = items.map(c => ({ user_id: currentUser.id, field_type: c.field_type, value: c.value }));
+  await sb.from('custom_options').upsert(rows, { onConflict: 'user_id,field_type,value', ignoreDuplicates: true });
+  await loadCustomOptions();
+  renderCustomOptionsIntoForm();
+}
+
+const CUSTOM_OPTION_LABELS = { trade_type: 'Tipo', strategy: 'Estrategia', direction: 'Dirección', market_condition: 'Condición de Mercado', close_type: 'Tipo de Cierre', error: 'Errores' };
+
+function openCustomOptionsModal() {
+  renderCustomOptionsModalList();
+  document.getElementById('customOptionsModal').style.display = 'flex';
+}
+
+function renderCustomOptionsModalList() {
+  const container = document.getElementById('customOptionsList');
+  const types = Object.keys(CUSTOM_OPTION_LABELS).filter(t => (customOptions[t]||[]).length);
+  if (!types.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-title">Aún no has creado opciones personalizadas</div><div class="empty-sub">Aparecerán aquí cuando escribas algo en "Otra/Otro"</div></div>';
+    return;
+  }
+  container.innerHTML = types.map(t => `
+    <div class="discipline-section">
+      <div class="discipline-section-title">${CUSTOM_OPTION_LABELS[t]}</div>
+      ${(customOptions[t]||[]).map(val => `
+        <div class="discipline-item">
+          <div class="discipline-item-text">${val}</div>
+          <div class="discipline-item-actions"><button class="btn-danger" onclick="deleteCustomOption('${t}','${val.replace(/'/g,"\\'")}')">✕</button></div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+async function deleteCustomOption(fieldType, value) {
+  await sb.from('custom_options').delete().eq('user_id', currentUser.id).eq('field_type', fieldType).eq('value', value);
+  await loadCustomOptions();
+  renderCustomOptionsIntoForm();
+  renderCustomOptionsModalList();
+  showToast('✦ Opción eliminada');
+}
+
 function newTradeForm() {
   editingTradeId = null;
   resetForm();
   showPage('nuevo');
   document.getElementById('tradeSubmitBtn').textContent = 'Guardar Trade';
   document.getElementById('pageTitle').textContent = 'Nuevo Trade';
+  renderCustomOptionsIntoForm();
 }
 
 function setSelectWithOther(selectId, otherId, value) {
@@ -1647,6 +1758,7 @@ async function editTrade(id) {
   if (!t) return;
   editingTradeId = id;
   resetForm();
+  renderCustomOptionsIntoForm();
 
   const set = (fid, val) => { const el = document.getElementById(fid); if (el) el.value = val ?? ''; };
   set('f_status', t.status || 'closed'); toggleStatusFields();
@@ -1723,19 +1835,28 @@ async function saveTrade(e) {
   const g = id => document.getElementById(id)?.value||null;
   const status = g('f_status') || 'closed';
   if (status === 'closed' && !g('f_pnl')) { alert('Para guardar un trade como Cerrado, necesitas el P&L (llena P&L Bruto en el Bloque 5).'); return; }
-  const resolveOther = (selectId, otherId) => {
+  const customOptionsToSave = [];
+  const resolveOther = (selectId, otherId, fieldType) => {
     const val = g(selectId);
-    if (val === 'Otra' || val === 'Otro') { const o = g(otherId); return o ? o.trim() : val; }
+    if (val === 'Otra' || val === 'Otro') {
+      const o = g(otherId);
+      const trimmed = o ? o.trim() : val;
+      if (o && o.trim() && fieldType) customOptionsToSave.push({ field_type: fieldType, value: trimmed });
+      return trimmed;
+    }
     return val;
   };
-  const tradeType = resolveOther('f_trade_type','f_trade_type_other');
-  const strategy = resolveOther('f_strategy','f_strategy_other');
-  const direction = resolveOther('f_direction','f_direction_other');
-  const marketCondition = resolveOther('f_market_condition','f_market_condition_other');
-  const closeType = resolveOther('f_close_type','f_close_type_other');
+  const tradeType = resolveOther('f_trade_type','f_trade_type_other','trade_type');
+  const strategy = resolveOther('f_strategy','f_strategy_other','strategy');
+  const direction = resolveOther('f_direction','f_direction_other','direction');
+  const marketCondition = resolveOther('f_market_condition','f_market_condition_other','market_condition');
+  const closeType = resolveOther('f_close_type','f_close_type_other','close_type');
   const errorOtherVal = g('f_error_other');
   const finalErrors = [...selectedErrors];
-  if (errorOtherVal && errorOtherVal.trim()) finalErrors.push(errorOtherVal.trim());
+  if (errorOtherVal && errorOtherVal.trim()) {
+    finalErrors.push(errorOtherVal.trim());
+    customOptionsToSave.push({ field_type: 'error', value: errorOtherVal.trim() });
+  }
   const isDetailMode = window.strikesMode === 'detail';
   const legs = isDetailMode ? collectLegsFromForm() : [];
   const netDeltaVal = isDetailMode && g('f_net_delta') ? parseFloat(g('f_net_delta')) : null;
@@ -1760,6 +1881,8 @@ async function saveTrade(e) {
     const { error: legsError } = await sb.from('trade_legs').insert(legsPayload);
     if (legsError) { alert('El trade se guardó, pero hubo un error guardando las patas: ' + legsError.message); }
   }
+
+  await saveNewCustomOptions(customOptionsToSave);
 
   const wasEditing = !!editingTradeId;
   editingTradeId = null;
@@ -3142,6 +3265,7 @@ async function init() {
   
   
   await loadAccounts();
+  await loadCustomOptions();
   document.getElementById('loading').style.display='none';
   document.getElementById('app').style.display='flex';
   renderDashboard();
