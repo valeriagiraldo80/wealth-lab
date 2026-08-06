@@ -653,8 +653,7 @@ textarea { resize: vertical; line-height: 1.5; }
                 <label>Vista</label>
                 <div class="toggle-group" id="gannViewGroup">
                   <button type="button" class="toggle-btn active" onclick="setGannView(this,'tabla')">📋 Tabla <span class="tip" data-tip="Todos los niveles, ordenados por cercanía al precio — mejor para anticipar y planear.">ⓘ</span></button>
-                  <button type="button" class="toggle-btn" onclick="setGannView(this,'espiral')">🌀 Espiral <span class="tip" data-tip="La geometría real del Square of Nine — mejor para entender por qué un nivel importa.">ⓘ</span></button>
-                  <button type="button" class="toggle-btn" onclick="setGannView(this,'recorrido')">🎬 Recorrido <span class="tip" data-tip="El camino real que hizo el precio desde el pivote, día por día — con un control para reproducirlo.">ⓘ</span></button>
+                  <button type="button" class="toggle-btn" onclick="setGannView(this,'espiral')">🌀 Espiral <span class="tip" data-tip="La geometría real del Square of Nine, con opción de ver el recorrido del precio.">ⓘ</span></button>
                 </div>
               </div>
             </div>
@@ -2746,7 +2745,8 @@ function setGannView(btn, view) {
   gannView = view;
   document.querySelectorAll('#gannViewGroup .toggle-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  if (view === 'recorrido') { stopRecorridoPlay(); renderGannRecorrido(); } else { calcGann(); }
+  stopRecorridoPlay();
+  calcGann();
 }
 
 // RECORRIDO — camino real del precio desde el pivote, con reproductor día por día
@@ -2788,6 +2788,7 @@ async function renderGannRecorrido() {
       <p style="font-size:0.75rem;color:var(--text2);margin-bottom:16px">Todavía no hay suficiente historial guardado desde tu pivote (${pivotDate}). Solo se trae una vez.</p>
       <button class="btn-primary" onclick="runBackfill()">Traer historial desde el pivote</button>
       <div id="backfillStatus" style="font-size:0.68rem;color:var(--text3);margin-top:10px"></div>
+      <div style="margin-top:14px"><span style="font-size:0.65rem;color:var(--text3);cursor:pointer;text-decoration:underline" onclick="calcGann()">← Volver a la espiral</span></div>
     </div>`;
     return;
   }
@@ -2806,6 +2807,9 @@ async function renderGannRecorrido() {
   });
 
   el.innerHTML = `
+    <div style="text-align:center;margin-bottom:10px">
+      <span style="font-size:0.65rem;color:var(--text3);cursor:pointer;text-decoration:underline" onclick="calcGann()">← Volver a la espiral</span>
+    </div>
     <div style="text-align:center;margin-bottom:10px">
       <span style="font-size:0.65rem;color:var(--text3)">Pivote ${document.getElementById('global_date').value} → </span>
       <span id="recorridoDateLabel" style="font-family:Cocogoose,sans-serif;font-size:0.85rem;color:var(--gold-light);font-weight:700"></span>
@@ -2893,7 +2897,10 @@ function renderGannSpiral(bullLevels, bearLevels, showBull, showBear, nearest, p
   const degMap = { '0°':0, '45°':45, '90°':90, '135°':135, '180°':180, '225°':225, '270°':270, '315°':315 };
   const showBoth = showBull && showBear;
 
-  let svg = `<div style="padding:10px 14px;background:var(--bg3);border-radius:8px;margin-bottom:12px;text-align:center">
+  let svg = `<div style="text-align:center;margin-bottom:10px">
+    <button class="btn-secondary" style="padding:6px 14px;font-size:0.65rem" onclick="renderGannRecorrido()">🎬 Ver recorrido del precio desde el pivote</button>
+  </div>
+  <div style="padding:10px 14px;background:var(--bg3);border-radius:8px;margin-bottom:12px;text-align:center">
     <span id="gannSpiralInfo" style="font-size:0.75rem;color:var(--text2)">Toca cualquier punto para ver su valor exacto</span>
   </div>
   <div style="overflow-x:auto"><svg viewBox="0 0 600 600" style="width:100%;max-width:600px;display:block;margin:0 auto" role="img">
