@@ -314,7 +314,7 @@ textarea { resize: vertical; line-height: 1.5; }
         <div class="nav-label">Sistema</div>
         <button class="nav-item" onclick="showPage('cuentas')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Mis Cuentas</button>
         <button class="nav-item" onclick="showPage('movimientos')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg> Movimientos</button>
-        <button class="nav-item" onclick="showPage('ciclos')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Ciclos</button>
+        <button class="nav-item" onclick="showPage('ciclos')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Sincronías</button>
         <button class="nav-item" onclick="showPage('reglas')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7l-3 6a3 3 0 0 0 6 0l-3-6zM19 7l-3 6a3 3 0 0 0 6 0l-3-6zM5 7h14M9 21h6"/></svg> Protocolo de Trading</button>
         <button class="nav-item" onclick="showPage('semanal')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> Revisión Semanal</button>
       </div>
@@ -607,35 +607,55 @@ textarea { resize: vertical; line-height: 1.5; }
           </div>
           <div class="form-group" style="margin:0;min-width:150px">
             <label>Precio actual</label>
-            <input type="number" id="global_price" placeholder="ej. 5600" style="padding:7px 10px;font-size:0.72rem" oninput="syncGlobalPivot()"/>
+            <input type="number" id="global_price" placeholder="ej. 5600" style="padding:7px 10px;font-size:0.72rem" oninput="onManualPriceEdit()"/>
+            <div id="marketPriceLabel" style="font-size:0.58rem;color:var(--text3);margin-top:3px"></div>
           </div>
+        </div>
+
+        <!-- Categorías -->
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+          <div class="toggle-group" id="ciclosCategoryGroup">
+            <button type="button" class="toggle-btn active" onclick="switchCategory(this,'precio')">🌀 Geometría del Precio</button>
+            <button type="button" class="toggle-btn" onclick="switchCategory(this,'tiempo')">⏱ Geometría del Tiempo</button>
+            <button type="button" class="toggle-btn" onclick="switchCategory(this,'contexto')">🌙 Contexto Natural</button>
+          </div>
+          <button class="ciclo-tab" style="border-color:var(--gold-dark);color:var(--gold-light)" onclick="switchTab('observaciones',this)">📝 Observaciones</button>
         </div>
 
         <!-- Tab navigation -->
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:16px">
-          <button class="ciclo-tab active" onclick="switchTab('mapa')">🌀 Mapa de Ciclos</button>
-          <button class="ciclo-tab" onclick="switchTab('angulos')">📐 Ángulos</button>
-          <button class="ciclo-tab" onclick="switchTab('rueda')">☯ Rueda de <span style="font-family:'Cocogoose',sans-serif">24</span></button>
-          <button class="ciclo-tab" onclick="switchTab('maestros')">✦ Números Maestros</button>
-          <button class="ciclo-tab" onclick="switchTab('rango')">📊 Rango de Apertura</button>
-          <button class="ciclo-tab" onclick="switchTab('temporales')">⏱ Ciclos Temporales</button>
-          <button class="ciclo-tab" onclick="switchTab('vibracion')">〰 Vibración</button>
-          <button class="ciclo-tab" onclick="switchTab('calendario')">📅 Calendario</button>
-          <button class="ciclo-tab" onclick="switchTab('estacionalidad')">🌿 Estacionalidad</button>
+          <button class="ciclo-tab active" data-cat="precio" onclick="switchTab('mapa',this)">🌀 Mapa de Ciclos</button>
+          <button class="ciclo-tab" data-cat="precio" onclick="switchTab('angulos',this)">📐 Ángulos</button>
+          <button class="ciclo-tab" data-cat="precio" onclick="switchTab('maestros',this)">✦ Números Maestros</button>
+          <button class="ciclo-tab" data-cat="precio" onclick="switchTab('rango',this)">📊 Rango de Apertura</button>
+          <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('temporales',this)">⏱ Ciclos Temporales</button>
+          <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('rueda',this)">☯ Rueda de <span style="font-family:'Cocogoose',sans-serif">24</span></button>
+          <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('calendario',this)">📅 Calendario</button>
+          <button class="ciclo-tab" data-cat="contexto" style="display:none" onclick="switchTab('estacionalidad',this)">🌿 Estacionalidad</button>
+          <button class="ciclo-tab" data-cat="contexto" style="display:none" onclick="switchTab('vibracion',this)">〰 Vibración</button>
+          <button class="ciclo-tab" data-cat="contexto" style="display:none" onclick="switchTab('luna',this)">🌙 Luna</button>
         </div>
 
         <!-- 1. MAPA DE CICLOS - Square of Nine -->
         <div class="ciclo-panel active" id="tab-mapa">
           <div class="form-section">
             <div class="form-section-title">Mapa de Ciclos — Espiral de Precio</div>
-            <div class="form-grid" style="max-width:400px;margin-bottom:20px">
-              <div class="form-group">
-                <label>Pivote (mínimo o máximo)</label>
-                <input type="number" id="gann_pivot" placeholder="ej. 5400" oninput="calcGann()"/>
+            <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:20px">
+              <div class="form-group full" style="max-width:500px;margin:0">
+                <label>Dirección del pivote</label>
+                <div class="toggle-group" id="gannDirectionGroup">
+                  <button type="button" class="toggle-btn active" onclick="setGannDirection(this,'ambas')">Ambas <span class="tip" data-tip="Úsalo solo si aún no sabes si este pivote fue el inicio de una tendencia o un punto de equilibrio — mientras el mercado confirma, ver las dos tablas te deja comparar ambos escenarios.">ⓘ</span></button>
+                  <button type="button" class="toggle-btn" onclick="setGannDirection(this,'alcista')">▲ Alcista <span class="tip" data-tip="Úsalo cuando ya confirmaste que el pivote fue el inicio de una tendencia al alza. Solo verás la tabla alcista, con resistencias y soportes calculados sobre esa misma estructura.">ⓘ</span></button>
+                  <button type="button" class="toggle-btn" onclick="setGannDirection(this,'bajista')">▼ Bajista <span class="tip" data-tip="Úsalo cuando ya confirmaste que el pivote fue el inicio de una tendencia a la baja. Solo verás la tabla bajista, con resistencias y soportes calculados sobre esa misma estructura.">ⓘ</span></button>
+                </div>
               </div>
-              <div class="form-group">
-                <label>Precio actual</label>
-                <input type="number" id="gann_price" placeholder="ej. 5600" oninput="calcGann()"/>
+              <div class="form-group full" style="max-width:340px;margin:0">
+                <label>Vista</label>
+                <div class="toggle-group" id="gannViewGroup">
+                  <button type="button" class="toggle-btn active" onclick="setGannView(this,'tabla')">📋 Tabla <span class="tip" data-tip="Todos los niveles, ordenados por cercanía al precio — mejor para anticipar y planear.">ⓘ</span></button>
+                  <button type="button" class="toggle-btn" onclick="setGannView(this,'espiral')">🌀 Espiral <span class="tip" data-tip="La geometría real del Square of Nine — mejor para entender por qué un nivel importa.">ⓘ</span></button>
+                  <button type="button" class="toggle-btn" onclick="setGannView(this,'recorrido')">🎬 Recorrido <span class="tip" data-tip="El camino real que hizo el precio desde el pivote, día por día — con un control para reproducirlo.">ⓘ</span></button>
+                </div>
               </div>
             </div>
             <div id="gann_result"></div>
@@ -647,20 +667,13 @@ textarea { resize: vertical; line-height: 1.5; }
           <div class="form-section">
             <div class="form-section-title">Ángulos de Gann</div>
             <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">La línea <span style="font-family:'Cocogoose',sans-serif">1x1</span> es la línea de equilibrio perfecta. Por encima = alcista. Por debajo = bajista.</p>
-            <div class="form-grid" style="max-width:500px;margin-bottom:20px">
+            <div class="form-grid" style="max-width:340px;margin-bottom:8px">
               <div class="form-group">
-                <label>Precio de origen</label>
-                <input type="number" id="ang_origin_price" placeholder="ej. 5400" oninput="calcAngulos()"/>
-              </div>
-              <div class="form-group">
-                <label>Días desde origen</label>
-                <input type="number" id="ang_days" placeholder="ej. 30" oninput="calcAngulos()"/>
-              </div>
-              <div class="form-group">
-                <label>Unidad de precio (pts/día)</label>
+                <label>Puntos por día <span class="tip" data-tip="Define qué tan inclinada es tu línea de equilibrio (1x1): cuántos puntos 'debería' avanzar el precio por cada día que pasa, según Gann. No hay un número universal correcto — depende del instrumento. Gann originalmente usaba 1 punto = 1 día para acciones bajo $100. Para el SPX, muchos traders lo ajustan según el rango diario promedio reciente del índice. Si no estás segura, prueba con tu propio promedio observado y ajústalo con el tiempo.">ⓘ</span></label>
                 <input type="number" id="ang_unit" placeholder="ej. 10" oninput="calcAngulos()"/>
               </div>
             </div>
+            <p style="font-size:0.6rem;color:var(--text3);margin-bottom:20px">Origen y días transcurridos se toman del Pivote Global de arriba.</p>
             <div id="angulos_result"></div>
           </div>
         </div>
@@ -679,12 +692,7 @@ textarea { resize: vertical; line-height: 1.5; }
           <div class="form-section">
             <div class="form-section-title">Números Maestros de Gann</div>
             <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6"><span style="font-family:'Cocogoose',sans-serif">144 · 90 · 45 · 360 · 30 · 120</span> — estos números aparecen constantemente como niveles de soporte, resistencia y tiempo.</p>
-            <div class="form-grid" style="max-width:400px;margin-bottom:20px">
-              <div class="form-group">
-                <label>Precio o nivel base</label>
-                <input type="number" id="master_price" placeholder="ej. 5400" oninput="calcMaestros()"/>
-              </div>
-            </div>
+            <p style="font-size:0.6rem;color:var(--text3);margin-bottom:16px">El precio base se toma del Pivote Global de arriba.</p>
             <div id="maestros_result"></div>
           </div>
         </div>
@@ -715,12 +723,7 @@ textarea { resize: vertical; line-height: 1.5; }
           <div class="form-section">
             <div class="form-section-title">Ciclos Temporales</div>
             <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Gann identificó ciclos de <span style="font-family:'Cocogoose',sans-serif">90, 144, 365</span> días y <span style="font-family:'Cocogoose',sans-serif">10</span> años como los más importantes en el mercado.</p>
-            <div class="form-grid" style="max-width:400px;margin-bottom:20px">
-              <div class="form-group full">
-                <label>Fecha de inicio del ciclo</label>
-                <input type="date" id="ciclo_start" oninput="calcTemporales()"/>
-              </div>
-            </div>
+            <p style="font-size:0.6rem;color:var(--text3);margin-bottom:16px">La fecha de inicio se toma del Pivote Global de arriba.</p>
             <div id="temporales_result"></div>
           </div>
         </div>
@@ -730,17 +733,23 @@ textarea { resize: vertical; line-height: 1.5; }
           <div class="form-section">
             <div class="form-section-title">Vibración del Precio</div>
             <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">"Cada instrumento tiene su propia vibración natural. Si encuentras el número correcto, el mercado te dirá exactamente a dónde va." — W.D. Gann</p>
-            <div class="form-grid" style="max-width:400px;margin-bottom:20px">
+            <div class="form-grid" style="max-width:340px;margin-bottom:8px">
               <div class="form-group">
-                <label>Mínimo histórico o precio de origen</label>
-                <input type="number" id="vib_origin" placeholder="ej. 666" oninput="calcVibracion()"/>
-              </div>
-              <div class="form-group">
-                <label>Precio actual</label>
-                <input type="number" id="vib_current" placeholder="ej. 5400" oninput="calcVibracion()"/>
+                <label>Origen de vibración <span class="tip" data-tip="No tiene que ser el mínimo histórico absoluto del instrumento — de hecho, casi nunca conviene que lo sea. Si el origen queda demasiado lejos del precio actual, la tabla se vuelve poco práctica (demasiados pasos entre uno y otro). Funciona mejor con un mínimo significativo más reciente: un piso importante de los últimos años, no el mínimo de toda la historia.">ⓘ</span></label>
+                <input type="number" id="vib_origin" placeholder="ej. tu mínimo significativo más reciente" oninput="calcVibracion()"/>
               </div>
             </div>
+            <p style="font-size:0.6rem;color:var(--text3);margin-bottom:20px">Este campo es independiente del Pivote Global — Vibración usa su propio origen. El precio actual sí se toma del Pivote Global de arriba.</p>
             <div id="vibracion_result"></div>
+          </div>
+        </div>
+
+        <!-- 7b. LUNA -->
+        <div class="ciclo-panel" id="tab-luna">
+          <div class="form-section">
+            <div class="form-section-title">🌙 Luna</div>
+            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:20px;line-height:1.6">Gann estudiaba el ciclo lunar como uno más de sus ciclos de tiempo, y buscaba confluencias entre la fase de la luna y la posición del precio en su propia espiral. Aquí comparamos ambos ángulos — el de la luna en su ciclo de fase, y el del precio en su Square of Nine.</p>
+            <div id="luna_result"></div>
           </div>
         </div>
 
@@ -757,8 +766,6 @@ textarea { resize: vertical; line-height: 1.5; }
                   <option>Fed / FOMC</option>
                   <option>NFP</option>
                   <option>CPI</option>
-                  <option>Luna Nueva</option>
-                  <option>Luna Llena</option>
                   <option>Equinoccio</option>
                   <option>Solsticio</option>
                   <option>Rueda de 24</option>
@@ -781,6 +788,49 @@ textarea { resize: vertical; line-height: 1.5; }
             <p style="font-size:0.72rem;color:var(--text2);margin-bottom:20px;line-height:1.6">Comportamiento histórico promedio del SPX por mes. El tiempo tiene memoria.</p>
             <div id="estacionalidad_result"></div>
           </div>
+        </div>
+
+        <div class="ciclo-panel" id="tab-observaciones">
+          <div class="form-section">
+            <div class="form-section-title">📝 Observaciones — ¿Funciona Gann?</div>
+            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Registra qué hizo el precio cuando confluyó una fecha, un ángulo, o una fase lunar — hayas tomado un trade o no. Con el tiempo, esto te dice objetivamente qué técnicas te funcionan de verdad.</p>
+            <div id="obsStatsBox" style="margin-bottom:20px"></div>
+
+            <div class="form-grid">
+              <div class="form-group"><label>Fecha</label><input type="date" id="obs_fecha" onchange="autoFillObsLuna()"/></div>
+              <div class="form-group">
+                <label>Tipo de fuente</label>
+                <select id="obs_tipo" onchange="autoFillObsLuna()">
+                  <option value="ciclo_temporal">⏱ Ciclo Temporal</option>
+                  <option value="angulo">📐 Ángulo de Gann</option>
+                  <option value="mapa_ciclos">🌀 Mapa de Ciclos</option>
+                  <option value="numero_maestro">✦ Número Maestro</option>
+                  <option value="vibracion">〰 Vibración</option>
+                  <option value="luna">🌙 Luna</option>
+                  <option value="calendario">📅 Calendario</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+              <div class="form-group full"><label>Detalle (ej. "Ciclo 90 días", "Ángulo 45°", "Luna llena")</label><input type="text" id="obs_detalle" placeholder="ej. Luna llena"/></div>
+              <div class="form-group full"><label>¿Qué esperabas?</label><input type="text" id="obs_expectativa" placeholder="ej. reversión bajista cerca de 7,700"/></div>
+              <div class="form-group full"><label>¿Qué hizo el precio?</label><input type="text" id="obs_resultado" placeholder="ej. bajó 1.2% y tocó el nivel calculado"/></div>
+              <div class="form-group full">
+                <label>¿Se confirmó?</label>
+                <div class="toggle-group" id="obsConfirmGroup">
+                  <button type="button" class="toggle-btn active" data-val="" onclick="setObsConfirmField(this,'')">Sin revisar</button>
+                  <button type="button" class="toggle-btn" data-val="true" onclick="setObsConfirmField(this,'true')">✓ Confirmado</button>
+                  <button type="button" class="toggle-btn" data-val="false" onclick="setObsConfirmField(this,'false')">✗ No fue</button>
+                </div>
+              </div>
+              <div class="form-group full"><label>Nota (opcional)</label><textarea id="obs_nota" rows="2"></textarea></div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn-primary" onclick="saveObservacion()" id="obsSaveBtn">Guardar observación</button>
+              <span id="obsCancelEdit" style="display:none;font-size:0.65rem;color:var(--text3);cursor:pointer;margin-left:12px" onclick="cancelObsEdit()">Cancelar edición</span>
+            </div>
+          </div>
+
+          <div id="observacionesList" style="margin-top:24px"></div>
         </div>
 
       </div>
@@ -2595,68 +2645,321 @@ function wrapNumbersJosefin(el) {
 }
 
 function syncGlobalPivot() {
-  const pivot = document.getElementById('global_pivot').value;
-  const price = document.getElementById('global_price').value;
-  const date = document.getElementById('global_date').value;
-
-  // Sync to Mapa de Ciclos
-  if (pivot && document.getElementById('gann_pivot')) {
-    document.getElementById('gann_pivot').value = pivot;
-  }
-  if (price && document.getElementById('gann_price')) {
-    document.getElementById('gann_price').value = price;
-  }
-  // Sync to Angulos
-  if (pivot && document.getElementById('ang_origin_price')) {
-    document.getElementById('ang_origin_price').value = pivot;
-  }
-  // Sync to Vibracion
-  if (pivot && document.getElementById('vib_origin')) {
-    document.getElementById('vib_origin').value = pivot;
-  }
-  if (price && document.getElementById('vib_current')) {
-    document.getElementById('vib_current').value = price;
-  }
-  // Sync to Maestros
-  if (pivot && document.getElementById('master_price')) {
-    document.getElementById('master_price').value = pivot;
-  }
-  // Sync to Temporales
-  if (date && document.getElementById('ciclo_start')) {
-    document.getElementById('ciclo_start').value = date;
-  }
-
-  // Auto-calculate all
+  // Mapa de Ciclos, Ángulos, Números Maestros, Ciclos Temporales y Luna leen directo del Pivote Global.
   calcGann();
   calcAngulos();
   calcVibracion();
   calcMaestros();
   calcTemporales();
+  calcLuna();
+  saveCiclosPivote();
 }
 
-function switchTab(tab) {
+let pivoteSaveTimeout = null;
+function saveCiclosPivote() {
+  if (!currentUser) return;
+  clearTimeout(pivoteSaveTimeout);
+  pivoteSaveTimeout = setTimeout(async () => {
+    const pivot_price = parseFloat(document.getElementById('global_pivot').value) || null;
+    const pivot_date = document.getElementById('global_date').value || null;
+    const current_price = parseFloat(document.getElementById('global_price').value) || null;
+    await sb.from('ciclos_pivote').upsert({
+      user_id: currentUser.id, pivot_price, pivot_date, current_price, updated_at: new Date().toISOString()
+    });
+  }, 800);
+}
+
+async function loadLatestMarketPrice() {
+  const label = document.getElementById('marketPriceLabel');
+  const { data } = await sb.from('market_snapshot').select('*').eq('ticker', 'SPX').order('fetched_at', { ascending: false }).limit(1).maybeSingle();
+  if (data && data.price != null) {
+    document.getElementById('global_price').value = data.price;
+    const d = new Date(data.fetched_at);
+    if (label) label.textContent = `Actualizado automáticamente · ${d.toLocaleDateString('es-PA')} ${d.toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit' })}`;
+  }
+}
+
+function onManualPriceEdit() {
+  const label = document.getElementById('marketPriceLabel');
+  if (label) label.textContent = 'Editado manualmente';
+  syncGlobalPivot();
+}
+
+async function loadCiclosPivote(todayFallback) {
+  const dateEl = document.getElementById('global_date');
+  if (!currentUser) { if (dateEl) dateEl.value = todayFallback; return; }
+  const { data } = await sb.from('ciclos_pivote').select('*').eq('user_id', currentUser.id).maybeSingle();
+  if (data && data.pivot_price != null) {
+    document.getElementById('global_pivot').value = data.pivot_price;
+    dateEl.value = data.pivot_date || todayFallback;
+    if (data.current_price != null) document.getElementById('global_price').value = data.current_price;
+  } else {
+    dateEl.value = todayFallback;
+  }
+  await loadLatestMarketPrice();
+  calcGann();
+  calcAngulos();
+  calcVibracion();
+  calcMaestros();
+  calcTemporales();
+  calcLuna();
+}
+
+function switchTab(tab, btn) {
   document.querySelectorAll('.ciclo-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.ciclo-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
-  event.target.classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (tab === 'observaciones') loadObservaciones();
 }
 
-function initCiclos() {
+function switchCategory(btn, cat) {
+  document.querySelectorAll('#ciclosCategoryGroup .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.ciclo-tab[data-cat]').forEach(t => {
+    t.style.display = t.dataset.cat === cat ? '' : 'none';
+  });
+  const firstTab = document.querySelector(`.ciclo-tab[data-cat="${cat}"]`);
+  if (firstTab) firstTab.click();
+}
+
+async function initCiclos() {
   renderRueda();
   renderEstacionalidad();
   loadCalEvents();
   const today = new Date().toISOString().split('T')[0];
-  if (document.getElementById('ciclo_start')) document.getElementById('ciclo_start').value = today;
-  if (document.getElementById('global_date')) document.getElementById('global_date').value = today;
   if (document.getElementById('cal_date')) document.getElementById('cal_date').value = today;
+  await loadCiclosPivote(today);
 }
 
 // 1. MAPA DE CICLOS - Square of Nine
-function calcGann() {
-  const pivot = parseFloat(document.getElementById('gann_pivot').value);
-  const price = parseFloat(document.getElementById('gann_price').value);
+let gannDirection = 'ambas';
+function setGannDirection(btn, dir) {
+  gannDirection = dir;
+  document.querySelectorAll('#gannDirectionGroup .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  calcGann();
+}
+
+let gannView = 'tabla';
+function setGannView(btn, view) {
+  gannView = view;
+  document.querySelectorAll('#gannViewGroup .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (view === 'recorrido') { stopRecorridoPlay(); renderGannRecorrido(); } else { calcGann(); }
+}
+
+// RECORRIDO — camino real del precio desde el pivote, con reproductor día por día
+let recorridoData = [];
+let recorridoPivot = null;
+let recorridoPlaying = false;
+let recorridoTimer = null;
+
+async function runBackfill() {
+  const pivotDate = document.getElementById('global_date').value;
+  const status = document.getElementById('backfillStatus');
+  if (status) status.textContent = 'Trayendo historial…';
+  try {
+    const res = await fetch(`https://nidteoxdxmmtupovcxnv.supabase.co/functions/v1/backfill-market-history?from=${pivotDate}`);
+    const json = await res.json();
+    if (json.ok) {
+      if (status) status.textContent = `Listo — ${json.inserted} días traídos.`;
+      renderGannRecorrido();
+    } else {
+      if (status) status.textContent = 'Error: ' + (json.error || 'desconocido');
+    }
+  } catch (e) {
+    if (status) status.textContent = 'Error de conexión: ' + e;
+  }
+}
+
+async function renderGannRecorrido() {
+  const pivot = parseFloat(document.getElementById('global_pivot').value);
+  const pivotDate = document.getElementById('global_date').value;
   const el = document.getElementById('gann_result');
-  if (!pivot || pivot <= 0) { el.innerHTML = ''; return; }
+  if (!pivot || !pivotDate) { el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">Configura el Pivote Global arriba (pivote y fecha) para ver esta sección.</p>'; return; }
+
+  el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">Cargando historial…</p>';
+
+  const { data } = await sb.from('market_snapshot').select('price,price_date').eq('ticker', 'SPX').gte('price_date', pivotDate).order('price_date', { ascending: true });
+
+  if (!data || data.length < 2) {
+    el.innerHTML = `<div style="text-align:center;padding:30px 20px;background:var(--bg3);border-radius:10px">
+      <p style="font-size:0.75rem;color:var(--text2);margin-bottom:16px">Todavía no hay suficiente historial guardado desde tu pivote (${pivotDate}). Solo se trae una vez.</p>
+      <button class="btn-primary" onclick="runBackfill()">Traer historial desde el pivote</button>
+      <div id="backfillStatus" style="font-size:0.68rem;color:var(--text3);margin-top:10px"></div>
+    </div>`;
+    return;
+  }
+
+  recorridoData = data;
+  recorridoPivot = pivot;
+
+  const cx = 150, cy = 150, ringGap = 16;
+  let ringsHtml = '';
+  for (let r = 1; r <= 10; r++) ringsHtml += `<circle cx="${cx}" cy="${cy}" r="${r * ringGap}" fill="none" stroke="var(--border)" stroke-width="0.4" opacity="0.35"/>`;
+  const degs = [0, 45, 90, 135, 180, 225, 270, 315];
+  degs.forEach(deg => {
+    const rad = deg * Math.PI / 180;
+    const ex = cx + 165 * Math.cos(rad), ey = cy - 165 * Math.sin(rad);
+    ringsHtml += `<line x1="${cx}" y1="${cy}" x2="${ex}" y2="${ey}" stroke="var(--text3)" stroke-width="${deg % 90 === 0 ? 0.6 : 0.3}" opacity="0.3"/>`;
+  });
+
+  el.innerHTML = `
+    <div style="text-align:center;margin-bottom:10px">
+      <span style="font-size:0.65rem;color:var(--text3)">Pivote ${document.getElementById('global_date').value} → </span>
+      <span id="recorridoDateLabel" style="font-family:Cocogoose,sans-serif;font-size:0.85rem;color:var(--gold-light);font-weight:700"></span>
+      <span style="font-size:0.65rem;color:var(--text3)"> · </span>
+      <span id="recorridoPriceLabel" style="font-family:Cocogoose,sans-serif;font-size:0.85rem;color:var(--gold-light);font-weight:700"></span>
+    </div>
+    <div style="overflow-x:auto"><svg viewBox="0 0 300 300" style="width:100%;max-width:320px;display:block;margin:0 auto">
+      ${ringsHtml}
+      <g id="recorridoPath"></g>
+    </svg></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:14px;max-width:400px;margin-left:auto;margin-right:auto">
+      <button class="btn-secondary" id="recorridoPlayBtn" style="padding:8px 14px;font-size:0.65rem" onclick="toggleRecorridoPlay()">▶ Reproducir</button>
+      <input type="range" id="recorridoSlider" min="0" max="${data.length - 1}" value="${data.length - 1}" style="flex:1" oninput="updateRecorridoFrame(this.value)"/>
+    </div>
+    <p style="font-size:0.6rem;color:var(--text3);text-align:center;margin-top:8px">${data.length} días de historial · el color se aclara hacia el día más reciente</p>
+  `;
+
+  updateRecorridoFrame(data.length - 1);
+}
+
+function spiralPos(pivotSqrt, price, cx, cy, ringGap) {
+  const dist = Math.sqrt(price) - pivotSqrt;
+  const angleDeg = (((dist % 1) + 1) % 1) * 360;
+  const radius = Math.abs(dist) * ringGap;
+  const rad = angleDeg * Math.PI / 180;
+  return { x: cx + radius * Math.cos(rad), y: cy - radius * Math.sin(rad) };
+}
+
+function updateRecorridoFrame(idx) {
+  idx = parseInt(idx);
+  if (!recorridoData.length) return;
+  const cx = 150, cy = 150, ringGap = 16;
+  const pivotSqrt = Math.sqrt(recorridoPivot);
+  const pts = [];
+  for (let i = 0; i <= idx; i++) pts.push(spiralPos(pivotSqrt, recorridoData[i].price, cx, cy, ringGap));
+
+  let svg = '';
+  for (let i = 1; i < pts.length; i++) {
+    const t = pts.length > 1 ? i / (pts.length - 1) : 1;
+    svg += `<line x1="${pts[i-1].x}" y1="${pts[i-1].y}" x2="${pts[i].x}" y2="${pts[i].y}" stroke="var(--gold)" stroke-width="${1 + t * 2}" opacity="${(0.2 + t * 0.7).toFixed(2)}" stroke-linecap="round"/>`;
+  }
+  const last = pts[pts.length - 1];
+  svg += `<circle cx="${last.x}" cy="${last.y}" r="5" fill="var(--gold-light)" stroke="var(--gold)" stroke-width="1.5"/>`;
+
+  const pathEl = document.getElementById('recorridoPath');
+  if (pathEl) pathEl.innerHTML = svg;
+
+  const row = recorridoData[idx];
+  const dateLabel = document.getElementById('recorridoDateLabel');
+  const priceLabel = document.getElementById('recorridoPriceLabel');
+  const slider = document.getElementById('recorridoSlider');
+  if (dateLabel) dateLabel.textContent = row.price_date;
+  if (priceLabel) priceLabel.textContent = Number(row.price).toFixed(0);
+  if (slider) slider.value = idx;
+}
+
+function toggleRecorridoPlay() {
+  const btn = document.getElementById('recorridoPlayBtn');
+  if (recorridoPlaying) {
+    stopRecorridoPlay();
+  } else {
+    recorridoPlaying = true;
+    if (btn) btn.textContent = '⏸ Pausar';
+    recorridoTimer = setInterval(() => {
+      const slider = document.getElementById('recorridoSlider');
+      let idx = slider ? parseInt(slider.value) : 0;
+      idx = idx >= recorridoData.length - 1 ? 0 : idx + 1;
+      updateRecorridoFrame(idx);
+    }, 500);
+  }
+}
+
+function stopRecorridoPlay() {
+  clearInterval(recorridoTimer);
+  recorridoPlaying = false;
+  const btn = document.getElementById('recorridoPlayBtn');
+  if (btn) btn.textContent = '▶ Reproducir';
+}
+
+function renderGannSpiral(bullLevels, bearLevels, showBull, showBear, nearest, price) {
+  const cx = 300, cy = 300;
+  const ringGap = 22;
+  const angleToRad = deg => deg * Math.PI / 180;
+  const pos = (deg, r) => ({ x: cx + r * Math.cos(angleToRad(deg)), y: cy - r * Math.sin(angleToRad(deg)) });
+  const degMap = { '0°':0, '45°':45, '90°':90, '135°':135, '180°':180, '225°':225, '270°':270, '315°':315 };
+  const showBoth = showBull && showBear;
+
+  let svg = `<div style="padding:10px 14px;background:var(--bg3);border-radius:8px;margin-bottom:12px;text-align:center">
+    <span id="gannSpiralInfo" style="font-size:0.75rem;color:var(--text2)">Toca cualquier punto para ver su valor exacto</span>
+  </div>
+  <div style="overflow-x:auto"><svg viewBox="0 0 600 600" style="width:100%;max-width:600px;display:block;margin:0 auto" role="img">
+    <title>Espiral del Square of Nine</title>`;
+
+  // Anillos de referencia
+  for (let r = 1; r <= 10; r++) {
+    svg += `<circle cx="${cx}" cy="${cy}" r="${r*ringGap}" fill="none" stroke="var(--border)" stroke-width="0.5" opacity="0.4"/>`;
+  }
+  // Números de anillo sobre el eje 90°
+  for (let r = 1; r <= 10; r++) {
+    const p = pos(90, r*ringGap);
+    svg += `<text x="${p.x+8}" y="${p.y+3}" font-size="9" fill="var(--text3)">${r}</text>`;
+  }
+  // 8 rayos
+  Object.entries(degMap).forEach(([label, deg]) => {
+    const isCardinal = deg % 90 === 0;
+    const end = pos(deg, 232);
+    svg += `<line x1="${cx}" y1="${cy}" x2="${end.x}" y2="${end.y}" stroke="var(--text3)" stroke-width="${isCardinal?1:0.5}" opacity="${isCardinal?0.5:0.3}"/>`;
+  });
+
+  // Puntos alcistas y bajistas — onclick funciona con mouse Y con toque (iPad/iPhone), a diferencia del tooltip nativo por hover
+  const plotSet = (levelsArr, source) => {
+    levelsArr.forEach(a => {
+      const deg = degMap[a.angle];
+      a.levels.forEach((l, i) => {
+        if (source === 'bear' && l <= 0) return;
+        const ring = i + 1;
+        const rOffset = showBoth ? (source === 'bull' ? 4 : -4) : 0;
+        const p = pos(deg, ring*ringGap + rOffset);
+        const isNearest = nearest && nearest.source === source && nearest.angle === a.angle && nearest.ring === ring;
+        const color = source === 'bull' ? 'var(--success)' : 'var(--danger)';
+        const radius = isNearest ? 6 : 3;
+        const sourceLabel = source === 'bull' ? 'Alcista' : 'Bajista';
+        svg += `<circle cx="${p.x}" cy="${p.y}" r="${radius+4}" fill="transparent" style="cursor:pointer" onclick="document.getElementById('gannSpiralInfo').innerHTML='<strong style=&quot;color:var(--gold-light)&quot;>${l.toFixed(0)}</strong> pts — ${a.angle} · Anillo ${ring} · ${sourceLabel}'"/>`;
+        svg += `<circle cx="${p.x}" cy="${p.y}" r="${radius}" fill="${isNearest ? 'var(--gold-light)' : color}" stroke="${isNearest ? 'var(--gold)' : 'none'}" stroke-width="${isNearest?1.5:0}" opacity="${isNearest?1:0.75}" style="pointer-events:none"/>`;
+        if (isNearest) {
+          svg += `<text x="${p.x+10}" y="${p.y-8}" font-size="12" font-weight="700" fill="var(--gold-light)" style="pointer-events:none">${l.toFixed(0)}</text>`;
+        }
+      });
+    });
+  };
+  if (showBull) plotSet(bullLevels, 'bull');
+  if (showBear) plotSet(bearLevels, 'bear');
+
+  // Pivote al centro
+  svg += `<circle cx="${cx}" cy="${cy}" r="6" fill="var(--gold)" stroke="var(--gold-light)" stroke-width="1" style="cursor:pointer" onclick="document.getElementById('gannSpiralInfo').innerHTML='<strong style=&quot;color:var(--gold-light)&quot;>Pivote</strong>'"/>`;
+
+  svg += `</svg></div>
+  <div style="display:flex;gap:20px;margin-top:12px;flex-wrap:wrap;font-size:0.62rem;justify-content:center">
+    <div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:var(--gold)"></span> Pivote</div>
+    ${showBull ? '<div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:var(--success)"></span> Nivel alcista</div>' : ''}
+    ${showBear ? '<div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:var(--danger)"></span> Nivel bajista</div>' : ''}
+    <div style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:var(--gold-light);border:1.5px solid var(--gold)"></span> Nivel más cercano</div>
+  </div>
+  <p style="font-size:0.6rem;color:var(--text3);text-align:center;margin-top:8px">Toca o haz clic en cualquier punto para ver su valor exacto.</p>`;
+
+  return svg;
+}
+
+function calcGann() {
+  const pivot = parseFloat(document.getElementById('global_pivot').value);
+  const price = parseFloat(document.getElementById('global_price').value);
+  const el = document.getElementById('gann_result');
+  if (!pivot || pivot <= 0) { el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">Configura el Pivote Global arriba para ver esta sección.</p>'; return; }
+
 
   const angles = [
     { label: 'Q1 0°–90°', angle: '0°', dir: 'E', type: 'Cardinal', inc: 0.000 },
@@ -2678,88 +2981,115 @@ function calcGann() {
     levels: rings.map(r => Math.pow(sqrtP + a.inc + (r-1), 2))
   }));
 
-  // Build bear levels  
+  // Build bear levels
   const bearLevels = angles.map(a => ({
     ...a,
-    levels: rings.map(r => {
-      const val = sqrtP - a.inc - (r-1) * 1 + a.inc;
-      return Math.pow(sqrtP - (a.inc + (r-1)), 2);
-    })
+    levels: rings.map(r => Math.pow(sqrtP - (a.inc + (r-1)), 2))
   }));
 
-  // Find nearest level to price
+  // Flattened lists, tagged by source table — se usan para "nivel más cercano" y para resistencias/soportes clave
   let allBullLevels = [];
-  bullLevels.forEach(a => a.levels.forEach((l,i) => allBullLevels.push({price: l, angle: a.angle, ring: i+1, type: a.type})));
-  
+  bullLevels.forEach(a => a.levels.forEach((l,i) => allBullLevels.push({price: l, angle: a.angle, ring: i+1, type: a.type, label: a.label, source: 'bull'})));
+  let allBearLevels = [];
+  bearLevels.forEach(a => a.levels.forEach((l,i) => { if (l > 0) allBearLevels.push({price: l, angle: a.angle, ring: i+1, type: a.type, label: a.label, source: 'bear'}); }));
+
+  const showBull = gannDirection !== 'bajista';
+  const showBear = gannDirection !== 'alcista';
+
+  // Nivel más cercano — busca solo en la(s) tabla(s) que aplican según la dirección del pivote
+  let searchSet = gannDirection === 'bajista' ? allBearLevels : gannDirection === 'alcista' ? allBullLevels : allBullLevels.concat(allBearLevels);
   let nearest = null;
   let minDist = Infinity;
   if (price) {
-    allBullLevels.forEach(l => {
+    searchSet.forEach(l => {
       const d = Math.abs(l.price - price);
       if (d < minDist) { minDist = d; nearest = l; }
     });
   }
 
-  // Current quadrant
-  let quadrant = '';
+  // Current quadrant — basado en la posición angular real del ángulo más cercano (0°-360°), no en la profundidad del anillo
+  const phaseByQuadrant = {
+    'Q1 0°–90°': 'Expansión',
+    'Q2 90°–180°': 'Consolidación',
+    'Q3 180°–270°': 'Contracción',
+    'Q4 270°–360°': 'Reversión'
+  };
+  let quadrant = '', phaseName = '';
   if (nearest) {
-    const pct = (nearest.ring - 1) / 10;
-    if (pct < 0.25) quadrant = 'Q1 · Expansión';
-    else if (pct < 0.5) quadrant = 'Q2 · Consolidación';
-    else if (pct < 0.75) quadrant = 'Q3 · Contracción';
-    else quadrant = 'Q4 · Reversión';
+    phaseName = phaseByQuadrant[nearest.label] || '';
+    quadrant = nearest.label + ' · ' + phaseName;
   }
 
   let html = '';
   
   if (price && nearest) {
     html += `<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-      <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Nivel más cercano</div><div class="stat-value text-gold">${nearest.price.toFixed(0)}</div><div class="stat-sub">${nearest.angle} · Anillo <span style="font-family:Cocogoose,sans-serif">${nearest.ring}</span></div></div>
+      <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Nivel más cercano</div><div class="stat-value text-gold">${nearest.price.toFixed(0)}</div><div class="stat-sub">${nearest.angle} · Anillo <span style="font-family:Cocogoose,sans-serif">${nearest.ring}</span> · ${nearest.source === 'bull' ? 'Alcista' : 'Bajista'}</div></div>
       <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Distancia</div><div class="stat-value ${price > nearest.price ? 'text-success' : 'text-danger'}">${Math.abs(price - nearest.price).toFixed(0)} pts</div><div class="stat-sub">${price > nearest.price ? 'Por encima' : 'Por debajo'}</div></div>
       <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Fase del ciclo</div><div class="stat-value text-gold" style="font-size:1rem">${quadrant}</div></div>
     </div>`;
   }
 
+  if (gannView === 'tabla') {
   // Bull table
-  html += `<div style="margin-bottom:8px"><span class="gann-label-bull">▲ NIVELES ALCISTAS — Fórmula: (√Pivote + inc)<span style="font-family:'Cocogoose',sans-serif">²</span></span></div>`;
-  html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Cuadrante</th><th>Ángulo</th><th>Dir</th><th>Tipo</th>`;
-  rings.forEach(r => html += `<th>Anillo <span style="font-family:Cocogoose,sans-serif">${r}</span></th>`);
-  html += `</tr></thead><tbody>`;
-  
-  bullLevels.forEach(a => {
-    const isCardinal = a.type === 'Cardinal';
-    const rowClass = isCardinal ? 'cardinal' : '';
-    html += `<tr class="${rowClass}"><td>${a.label}</td><td>${a.angle}</td><td>${a.dir}</td><td>${a.type}</td>`;
-    a.levels.forEach((l,i) => {
-      const isNearest = price && nearest && Math.abs(l - price) < 30 && a.angle === nearest.angle;
-      html += `<td class="${isNearest ? 'nearest' : ''}">${l.toFixed(0)}</td>`;
+  if (showBull) {
+    html += `<div style="margin-bottom:8px"><span class="gann-label-bull">▲ NIVELES ALCISTAS — Fórmula: (√Pivote + inc)<span style="font-family:'Cocogoose',sans-serif">²</span></span></div>`;
+    html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Cuadrante</th><th>Ángulo</th><th>Dir</th><th>Tipo</th>`;
+    rings.forEach(r => html += `<th>Anillo <span style="font-family:Cocogoose,sans-serif">${r}</span></th>`);
+    html += `</tr></thead><tbody>`;
+
+    bullLevels.forEach(a => {
+      const isCardinal = a.type === 'Cardinal';
+      const rowClass = isCardinal ? 'cardinal' : '';
+      html += `<tr class="${rowClass}"><td>${a.label}</td><td>${a.angle}</td><td>${a.dir}</td><td>${a.type}</td>`;
+      a.levels.forEach((l,i) => {
+        const isNearest = price && nearest && nearest.source === 'bull' && Math.abs(l - price) < 30 && a.angle === nearest.angle;
+        html += `<td class="${isNearest ? 'nearest' : ''}">${l.toFixed(0)}</td>`;
+      });
+      html += `</tr>`;
     });
-    html += `</tr>`;
-  });
-  html += `</tbody></table></div>`;
+
+    // Distancia al precio actual — promedio por anillo, usando solo los datos de esta tabla (alcista)
+    html += `<tr style="background:var(--bg4)"><td colspan="4" style="color:var(--text3);text-align:right">Distancia al precio actual =</td>`;
+    if (price) {
+      bullLevels[0].levels.forEach((l,i) => {
+        const avgLevel = bullLevels.reduce((s,a) => s + a.levels[i], 0) / bullLevels.length;
+        html += `<td style="color:var(--gold-light);font-weight:700">${Math.abs(price - avgLevel).toFixed(0)}</td>`;
+      });
+    }
+    html += `</tr></tbody></table></div>`;
+  }
 
   // Bear table
-  html += `<div style="margin:20px 0 8px"><span class="gann-label-bear">▼ NIVELES BAJISTAS — Fórmula: (√Pivote − inc)<span style="font-family:'Cocogoose',sans-serif">²</span></span></div>`;
-  html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Cuadrante</th><th>Ángulo</th><th>Dir</th><th>Tipo</th>`;
-  rings.forEach(r => html += `<th>Anillo <span style="font-family:Cocogoose,sans-serif">${r}</span></th>`);
-  html += `</tr></thead><tbody>`;
-  
-  bearLevels.forEach(a => {
-    const isCardinal = a.type === 'Cardinal';
-    html += `<tr class="${isCardinal ? 'cardinal' : ''}"><td>${a.label}</td><td>${a.angle}</td><td>${a.dir}</td><td>${a.type}</td>`;
-    a.levels.forEach(l => html += `<td>${l > 0 ? l.toFixed(0) : '—'}</td>`);
-    html += `</tr>`;
-  });
+  if (showBear) {
+    html += `<div style="margin:20px 0 8px"><span class="gann-label-bear">▼ NIVELES BAJISTAS — Fórmula: (√Pivote − inc)<span style="font-family:'Cocogoose',sans-serif">²</span></span></div>`;
+    html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Cuadrante</th><th>Ángulo</th><th>Dir</th><th>Tipo</th>`;
+    rings.forEach(r => html += `<th>Anillo <span style="font-family:Cocogoose,sans-serif">${r}</span></th>`);
+    html += `</tr></thead><tbody>`;
 
-  // Distance row
-  html += `<tr style="background:var(--bg4)"><td colspan="4" style="color:var(--text3);text-align:right">Distancia al precio actual =</td>`;
-  if (price) {
-    bullLevels[0].levels.forEach((l,i) => {
-      const avgLevel = bullLevels.reduce((s,a) => s + a.levels[i], 0) / bullLevels.length;
-      html += `<td style="color:var(--gold-light);font-weight:700">${Math.abs(price - avgLevel).toFixed(0)}</td>`;
+    bearLevels.forEach(a => {
+      const isCardinal = a.type === 'Cardinal';
+      html += `<tr class="${isCardinal ? 'cardinal' : ''}"><td>${a.label}</td><td>${a.angle}</td><td>${a.dir}</td><td>${a.type}</td>`;
+      a.levels.forEach((l,i) => {
+        const isNearest = price && nearest && nearest.source === 'bear' && l > 0 && Math.abs(l - price) < 30 && a.angle === nearest.angle;
+        html += `<td class="${isNearest ? 'nearest' : ''}">${l > 0 ? l.toFixed(0) : '—'}</td>`;
+      });
+      html += `</tr>`;
     });
+
+    // Distancia al precio actual — promedio por anillo, usando solo los datos de esta tabla (bajista)
+    html += `<tr style="background:var(--bg4)"><td colspan="4" style="color:var(--text3);text-align:right">Distancia al precio actual =</td>`;
+    if (price) {
+      bearLevels[0].levels.forEach((l,i) => {
+        const avgLevel = bearLevels.reduce((s,a) => s + a.levels[i], 0) / bearLevels.length;
+        html += `<td style="color:var(--gold-light);font-weight:700">${Math.abs(price - avgLevel).toFixed(0)}</td>`;
+      });
+    }
+    html += `</tr></tbody></table></div>`;
   }
-  html += `</tr></tbody></table></div>`;
+  } else {
+    html += renderGannSpiral(bullLevels, bearLevels, showBull, showBear, nearest, price);
+  }
 
   html += `<div style="display:flex;gap:20px;margin-top:16px;flex-wrap:wrap;font-size:0.65rem">
     <div style="color:var(--gold-light);font-weight:700">CARDINAL = FUERTE</div>
@@ -2774,24 +3104,25 @@ function calcGann() {
 
   // KEY TAKEAWAYS BOX
   if (price) {
-    // Find top 3 bull resistance levels above price
-    let bullAbove = [];
-    bullLevels.forEach(a => a.levels.forEach((l,i) => { if(l > price) bullAbove.push({price:l, angle:a.angle, type:a.type, ring:i+1}); }));
-    bullAbove.sort((a,b) => a.price-b.price);
-    const top3Bull = bullAbove.slice(0,3);
+    // Fuente de resistencias/soportes: solo la tabla que aplica según la dirección del pivote.
+    // En "ambas" se preserva el comportamiento original: resistencias de la tabla alcista, soportes de la bajista.
+    const resistSource = gannDirection === 'bajista' ? allBearLevels : allBullLevels;
+    const supportSource = gannDirection === 'alcista' ? allBullLevels : allBearLevels;
 
-    // Find top 3 bear support levels below price
-    let bearBelow = [];
-    bearLevels.forEach(a => a.levels.forEach((l,i) => { if(l > 0 && l < price) bearBelow.push({price:l, angle:a.angle, type:a.type, ring:i+1}); }));
-    bearBelow.sort((a,b) => b.price-a.price);
-    const top3Bear = bearBelow.slice(0,3);
+    let above = resistSource.filter(l => l.price > price);
+    above.sort((a,b) => a.price-b.price);
+    const top3Bull = above.slice(0,3);
+
+    let below = supportSource.filter(l => l.price > 0 && l.price < price);
+    below.sort((a,b) => b.price-a.price);
+    const top3Bear = below.slice(0,3);
 
     // Quadrant interpretation
     const qInterpret = {
-      'Q1 · Expansión': 'El precio está en fase de impulso alcista inicial. Los niveles cardinales son los más fuertes.',
-      'Q2 · Consolidación': 'El precio está digiriendo el movimiento. Zona de acumulación o distribución.',
-      'Q3 · Contracción': 'Punto de máxima tensión — el 180° es el opuesto al pivote. Reversiones frecuentes aquí.',
-      'Q4 · Reversión': 'Zona de agotamiento del impulso. El mercado puede cambiar de dirección pronto.'
+      'Expansión': 'El precio está en fase de impulso alcista inicial. Los niveles cardinales son los más fuertes.',
+      'Consolidación': 'El precio está digiriendo el movimiento. Zona de acumulación o distribución.',
+      'Contracción': 'Punto de máxima tensión — el 180° es el opuesto al pivote. Reversiones frecuentes aquí.',
+      'Reversión': 'Zona de agotamiento del impulso. El mercado puede cambiar de dirección pronto.'
     };
 
     html += `<div style="margin-top:24px;background:rgba(40,63,50,0.4);border:1px solid var(--gold-dark);border-radius:12px;padding:20px">
@@ -2814,7 +3145,7 @@ function calcGann() {
         <div style="background:rgba(170,146,82,0.08);border:1px solid rgba(170,146,82,0.2);border-radius:8px;padding:12px">
           <div style="font-size:0.58rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px">◈ Fase actual</div>
           <div style="font-family:'Cocogoose',sans-serif;font-size:0.85rem;font-weight:700;color:var(--gold-light);margin-bottom:6px">${quadrant}</div>
-          <div style="font-size:0.65rem;color:var(--text2);line-height:1.5">${qInterpret[quadrant] || ''}</div>
+          <div style="font-size:0.65rem;color:var(--text2);line-height:1.5">${qInterpret[phaseName] || ''}</div>
         </div>
       </div>
       <div style="background:rgba(40,63,50,0.5);border-left:2px solid var(--gold);border-radius:0 8px 8px 0;padding:10px 14px">
@@ -2833,11 +3164,13 @@ function calcGann() {
 
 // 2. ÁNGULOS DE GANN
 function calcAngulos() {
-  const origin = parseFloat(document.getElementById('ang_origin_price').value);
-  const days = parseFloat(document.getElementById('ang_days').value);
+  const origin = parseFloat(document.getElementById('global_pivot').value);
+  const dateStr = document.getElementById('global_date').value;
   const unit = parseFloat(document.getElementById('ang_unit').value) || 1;
   const el = document.getElementById('angulos_result');
-  if (!origin || !days) { el.innerHTML = ''; return; }
+  if (!origin || !dateStr) { el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">Configura el Pivote Global arriba (pivote y fecha) para ver esta sección.</p>'; return; }
+  const days = Math.floor((new Date() - new Date(dateStr)) / (24*60*60*1000));
+  if (days < 0) { el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">La fecha del Pivote Global es en el futuro — ajústala arriba.</p>'; return; }
 
   const angles = [
     { ratio: '<span style="font-family:Cocogoose,sans-serif">1x8</span>', mult: 0.125, label: '1x8 — muy bajista' },
@@ -2850,16 +3183,18 @@ function calcAngulos() {
     { ratio: '<span style="font-family:Cocogoose,sans-serif">4x1</span>', mult: 4, label: '4x1 — impulso extremo' },
   ];
 
-  let html = `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Ángulo</th><th>Descripción</th><th>Nivel en día ${days}</th><th>Estado</th></tr></thead><tbody>`;
+  const l1x1Base = origin + (days * unit);
+  let html = `<div style="margin-bottom:12px;padding:10px 14px;background:var(--bg3);border-radius:8px;font-size:0.65rem;color:var(--text3)">Origen: <strong style="color:var(--gold-light);font-family:Cocogoose,sans-serif">${origin}</strong> · Días transcurridos: <strong style="color:var(--gold-light);font-family:Cocogoose,sans-serif">${days}</strong></div>`;
+  html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Ángulo</th><th>Descripción</th><th>Nivel en día ${days}</th><th>Estado</th></tr></thead><tbody>`;
   
   angles.forEach(a => {
     const level = origin + (days * unit * a.mult);
-    const is1x1 = a.ratio === '1x1';
+    const is1x1 = a.mult === 1;
     html += `<tr class="${is1x1 ? 'cardinal' : ''}">
       <td>${a.ratio}</td>
       <td style="text-align:left">${a.label}</td>
       <td>${level.toFixed(2)}</td>
-      <td>${is1x1 ? '⚖ Equilibrio' : level > origin + days ? '↑' : '↓'}</td>
+      <td>${is1x1 ? '⚖ Equilibrio' : level > l1x1Base ? '↑' : '↓'}</td>
     </tr>`;
   });
   html += `</tbody></table></div>
@@ -2867,10 +3202,9 @@ function calcAngulos() {
     <p style="font-size:0.72rem;color:var(--text2);line-height:1.6">Si el precio actual está <strong style="color:var(--success)">por encima</strong> de la línea 1x1 = tendencia alcista dominante. <strong style="color:var(--danger)">Por debajo</strong> = tendencia bajista. El precio tiende a volver a la 1x1.</p>
   </div>`;
 
-  const u2 = parseFloat(document.getElementById('ang_unit')?.value) || 1;
-  const l1x1 = origin + (days * u2);
-  const l2x1 = origin + (days * u2 * 2);
-  const l1x2 = origin + (days * u2 * 0.5);
+  const l1x1 = origin + (days * unit);
+  const l2x1 = origin + (days * unit * 2);
+  const l1x2 = origin + (days * unit * 0.5);
   html += `<div style="margin-top:16px;background:rgba(40,63,50,0.4);border:1px solid var(--gold-dark);border-radius:12px;padding:20px">
     <div style="font-size:0.65rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">✦ Key Takeaways</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -2947,9 +3281,10 @@ function renderRueda() {
 
 // 4. NÚMEROS MAESTROS
 function calcMaestros() {
-  const price = parseFloat(document.getElementById('master_price').value);
+  const price = parseFloat(document.getElementById('global_pivot').value);
+  const dateStr = document.getElementById('global_date').value;
   const el = document.getElementById('maestros_result');
-  if (!price) { el.innerHTML = ''; return; }
+  if (!price) { el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">Configura el Pivote Global arriba para ver esta sección.</p>'; return; }
 
   const masters = [30, 45, 90, 120, 144, 180, 270, 360];
   
@@ -2957,23 +3292,22 @@ function calcMaestros() {
   masters.forEach(m => {
     html += `<div class="master-card">
       <div class="master-num">${m}° / ${m} días</div>
-      <div class="master-val">${(price * m / 100).toFixed(0)}</div>
-      <div style="font-size:0.58rem;color:var(--text3);margin-top:2px">+${m}%: ${(price * (1 + m/100)).toFixed(0)}</div>
-      <div style="font-size:0.58rem;color:var(--text3)">−${m}%: ${(price * (1 - m/100)).toFixed(0)}</div>
+      <div class="master-val">${(price + m).toFixed(0)}</div>
+      <div style="font-size:0.58rem;color:var(--text3);margin-top:2px">Resistencia: +${m} pts</div>
+      <div style="font-size:0.58rem;color:var(--text3)">Soporte: ${(price - m).toFixed(0)} (−${m} pts)</div>
     </div>`;
   });
   html += `</div>`;
 
-  html += `<div style="margin-top:20px;overflow-x:auto"><table class="gann-table"><thead><tr><th>Número Maestro</th><th>Precio × Factor</th><th>Precio + Factor</th><th>Precio − Factor</th><th>Fecha +N días</th></tr></thead><tbody>`;
-  const today = new Date();
+  html += `<div style="margin-top:20px;overflow-x:auto"><table class="gann-table"><thead><tr><th>Número Maestro</th><th>Precio + Factor</th><th>Precio − Factor</th><th>Fecha (pivote +N días)</th></tr></thead><tbody>`;
+  const baseDate = dateStr ? new Date(dateStr) : null;
   masters.forEach(m => {
-    const futureDate = new Date(today.getTime() + m * 24*60*60*1000);
+    const futureDate = baseDate ? new Date(baseDate.getTime() + m * 24*60*60*1000) : null;
     html += `<tr>
       <td style="color:var(--gold-light);font-weight:600">${m}</td>
-      <td>${(price * m).toFixed(0)}</td>
       <td style="color:var(--success)">${(price + m).toFixed(0)}</td>
       <td style="color:var(--danger)">${(price - m).toFixed(0)}</td>
-      <td>${futureDate.toLocaleDateString('es-PA')}</td>
+      <td>${futureDate ? futureDate.toLocaleDateString('es-PA') : '—'}</td>
     </tr>`;
   });
   html += `</tbody></table></div>`;
@@ -3022,9 +3356,9 @@ function calcRango() {
 
 // 6. CICLOS TEMPORALES
 function calcTemporales() {
-  const startStr = document.getElementById('ciclo_start').value;
+  const startStr = document.getElementById('global_date').value;
   const el = document.getElementById('temporales_result');
-  if (!startStr) { el.innerHTML = ''; return; }
+  if (!startStr) { el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">Configura la fecha del Pivote Global arriba para ver esta sección.</p>'; return; }
 
   const start = new Date(startStr);
   const today = new Date();
@@ -3049,9 +3383,10 @@ function calcTemporales() {
   </div>`;
 
   cycles.forEach(c => {
-    const completed = Math.floor(daysPassed / c.days);
-    const remaining = c.days - (daysPassed % c.days);
-    const pct = Math.round((daysPassed % c.days) / c.days * 100);
+    const modDays = daysPassed % c.days;
+    const isCompletionDay = daysPassed > 0 && modDays === 0;
+    const remaining = isCompletionDay ? 0 : c.days - modDays;
+    const pct = isCompletionDay ? 100 : Math.round(modDays / c.days * 100);
     const nextDate = new Date(today.getTime() + remaining * 24*60*60*1000);
     
     html += `<div style="margin-bottom:14px">
@@ -3061,7 +3396,7 @@ function calcTemporales() {
           <span style="font-size:0.6rem;color:var(--text3);margin-left:8px">${c.desc}</span>
         </div>
         <div style="text-align:right">
-          <span style="font-size:0.65rem;font-family:'Cocogoose',sans-serif;color:var(--gold)">${pct}%</span>
+          <span style="font-size:0.65rem;font-family:'Cocogoose',sans-serif;color:${isCompletionDay ? 'var(--gold-light)' : 'var(--gold)'}">${pct}%${isCompletionDay ? ' ★ HOY' : ''}</span>
           <span style="font-size:0.6rem;color:var(--text3);margin-left:6px">próximo: <span style="font-family:'Cocogoose',sans-serif">${nextDate.toLocaleDateString('es-PA')}</span></span>
         </div>
       </div>
@@ -3074,8 +3409,9 @@ function calcTemporales() {
 
   // KEY TAKEAWAYS
   const urgentCycles = cycles.filter(c => {
-    const rem = c.days - (daysPassed % c.days);
-    return rem <= 21 && rem > 0 && c.days <= 365;
+    const modDays = daysPassed % c.days;
+    const rem = (daysPassed > 0 && modDays === 0) ? 0 : c.days - modDays;
+    return rem <= 21 && c.days <= 365;
   });
 
   html += `<div style="margin-top:20px;background:rgba(40,63,50,0.4);border:1px solid var(--gold-dark);border-radius:12px;padding:20px">
@@ -3083,9 +3419,11 @@ function calcTemporales() {
     ${urgentCycles.length ? `<div style="margin-bottom:12px">
       <div style="font-size:0.6rem;color:var(--warning);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">⚠ Ciclos próximos a completarse</div>
       ${urgentCycles.map(c => {
-        const rem = c.days - (daysPassed % c.days);
+        const modDays = daysPassed % c.days;
+        const rem = (daysPassed > 0 && modDays === 0) ? 0 : c.days - modDays;
         const nd = new Date(today.getTime() + rem*24*60*60*1000);
-        return '<div style="display:flex;justify-content:space-between;padding:8px 12px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:6px;margin-bottom:6px"><span style="font-size:0.7rem;color:var(--text)">' + c.label + '</span><span style="font-family:Cocogoose,sans-serif;font-size:0.7rem;color:var(--warning)">Faltan ' + rem + ' días · ' + nd.toLocaleDateString("es-PA") + '</span></div>';
+        const remText = rem === 0 ? '¡HOY se completa!' : ('Faltan ' + rem + ' días · ' + nd.toLocaleDateString("es-PA"));
+        return '<div style="display:flex;justify-content:space-between;padding:8px 12px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:6px;margin-bottom:6px"><span style="font-size:0.7rem;color:var(--text)">' + c.label + '</span><span style="font-family:Cocogoose,sans-serif;font-size:0.7rem;color:var(--warning)">' + remText + '</span></div>';
       }).join('')}
     </div>` : '<div style="font-size:0.7rem;color:var(--text2);margin-bottom:12px">No hay ciclos críticos en los próximos 21 días.</div>'}
     <div style="background:rgba(40,63,50,0.5);border-left:2px solid var(--gold);border-radius:0 8px 8px 0;padding:10px 14px;font-size:0.65rem;color:var(--text2);line-height:1.6">
@@ -3100,30 +3438,52 @@ function calcTemporales() {
 // 7. VIBRACIÓN DEL PRECIO
 function calcVibracion() {
   const origin = parseFloat(document.getElementById('vib_origin').value);
-  const current = parseFloat(document.getElementById('vib_current').value);
+  const current = parseFloat(document.getElementById('global_price').value);
   const el = document.getElementById('vibracion_result');
   if (!origin) { el.innerHTML = ''; return; }
 
   const sqrtOrigin = Math.sqrt(origin);
+  // El rango de pasos se ajusta solo para alcanzar el precio actual + margen — un rango fijo
+  // de 20 pasos nunca llega al precio actual si el origen es un mínimo histórico lejano.
+  const targetSqrt = current ? Math.sqrt(current) : sqrtOrigin + 20;
+  const steps = Math.max(20, Math.ceil(targetSqrt - sqrtOrigin) + 10);
   const levels = [];
   
-  for (let i = 0; i <= 20; i++) {
+  for (let i = 0; i <= steps; i++) {
     const level = Math.pow(sqrtOrigin + i, 2);
     levels.push(level);
   }
 
+  const nearestLevel = current ? levels.reduce((prev, curr) => Math.abs(curr-current) < Math.abs(prev-current) ? curr : prev) : null;
+  const nearestIdx = current ? levels.indexOf(nearestLevel) : -1;
+
   let html = `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Vibración</th><th>Nivel de Precio</th><th>Distancia desde origen</th>${current ? '<th>Distancia al precio actual</th>' : ''}</tr></thead><tbody>`;
-  
-  levels.forEach((l, i) => {
-    const isNearest = current && levels.reduce((prev, curr) => 
-      Math.abs(curr - current) < Math.abs(prev - current) ? curr : prev
-    ) === l;
+
+  // Si el origen queda muy lejos del precio actual (ej. un mínimo histórico real), mostramos
+  // el origen y una ventana alrededor del nivel más cercano al precio — no los pasos intermedios,
+  // que solo saturan la tabla sin aportar nada útil.
+  let showIdx = [0];
+  if (current && levels.length > 40) {
+    for (let i = Math.max(1, nearestIdx-10); i <= Math.min(levels.length-1, nearestIdx+10); i++) showIdx.push(i);
+  } else {
+    for (let i = 1; i < levels.length; i++) showIdx.push(i);
+  }
+  showIdx = [...new Set(showIdx)].sort((a,b) => a-b);
+
+  let prevIdx = -1;
+  showIdx.forEach(i => {
+    if (prevIdx !== -1 && i - prevIdx > 1) {
+      html += `<tr><td colspan="${current ? 4 : 3}" style="text-align:center;color:var(--text3);font-size:0.62rem;padding:6px">···</td></tr>`;
+    }
+    const l = levels[i];
+    const isNearest = current && l === nearestLevel;
     html += `<tr class="${isNearest ? 'nearest' : i === 0 ? 'cardinal' : ''}">
       <td style="color:var(--gold-light)">${i === 0 ? 'Origen ★' : `+${i} vibración`}</td>
       <td>${l.toFixed(2)}</td>
       <td>${(l - origin).toFixed(2)} pts</td>
       ${current ? `<td style="color:${Math.abs(l-current) < 50 ? 'var(--gold-light)' : 'var(--text2)'}">${Math.abs(l - current).toFixed(2)}</td>` : ''}
     </tr>`;
+    prevIdx = i;
   });
   html += `</tbody></table></div>
   <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;border-left:2px solid var(--gold)">
@@ -3159,7 +3519,383 @@ function calcVibracion() {
   wrapNumbersJosefin(el);
 }
 
+// OBSERVACIONES — diario de "¿funciona Gann?", independiente de la Bitácora
+let obsConfirmField = '';
+let editingObsId = null;
+
+function autoFillObsLuna() {
+  const tipo = document.getElementById('obs_tipo').value;
+  const fechaStr = document.getElementById('obs_fecha').value;
+  if (tipo !== 'luna' || !fechaStr) return;
+  const moon = getMoonPhase(new Date(fechaStr + 'T12:00:00'));
+  document.getElementById('obs_detalle').value = `${moon.icon} ${moon.phaseName} (${moon.illum}% iluminada)`;
+}
+
+function setObsConfirmField(btn, val) {
+  obsConfirmField = val;
+  document.querySelectorAll('#obsConfirmGroup .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function cancelObsEdit() {
+  editingObsId = null;
+  document.getElementById('obs_fecha').value = '';
+  document.getElementById('obs_detalle').value = '';
+  document.getElementById('obs_expectativa').value = '';
+  document.getElementById('obs_resultado').value = '';
+  document.getElementById('obs_nota').value = '';
+  document.getElementById('obsSaveBtn').textContent = 'Guardar observación';
+  document.getElementById('obsCancelEdit').style.display = 'none';
+  setObsConfirmField(document.querySelector('#obsConfirmGroup .toggle-btn'), '');
+}
+
+async function saveObservacion() {
+  if (!currentUser) return;
+  const fecha = document.getElementById('obs_fecha').value;
+  if (!fecha) { showToast('Falta la fecha'); return; }
+  const payload = {
+    user_id: currentUser.id,
+    fecha,
+    fuente_tipo: document.getElementById('obs_tipo').value,
+    fuente_detalle: document.getElementById('obs_detalle').value || null,
+    expectativa: document.getElementById('obs_expectativa').value || null,
+    resultado: document.getElementById('obs_resultado').value || null,
+    confirmado: obsConfirmField === '' ? null : obsConfirmField === 'true',
+    nota: document.getElementById('obs_nota').value || null,
+    updated_at: new Date().toISOString()
+  };
+  if (editingObsId) {
+    await sb.from('sincronias_observaciones').update(payload).eq('id', editingObsId);
+    showToast('Observación actualizada');
+  } else {
+    await sb.from('sincronias_observaciones').insert(payload);
+    showToast('Observación guardada');
+  }
+  cancelObsEdit();
+  loadObservaciones();
+}
+
+function startObsEdit(o) {
+  editingObsId = o.id;
+  document.getElementById('obs_fecha').value = o.fecha;
+  document.getElementById('obs_tipo').value = o.fuente_tipo;
+  document.getElementById('obs_detalle').value = o.fuente_detalle || '';
+  document.getElementById('obs_expectativa').value = o.expectativa || '';
+  document.getElementById('obs_resultado').value = o.resultado || '';
+  document.getElementById('obs_nota').value = o.nota || '';
+  const val = o.confirmado === null ? '' : String(o.confirmado);
+  const btn = document.querySelector(`#obsConfirmGroup .toggle-btn[data-val="${val}"]`);
+  if (btn) setObsConfirmField(btn, val);
+  document.getElementById('obsSaveBtn').textContent = 'Actualizar observación';
+  document.getElementById('obsCancelEdit').style.display = 'inline';
+  document.getElementById('obs_fecha').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function quickConfirmObs(id, val) {
+  await sb.from('sincronias_observaciones').update({ confirmado: val, updated_at: new Date().toISOString() }).eq('id', id);
+  loadObservaciones();
+}
+
+async function deleteObs(id) {
+  if (!confirm('¿Eliminar esta observación?')) return;
+  await sb.from('sincronias_observaciones').delete().eq('id', id);
+  showToast('Observación eliminada');
+  loadObservaciones();
+}
+
+const OBS_TIPO_LABELS = {
+  ciclo_temporal: '⏱ Ciclo Temporal', angulo: '📐 Ángulo de Gann', mapa_ciclos: '🌀 Mapa de Ciclos',
+  numero_maestro: '✦ Número Maestro', vibracion: '〰 Vibración', luna: '🌙 Luna', calendario: '📅 Calendario', otro: 'Otro'
+};
+
+let lastObsRows = [];
+async function loadObservaciones() {
+  if (!currentUser) return;
+  const { data } = await sb.from('sincronias_observaciones').select('*').eq('user_id', currentUser.id).order('fecha', { ascending: false });
+  lastObsRows = data || [];
+  renderObsStats(lastObsRows);
+  renderObsList(lastObsRows);
+}
+
+function startObsEditById(id) {
+  const o = lastObsRows.find(r => r.id === id);
+  if (o) startObsEdit(o);
+}
+
+function renderObsStats(rows) {
+  const el = document.getElementById('obsStatsBox');
+  const byTipo = {};
+  rows.forEach(r => {
+    if (r.confirmado === null) return;
+    if (!byTipo[r.fuente_tipo]) byTipo[r.fuente_tipo] = { total: 0, ok: 0 };
+    byTipo[r.fuente_tipo].total++;
+    if (r.confirmado) byTipo[r.fuente_tipo].ok++;
+  });
+  const keys = Object.keys(byTipo);
+  if (!keys.length) {
+    el.innerHTML = `<p style="font-size:0.68rem;color:var(--text3)">Aún no hay observaciones revisadas — confirma o descarta algunas para empezar a ver qué técnicas te funcionan.</p>`;
+    return;
+  }
+  el.innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap">` + keys.map(k => {
+    const pct = Math.round(byTipo[k].ok / byTipo[k].total * 100);
+    return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px">
+      <div style="font-size:0.62rem;color:var(--text3)">${OBS_TIPO_LABELS[k] || k}</div>
+      <div style="font-family:Cocogoose,sans-serif;font-size:1rem;color:var(--gold-light);font-weight:700">${pct}%</div>
+      <div style="font-size:0.58rem;color:var(--text3)">${byTipo[k].ok}/${byTipo[k].total} confirmadas</div>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+function renderObsList(rows) {
+  const el = document.getElementById('observacionesList');
+  if (!rows.length) { el.innerHTML = `<p style="font-size:0.72rem;color:var(--text3)">Todavía no has registrado ninguna observación.</p>`; return; }
+  el.innerHTML = rows.map(o => {
+    let statusHtml;
+    if (o.confirmado === null) {
+      statusHtml = `<div style="display:flex;gap:8px">
+        <button class="btn-secondary" style="padding:6px 12px;font-size:0.62rem;color:var(--success);border-color:var(--success)" onclick="quickConfirmObs('${o.id}', true)">✓ Confirmar</button>
+        <button class="btn-secondary" style="padding:6px 12px;font-size:0.62rem" onclick="quickConfirmObs('${o.id}', false)">✗ No fue</button>
+      </div>`;
+    } else {
+      statusHtml = o.confirmado
+        ? `<span style="font-size:0.65rem;color:var(--success);font-weight:700">✓ Confirmado</span>`
+        : `<span style="font-size:0.65rem;color:var(--danger);font-weight:700">✗ No fue</span>`;
+    }
+    return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+            <span style="font-size:0.68rem;color:var(--gold-light)">${OBS_TIPO_LABELS[o.fuente_tipo] || o.fuente_tipo}</span>
+            ${o.fuente_detalle ? `<span style="font-size:0.62rem;color:var(--text3)">· ${o.fuente_detalle}</span>` : ''}
+            <span style="font-size:0.6rem;color:var(--text3)">· ${o.fecha}</span>
+          </div>
+          ${o.expectativa ? `<div style="font-size:0.68rem;color:var(--text2)"><strong style="color:var(--text3)">Esperaba:</strong> ${o.expectativa}</div>` : ''}
+          ${o.resultado ? `<div style="font-size:0.68rem;color:var(--text2)"><strong style="color:var(--text3)">Pasó:</strong> ${o.resultado}</div>` : ''}
+          ${o.nota ? `<div style="font-size:0.62rem;color:var(--text3);margin-top:4px">${o.nota}</div>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+          ${statusHtml}
+          <div style="display:flex;gap:10px">
+            <span style="cursor:pointer;font-size:0.65rem;color:var(--text3)" onclick="startObsEditById('${o.id}')" title="Editar">✎</span>
+            <span style="cursor:pointer;font-size:0.65rem;color:var(--text3)" onclick="deleteObs('${o.id}')" title="Eliminar">🗑</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 // 8. CALENDARIO
+// FASE LUNAR — calculada matemáticamente, sin depender de ningún proveedor de datos pago
+const SYNODIC_MONTH = 29.53058867; // días de un ciclo lunar completo
+const KNOWN_NEW_MOON_UTC = Date.UTC(2000, 0, 6, 18, 14, 0); // nueva luna de referencia conocida
+
+function getMoonPhase(date) {
+  const diffDays = (date.getTime() - KNOWN_NEW_MOON_UTC) / 86400000;
+  let age = diffDays % SYNODIC_MONTH;
+  if (age < 0) age += SYNODIC_MONTH;
+  const illum = Math.round((1 - Math.cos(2 * Math.PI * age / SYNODIC_MONTH)) / 2 * 100);
+  let phaseName, icon;
+  if (age < 1.84566) { phaseName = 'Luna Nueva'; icon = '🌑'; }
+  else if (age < 5.53699) { phaseName = 'Creciente'; icon = '🌒'; }
+  else if (age < 9.22831) { phaseName = 'Cuarto Creciente'; icon = '🌓'; }
+  else if (age < 12.91963) { phaseName = 'Gibosa Creciente'; icon = '🌔'; }
+  else if (age < 16.61096) { phaseName = 'Luna Llena'; icon = '🌕'; }
+  else if (age < 20.30228) { phaseName = 'Gibosa Menguante'; icon = '🌖'; }
+  else if (age < 23.99361) { phaseName = 'Cuarto Menguante'; icon = '🌗'; }
+  else if (age < 27.68493) { phaseName = 'Menguante'; icon = '🌘'; }
+  else { phaseName = 'Luna Nueva'; icon = '🌑'; }
+  return { age, illum, phaseName, icon };
+}
+
+// Fechas exactas de próximas lunas nuevas/llenas dentro de una ventana — para mostrarlas solas en el calendario
+function getMoonEvents(daysBack, daysForward) {
+  const now = Date.now();
+  const startWindow = now - daysBack * 86400000;
+  const endWindow = now + daysForward * 86400000;
+  const events = [];
+  let k = Math.floor((startWindow - KNOWN_NEW_MOON_UTC) / (SYNODIC_MONTH * 86400000)) - 1;
+  while (true) {
+    const newMoonTime = KNOWN_NEW_MOON_UTC + k * SYNODIC_MONTH * 86400000;
+    if (newMoonTime > endWindow) break;
+    const fullMoonTime = newMoonTime + (SYNODIC_MONTH / 2) * 86400000;
+    if (newMoonTime >= startWindow && newMoonTime <= endWindow) events.push({ date: new Date(newMoonTime), type: 'Luna Nueva', icon: '🌑' });
+    if (fullMoonTime >= startWindow && fullMoonTime <= endWindow) events.push({ date: new Date(fullMoonTime), type: 'Luna Llena', icon: '🌕' });
+    k++;
+  }
+  return events;
+}
+
+// LUNA — dos relojes (precio y luna), detección de aspectos, y proyección inversa de niveles
+const ASPECTS = [
+  { name: 'Conjunción', deg: 0, group: 'neutral' },
+  { name: 'Sextil', deg: 60, group: 'armonia' },
+  { name: 'Cuadratura', deg: 90, group: 'tension' },
+  { name: 'Trígono', deg: 120, group: 'armonia' },
+  { name: 'Oposición', deg: 180, group: 'tension' }
+];
+const ASPECT_TOLERANCE = 8;
+const ASPECT_GROUP_META = {
+  tension: { label: 'Tensión — posible giro', color: 'var(--danger)', bg: 'rgba(248,113,113,0.08)', border: 'rgba(248,113,113,0.25)' },
+  armonia: { label: 'Armonía — continuidad', color: 'var(--success)', bg: 'rgba(74,222,128,0.08)', border: 'rgba(74,222,128,0.25)' },
+  neutral: { label: 'Alineación neutral', color: 'var(--gold-light)', bg: 'rgba(170,146,82,0.08)', border: 'rgba(170,146,82,0.25)' }
+};
+
+function moonPathD(cx, cy, r, f) {
+  f = ((f % 1) + 1) % 1;
+  const rx = r * Math.abs(Math.cos(2 * Math.PI * f));
+  const s1 = f < 0.5 ? 1 : 0;
+  const qi = Math.floor(f * 4) % 4;
+  const s2 = (qi === 1 || qi === 3) ? 1 : 0;
+  return `M ${cx} ${cy - r} A ${r} ${r} 0 0 ${s1} ${cx} ${cy + r} A ${rx} ${r} 0 0 ${s2} ${cx} ${cy - r}`;
+}
+
+function angleDiff(a, b) {
+  const d = Math.abs(a - b) % 360;
+  return d > 180 ? 360 - d : d;
+}
+
+function priceAngleContinuous(pivot, price) {
+  const frac = (Math.sqrt(price) - Math.sqrt(pivot)) % 1;
+  return (((frac % 1) + 1) % 1) * 360;
+}
+
+function nearestPricesForAngle(pivot, currentPrice, targetAngleDeg) {
+  const candidates = [];
+  for (let r = -12; r <= 12; r++) {
+    const val = Math.sqrt(pivot) + r + targetAngleDeg / 360;
+    if (val > 0) candidates.push({ price: val * val });
+  }
+  candidates.sort((a, b) => Math.abs(a.price - currentPrice) - Math.abs(b.price - currentPrice));
+  return candidates.slice(0, 2);
+}
+
+function toggleLunaAcc(id) {
+  const el = document.getElementById(id);
+  const icon = document.getElementById(id + '-icon');
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (icon) icon.textContent = open ? '▾' : '▴';
+}
+
+function calcLuna() {
+  const pivot = parseFloat(document.getElementById('global_pivot').value);
+  const price = parseFloat(document.getElementById('global_price').value);
+  const el = document.getElementById('luna_result');
+  if (!el) return;
+  if (!pivot || !price) { el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">Configura el Pivote Global arriba (pivote y precio actual) para ver esta sección.</p>'; return; }
+
+  const now = new Date();
+  const moon = getMoonPhase(now);
+  const lunaAngle = (moon.age / SYNODIC_MONTH) * 360;
+  const priceAngle = priceAngleContinuous(pivot, price);
+  const diff = angleDiff(lunaAngle, priceAngle);
+
+  let detected = ASPECTS[0], minDist = 999;
+  ASPECTS.forEach(a => { const d = Math.abs(diff - a.deg); if (d < minDist) { minDist = d; detected = a; } });
+  const isMatch = minDist <= ASPECT_TOLERANCE;
+
+  const cx = 80, cy = 80, r = 60;
+  const needle = deg => ({ x: cx + 46 * Math.cos(deg * Math.PI / 180), y: cy - 46 * Math.sin(deg * Math.PI / 180) });
+  const pN = needle(priceAngle);
+  const lN = needle(lunaAngle);
+
+  let html = `<div style="display:flex;gap:24px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+    <div style="text-align:center">
+      <svg viewBox="0 0 160 160" width="130" height="130">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="1"/>
+        <line x1="${cx}" y1="${cy}" x2="${pN.x}" y2="${pN.y}" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="${cx}" cy="${cy}" r="4" fill="var(--gold)"/>
+      </svg>
+      <div style="font-size:0.65rem;color:var(--text3)">Precio</div>
+      <div style="font-family:Cocogoose,sans-serif;font-size:1rem;color:var(--gold-light);font-weight:700">${priceAngle.toFixed(0)}°</div>
+    </div>
+    <div style="text-align:center;min-width:120px">
+      <div style="background:${isMatch ? ASPECT_GROUP_META[detected.group].bg : 'var(--bg3)'};border:1px solid ${isMatch ? ASPECT_GROUP_META[detected.group].border : 'var(--border)'};border-radius:8px;padding:10px 14px">
+        <div style="font-size:0.68rem;font-weight:700;color:${isMatch ? ASPECT_GROUP_META[detected.group].color : 'var(--text3)'}">${isMatch ? detected.name : 'Sin aspecto'}</div>
+        <div style="font-size:0.6rem;color:var(--text3);margin-top:2px">diferencia de ${diff.toFixed(0)}°</div>
+      </div>
+    </div>
+    <div style="text-align:center">
+      <svg viewBox="0 0 190 190" width="150" height="150">
+        <defs>
+          <radialGradient id="moonSurface" cx="35%" cy="32%" r="75%">
+            <stop offset="0%" stop-color="#f7f0dc"/>
+            <stop offset="55%" stop-color="#e4d6a8"/>
+            <stop offset="100%" stop-color="#b8a468"/>
+          </radialGradient>
+        </defs>
+        <g transform="translate(15,15)">
+          <circle cx="${cx}" cy="${cy}" r="${r * 0.7}" fill="#2a2a24"/>
+          <path d="${moonPathD(cx, cy, r * 0.7, moon.age / SYNODIC_MONTH)}" fill="url(#moonSurface)"/>
+          <circle cx="63" cy="68" r="4" fill="#00000022"/>
+          <circle cx="92" cy="55" r="6" fill="#00000018"/>
+          <circle cx="85" cy="95" r="3.5" fill="#00000020"/>
+          <circle cx="80" cy="80" r="${r * 0.7}" fill="none" stroke="var(--border)" stroke-width="0.75"/>
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="0.75" stroke-dasharray="2 3"/>
+          <line x1="${cx}" y1="${cy}" x2="${lN.x}" y2="${lN.y}" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+          <circle cx="${cx}" cy="${cy}" r="3" fill="var(--gold)"/>
+        </g>
+      </svg>
+      <div style="font-size:0.65rem;color:var(--text3)">Luna · ${moon.phaseName}</div>
+      <div style="font-family:Cocogoose,sans-serif;font-size:1rem;color:var(--gold-light);font-weight:700">${lunaAngle.toFixed(0)}°</div>
+    </div>
+  </div>`;
+
+  // Número sinódico como número maestro
+  html += `<div style="background:var(--bg3);border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:0.68rem;color:var(--text2)">
+    <strong style="color:var(--gold-light)">Ciclo sinódico: 29.53 días</strong> — casi coincide con tu número maestro 30. Gann mismo lo notó: el ciclo lunar es, en sí, un número maestro más.
+  </div>`;
+
+  // Próximas fases
+  const upcoming = getMoonEvents(0, 60);
+  if (upcoming.length) {
+    html += `<div style="margin-bottom:20px">
+      <div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Próximas fases</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        ${upcoming.slice(0, 4).map(e => `<div style="background:var(--bg3);border-radius:8px;padding:8px 12px;font-size:0.65rem">
+          <span>${e.icon} ${e.type}</span> · <span style="font-family:Cocogoose,sans-serif;color:var(--gold-light)">${e.date.toISOString().split('T')[0]}</span>
+        </div>`).join('')}
+      </div>
+    </div>`;
+
+    // Acordeón de proyección: niveles de precio para estar en cada aspecto con la próxima fecha lunar importante
+    const targetEvent = upcoming[0];
+    const targetMoon = getMoonPhase(targetEvent.date);
+    const targetLunaAngle = (targetMoon.age / SYNODIC_MONTH) * 360;
+
+    const groups = { tension: [], armonia: [], neutral: [] };
+    ASPECTS.forEach(a => {
+      const targetAngle = (targetLunaAngle + a.deg) % 360;
+      const levels = nearestPricesForAngle(pivot, price, targetAngle);
+      levels.forEach(l => groups[a.group].push({ aspectName: a.name, price: l.price }));
+    });
+
+    html += `<div style="margin-bottom:8px">
+      <div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Si el precio quisiera alinearse con ${targetEvent.icon} ${targetEvent.type} (${targetEvent.date.toISOString().split('T')[0]})</div>
+    </div>`;
+
+    Object.entries(groups).forEach(([key, items]) => {
+      const meta = ASPECT_GROUP_META[key];
+      html += `<div style="margin-bottom:8px">
+        <button type="button" onclick="toggleLunaAcc('lunaAcc_${key}')" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:${meta.bg};border:1px solid ${meta.border};border-radius:8px;padding:10px 14px;cursor:pointer">
+          <span style="font-size:0.7rem;font-weight:700;color:${meta.color}">${meta.label}</span>
+          <span id="lunaAcc_${key}-icon" style="color:${meta.color}">▾</span>
+        </button>
+        <div id="lunaAcc_${key}" style="display:none;padding:8px 4px 0">
+          ${items.map(it => `<div style="display:flex;justify-content:space-between;background:var(--bg3);border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:0.68rem">
+            <span style="color:var(--text2)">${it.aspectName} · ${it.price > price ? 'por encima' : 'por debajo'}</span>
+            <span style="font-family:Cocogoose,sans-serif;color:var(--gold-light);font-weight:700">${it.price.toFixed(0)}</span>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    });
+  }
+
+  el.innerHTML = html;
+  wrapNumbersJosefin(el);
+}
+
 async function loadCalEvents() {
   const { data } = await sb.from('calendar_events').select('*').order('event_date');
   calEvents = data || [];
@@ -3185,24 +3921,29 @@ async function deleteCalEvent(id) {
 function renderCalEvents() {
   const el = document.getElementById('calendario_result');
   if (!el) return;
+
+  const today = new Date().toISOString().split('T')[0];
+
   if (!calEvents.length) {
     el.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">No hay fechas registradas</div></div>';
     return;
   }
-  const today = new Date().toISOString().split('T')[0];
+
   const typeColors = {
     'OPEX': 'badge-gold', 'Triple Witching': 'badge-red', 'Fed / FOMC': 'badge-blue',
-    'NFP': 'badge-blue', 'CPI': 'badge-blue', 'Luna Nueva': 'badge-gray',
-    'Luna Llena': 'badge-gray', 'Equinoccio': 'badge-green', 'Solsticio': 'badge-green',
+    'NFP': 'badge-blue', 'CPI': 'badge-blue', 'Equinoccio': 'badge-green', 'Solsticio': 'badge-green',
     'Rueda de 24': 'badge-warning', 'Otro': 'badge-gray'
   };
-  const calHtml = calEvents.map(e => `
+
+  const html = calEvents.map(e => `
     <div class="cal-event" style="${e.event_date === today ? 'border-color:var(--gold)' : ''}">
       <div class="cal-event-date">${e.event_date} ${e.event_date === today ? '← HOY' : ''}</div>
       <span class="badge ${typeColors[e.event_type] || 'badge-gray'}">${e.event_type}</span>
       <div class="cal-event-desc">${e.description || ''}</div>
       <button class="btn-danger" onclick="deleteCalEvent('${e.id}')">✕</button>
     </div>`).join('');
+
+  el.innerHTML = html;
 }
 
 // 9. ESTACIONALIDAD
