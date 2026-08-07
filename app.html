@@ -2335,21 +2335,43 @@ function parseThinkorswimStatement(text) {
     let dte = null;
     if (first.expIso && first.dateIso) dte = Math.round((new Date(first.expIso) - new Date(first.dateIso)) / 86400000);
 
-    // Para posiciones aún abiertas construidas con varias entradas parciales,
-    // el tamaño real es la posición neta acumulada, no solo la primera fila.
-    const contracts = isOpen ? Math.abs(netQty) : Math.abs(first.qty);
-    const premiumTotal = isOpen ? Math.abs(pnlGross) : Math.abs(first.amount);
+    // Para posiciones construidas con varias entradas (apertura en partes, o agregar contratos
+    // a la misma estructura antes de cerrar), el tamaño real es el pico de la posición acumulada
+    // y la prima total es la suma de TODAS las aperturas, no solo la primera fila.
+    let runningQty = 0, peakAbsQty = 0, openingPremium = 0, fillCount = records.length;
+    records.forEach(r => {
+      const before = runningQty;
+      runningQty += r.qty;
+      const isOpeningFill = Math.abs(runningQty) > Math.abs(before);
+      if (isOpeningFill) openingPremium += r.amount;
+      peakAbsQty = Math.max(peakAbsQty, Math.abs(runningQty));
+    });
+    const contracts = isOpen ? Math.abs(netQty) : (peakAbsQty || Math.abs(first.qty));
+    const premiumTotal = isOpen ? Math.abs(pnlGross) : Math.abs(openingPremium || first.amount);
     const premiumPerContract = premiumTotal / (contracts || 1);
     const riskCalc = tosComputeRisk(first.strategyKw, first.strikes, openingSold, premiumTotal, contracts);
     const finalStrategyName = (riskCalc.detectedButterfly && strategyName === 'Iron Condor') ? 'Iron Butterfly' : strategyName;
+    // Si hubo más de 2 movimientos (no fue un simple abrir+cerrar), márcalo para revisión —
+    // patrones así (ajustes, rolls, entradas escalonadas) merecen que lo confirmes tú misma.
+    const complexFillPattern = fillCount > 2 && !isOpen;
+
+    let noteText;
+    if (needsReview) {
+      noteText = 'Importado desde thinkorswim — no se encontró un cierre claro (revisa manualmente: puede ser una asignación, un roll o un ajuste parcial).';
+    } else if (complexFillPattern) {
+      noteText = `Importado desde thinkorswim — este trade tuvo ${fillCount} movimientos (no fue un simple abrir+cerrar), posiblemente entraste en partes o ajustaste la posición. El P&L es correcto (es la suma real de todos los movimientos), pero verifica que el ancho, riesgo y contratos coincidan con lo que recuerdas.`;
+    } else {
+      noteText = 'Importado automáticamente desde estado de cuenta de thinkorswim.';
+    }
 
     results.push({
       needsReview,
+      complexFill: complexFillPattern,
       summary: `${first.dateIso} · ${first.symbol} · ${finalStrategyName} (${strikesSummary})`,
       trade: {
         trade_date: first.dateIso, asset: first.symbol, strategy: finalStrategyName,
         trade_type: dte === 0 ? '0DTE' : 'Swing',
-        direction: tosInferDirection(finalStrategyName), status: isOpen ? 'open' : (needsReview ? 'closed' : 'closed'),
+        direction: tosInferDirection(finalStrategyName), status: isOpen ? 'open' : 'closed',
         strikes: strikesSummary, contracts,
         premium_collected: premiumPerContract,
         premium_total: premiumTotal,
@@ -2359,7 +2381,7 @@ function parseThinkorswimStatement(text) {
         pnl_gross: (isOpen || needsReview) ? null : pnlGross,
         broker_fees: fees,
         pnl: (isOpen || needsReview) ? null : (pnlGross - fees),
-        notes: (needsReview ? 'Importado desde thinkorswim — no se encontró un cierre claro (revisa manualmente: puede ser una asignación, un roll o un ajuste parcial).' : 'Importado automáticamente desde estado de cuenta de thinkorswim.') + (riskCalc.note ? ' ' + riskCalc.note : '')
+        notes: noteText + (riskCalc.note ? ' ' + riskCalc.note : '')
       }
     });
   });
@@ -2383,7 +2405,7 @@ function handleCsvFile(event) {
         document.getElementById('confirmImportBtn').style.display = 'none';
         return;
       }
-      window._importValidRows = results.map(r => ({ errors: [], trade: r.trade, legs: [], needsReview: r.needsReview, summary: r.summary }));
+      window._importValidRows = results.map(r => ({ errors: [], trade: r.trade, legs: [], needsReview: r.needsReview, complexFill: r.complexFill, summary: r.summary }));
       const okCount = results.filter(r => !r.needsReview).length;
       const reviewCount = results.filter(r => r.needsReview).length;
       let html = `<div style="font-size:0.7rem;color:var(--gold-light);margin-bottom:8px">Formato detectado: estado de cuenta de thinkorswim</div>
@@ -2392,7 +2414,7 @@ function handleCsvFile(event) {
         <strong style="color:#4ade80">${okCount}</strong> con P&L calculado ${reviewCount ? `· <strong style="color:#facc15">${reviewCount}</strong> requieren revisión (se importan sin P&L)` : ''}
       </div>`;
       html += '<div class="breakdown-list" style="max-height:280px;overflow-y:auto">' + results.map(r => {
-        const badge = r.needsReview ? '<span class="metric-badge warn">Revisar</span>' : (r.trade.status==='open' ? '<span class="metric-badge neutral">Abierto</span>' : '<span class="metric-badge good">Cerrado</span>');
+        const badge = r.needsReview ? '<span class="metric-badge warn">Revisar</span>' : r.complexFill ? '<span class="metric-badge warn">Verificar</span>' : (r.trade.status==='open' ? '<span class="metric-badge neutral">Abierto</span>' : '<span class="metric-badge good">Cerrado</span>');
         const pnlTxt = r.trade.pnl!=null ? `${r.trade.pnl>=0?'+':''}$${r.trade.pnl.toFixed(2)}` : '—';
         return `<div class="breakdown-row"><span>${r.summary}</span><span style="display:flex;gap:8px;align-items:center">${badge}<span class="bval ${r.trade.pnl>=0?'text-success':'text-danger'}">${pnlTxt}</span></span></div>`;
       }).join('') + '</div>';
@@ -2436,8 +2458,11 @@ async function confirmImport() {
   btn.disabled = true;
   let successCount = 0, failCount = 0;
   let firstErrorMsg = null;
+  const acc = accounts.find(a => a.id === currentAccountId);
+  const balance = acc ? parseFloat(acc.current_balance) || 0 : 0;
   for (const r of rows) {
-    const payload = { ...r.trade, account_id: currentAccountId, user_id: currentUser.id };
+    const riskPct = (r.trade.max_risk_usd != null && balance) ? (r.trade.max_risk_usd / balance * 100) : null;
+    const payload = { ...r.trade, risk_pct: riskPct, account_id: currentAccountId, user_id: currentUser.id };
     const { data, error } = await sb.from('trades').insert(payload).select().single();
     if (error) {
       failCount++;
