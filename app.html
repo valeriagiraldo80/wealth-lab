@@ -988,7 +988,7 @@ function closeConfirmModal(confirmed) {
     <div class="form-grid" style="margin-bottom:16px">
       <div class="form-group full"><label>Nombre de la cuenta</label><input type="text" id="m_name" placeholder="ej. Personal, Prometido, Cliente..."/></div>
       <div class="form-group"><label>Balance inicial ($)</label><input type="number" id="m_initial" placeholder="ej. 15000"/></div>
-      <div class="form-group"><label>Balance actual ($)</label><input type="number" id="m_current" placeholder="ej. 15000"/></div>
+      <div class="form-group"><label>Balance base ($) <span class="tip" data-tip="Es el punto de partida para calcular tu balance real (se le suman automáticamente tus movimientos y P&L). No es necesario actualizarlo manualmente cada vez que deposites o retires — eso ya se suma solo.">ⓘ</span></label><input type="number" id="m_current" placeholder="ej. 15000"/><div id="m_real_balance_hint" class="hint-total"></div></div>
     </div>
     <div style="margin-bottom:20px">
       <div class="form-section-title" style="margin-bottom:12px">Metas</div>
@@ -1630,7 +1630,7 @@ function collectGoalsFromForm() {
 
 function showAddAccount() { editingAccountId = null; document.getElementById('modalTitle').textContent = 'Nueva Cuenta'; document.getElementById('m_name').value=''; document.getElementById('m_initial').value=''; document.getElementById('m_current').value=''; document.getElementById('goalsList').innerHTML=''; document.getElementById('accountModal').style.display='flex'; }
 
-function editAccount(id) {
+async function editAccount(id) {
   const a = accounts.find(x=>x.id===id); if(!a) return;
   editingAccountId = id;
   const goals = a.goals?(typeof a.goals==='string'?JSON.parse(a.goals):a.goals):[];
@@ -1638,9 +1638,12 @@ function editAccount(id) {
   document.getElementById('m_name').value = a.name||'';
   document.getElementById('m_initial').value = a.initial_balance||'';
   document.getElementById('m_current').value = a.current_balance||'';
+  document.getElementById('m_real_balance_hint').textContent = '';
   document.getElementById('goalsList').innerHTML = '';
   if (goals.length) { goals.forEach(g => addGoalRow(g)); } 
   document.getElementById('accountModal').style.display='flex';
+  const real = await getRealAccountBalance(id);
+  document.getElementById('m_real_balance_hint').textContent = `Balance real actualizado (con movimientos y P&L): $${real.toLocaleString('en-US',{maximumFractionDigits:2})}`;
 }
 
 function closeModal() { document.getElementById('accountModal').style.display='none'; }
@@ -2099,11 +2102,12 @@ async function loadMovements() {
 async function getRealAccountBalance(accountId) {
   const acc = accounts.find(a => a.id === accountId);
   if (!acc) return 0;
-  const s = calcStats();
+  const { data: pnlRows } = await sb.from('trades').select('pnl').eq('account_id', accountId).eq('status', 'closed');
+  const totalPnl = (pnlRows||[]).reduce((s,t)=>s+(parseFloat(t.pnl)||0),0);
   const movs = await sb.from('movements').select('type, amount').eq('account_id', accountId).then(r => r.data || []);
   const totalDeposits = movs.filter(m => m.type === 'Depósito').reduce((s,m) => s+(parseFloat(m.amount)||0), 0);
   const totalWithdrawals = movs.filter(m => m.type === 'Retiro').reduce((s,m) => s+(parseFloat(m.amount)||0), 0);
-  return (parseFloat(acc.current_balance)||0) + s.totalPnl + totalDeposits - totalWithdrawals;
+  return (parseFloat(acc.current_balance)||0) + totalPnl + totalDeposits - totalWithdrawals;
 }
 
 async function refreshRealBalanceCache() {
