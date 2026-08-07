@@ -2150,7 +2150,7 @@ function validateCsvRow(row, index) {
 
   const trade = {
     trade_date: date, asset, strategy: (row.estrategia||'').trim() || 'Sin especificar',
-    trade_type: (row.tipo||'').trim() || null, direction: (row.direccion||'').trim() || null,
+    trade_type: (row.tipo||'').trim() || 'Swing', direction: (row.direccion||'').trim() || 'Neutral',
     status, strikes: legs.length ? legs.map(l=>`${l.strike??'?'}${l.option_type?l.option_type[0]:''}`).join(' / ') : ((row.strikes||'').trim() || null),
     contracts: contracts || null, premium_collected: isNaN(premium) ? null : premium,
     premium_total: (!isNaN(premium) && contracts) ? premium*contracts : null,
@@ -2295,6 +2295,7 @@ function parseThinkorswimStatement(text) {
       summary: `${first.dateIso} · ${first.symbol} · ${strategyName} (${strikesSummary})`,
       trade: {
         trade_date: first.dateIso, asset: first.symbol, strategy: strategyName,
+        trade_type: dte === 0 ? '0DTE' : 'Swing',
         direction: tosInferDirection(strategyName), status: isOpen ? 'open' : (needsReview ? 'closed' : 'closed'),
         strikes: strikesSummary, contracts,
         premium_collected: premiumPerContract,
@@ -2379,10 +2380,16 @@ async function confirmImport() {
   const btn = document.getElementById('confirmImportBtn');
   btn.disabled = true;
   let successCount = 0, failCount = 0;
+  let firstErrorMsg = null;
   for (const r of rows) {
     const payload = { ...r.trade, account_id: currentAccountId, user_id: currentUser.id };
     const { data, error } = await sb.from('trades').insert(payload).select().single();
-    if (error) { failCount++; continue; }
+    if (error) {
+      failCount++;
+      console.error('Error importando trade:', error, payload);
+      if (!firstErrorMsg) firstErrorMsg = error.message;
+      continue;
+    }
     if (r.legs.length) {
       const legsPayload = r.legs.map(l => ({ ...l, trade_id: data.id, user_id: currentUser.id }));
       await sb.from('trade_legs').insert(legsPayload);
@@ -2391,7 +2398,7 @@ async function confirmImport() {
   }
   btn.disabled = false;
   closeImportModal();
-  showToast(`✦ ${successCount} trade${successCount!==1?'s':''} importado${successCount!==1?'s':''}${failCount?` (${failCount} fallaron)`:''}`);
+  showToast(`✦ ${successCount} trade${successCount!==1?'s':''} importado${successCount!==1?'s':''}${failCount?` (${failCount} fallaron${firstErrorMsg?': '+firstErrorMsg:''})`:''}`);
   await loadTrades();
   renderBitacora();
 }
