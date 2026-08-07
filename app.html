@@ -2203,10 +2203,61 @@ function tosMapStrategyName(strategyKw, typeText, openingSold) {
   if (isCall) return openingSold ? 'Call Vendida' : 'Call Comprada';
   return openingSold ? 'Put Vendida' : 'Put Comprada';
 }
+const TOS_DIRECTION_MAP = {
+  'Call Vertical (Crédito)': 'Bajista',
+  'Call Vertical (Débito)': 'Alcista',
+  'Put Vertical (Crédito)': 'Alcista',
+  'Put Vertical (Débito)': 'Bajista',
+  'Call Vendida': 'Bajista',
+  'Call Comprada': 'Alcista',
+  'Put Vendida': 'Alcista',
+  'Put Comprada': 'Bajista'
+};
+function tosComputeRisk(strategyKw, strikes, openingSold, premiumTotal, contracts) {
+  const mult = 100;
+  let wing_width = null, max_risk_usd = null, note = null, detectedButterfly = false;
+
+  if (strategyKw === 'VERTICAL' && strikes.length === 2) {
+    wing_width = Math.round(Math.abs(strikes[1]-strikes[0]));
+    max_risk_usd = openingSold
+      ? Math.max(0, wing_width*mult*contracts - premiumTotal)  // Crédito: ancho - prima recibida
+      : premiumTotal;                                          // Débito: riesgo = prima pagada
+  } else if ((strategyKw === 'IRON CONDOR' || strategyKw === 'IRON BUTTERFLY' || strategyKw === 'CONDOR') && strikes.length === 4) {
+    // 4 strikes ordenados: [put largo, put corto, call corto, call largo]
+    const sorted = [...strikes].sort((a,b)=>a-b);
+    const putWidth = sorted[1]-sorted[0];
+    const callWidth = sorted[3]-sorted[2];
+    detectedButterfly = Math.abs(sorted[1]-sorted[2]) < 0.01; // strike de venta call = strike de venta put
+    wing_width = Math.round(Math.max(putWidth, callWidth));
+    max_risk_usd = openingSold ? Math.max(0, wing_width*mult*contracts - premiumTotal) : premiumTotal;
+    const asymmetric = Math.abs(putWidth-callWidth) > 0.01;
+    if (detectedButterfly && asymmetric) {
+      note = 'Detectado como Iron Butterfly (thinkorswim la exportó como Iron Condor, pero el strike de venta es el mismo en call y put) con alas desiguales — el riesgo usa el ala más ancha como escenario conservador.';
+    } else if (detectedButterfly) {
+      note = 'Detectado como Iron Butterfly — thinkorswim la exportó como Iron Condor, pero el strike de venta es el mismo en call y put (mariposa simétrica).';
+    } else if (asymmetric) {
+      note = 'Iron Condor con anchos distintos entre el lado call y put — el riesgo usa el lado más ancho como escenario conservador.';
+    }
+  } else if (strategyKw === 'BUTTERFLY' && strikes.length === 3) {
+    const sorted = [...strikes].sort((a,b)=>a-b);
+    const leftWidth = sorted[1]-sorted[0], rightWidth = sorted[2]-sorted[1];
+    wing_width = Math.round(Math.max(leftWidth, rightWidth));
+    max_risk_usd = openingSold ? Math.max(0, wing_width*mult*contracts - premiumTotal) : premiumTotal;
+    if (Math.abs(leftWidth-rightWidth) > 0.01) note = 'Butterfly con alas desiguales (broken wing) — el riesgo usa el ala más ancha como escenario conservador.';
+  } else if (!strategyKw && strikes.length === 1) {
+    if (!openingSold) {
+      max_risk_usd = premiumTotal; // opción comprada: riesgo = prima pagada
+    } else {
+      note = 'Riesgo no calculado: una opción vendida sin cobertura no tiene un riesgo máximo matemáticamente definido.';
+    }
+  } else if (strikes.length > 2) {
+    note = 'Ancho de alas y riesgo máximo no se calcularon automáticamente para esta estructura — complétalo manualmente si lo necesitas.';
+  }
+  return { wing_width, max_risk_usd, note, detectedButterfly };
+}
+
 function tosInferDirection(strategyName) {
-  if (/Iron|Condor|Butterfly|Strangle|Straddle/.test(strategyName)) return 'Neutral';
-  if (/Call/.test(strategyName)) return 'Alcista';
-  if (/Put/.test(strategyName)) return 'Bajista';
+  if (TOS_DIRECTION_MAP[strategyName]) return TOS_DIRECTION_MAP[strategyName];
   return 'Neutral';
 }
 function splitTosCsvLine(line) {
@@ -2289,22 +2340,26 @@ function parseThinkorswimStatement(text) {
     const contracts = isOpen ? Math.abs(netQty) : Math.abs(first.qty);
     const premiumTotal = isOpen ? Math.abs(pnlGross) : Math.abs(first.amount);
     const premiumPerContract = premiumTotal / (contracts || 1);
+    const riskCalc = tosComputeRisk(first.strategyKw, first.strikes, openingSold, premiumTotal, contracts);
+    const finalStrategyName = (riskCalc.detectedButterfly && strategyName === 'Iron Condor') ? 'Iron Butterfly' : strategyName;
 
     results.push({
       needsReview,
-      summary: `${first.dateIso} · ${first.symbol} · ${strategyName} (${strikesSummary})`,
+      summary: `${first.dateIso} · ${first.symbol} · ${finalStrategyName} (${strikesSummary})`,
       trade: {
-        trade_date: first.dateIso, asset: first.symbol, strategy: strategyName,
+        trade_date: first.dateIso, asset: first.symbol, strategy: finalStrategyName,
         trade_type: dte === 0 ? '0DTE' : 'Swing',
-        direction: tosInferDirection(strategyName), status: isOpen ? 'open' : (needsReview ? 'closed' : 'closed'),
+        direction: tosInferDirection(finalStrategyName), status: isOpen ? 'open' : (needsReview ? 'closed' : 'closed'),
         strikes: strikesSummary, contracts,
         premium_collected: premiumPerContract,
         premium_total: premiumTotal,
+        wing_width: riskCalc.wing_width,
+        max_risk_usd: riskCalc.max_risk_usd,
         dte, close_type: closedByExpiration ? 'Expiró' : (isOpen ? null : 'Manual'),
         pnl_gross: (isOpen || needsReview) ? null : pnlGross,
         broker_fees: fees,
         pnl: (isOpen || needsReview) ? null : (pnlGross - fees),
-        notes: needsReview ? 'Importado desde thinkorswim — no se encontró un cierre claro (revisa manualmente: puede ser una asignación, un roll o un ajuste parcial).' : 'Importado automáticamente desde estado de cuenta de thinkorswim.'
+        notes: (needsReview ? 'Importado desde thinkorswim — no se encontró un cierre claro (revisa manualmente: puede ser una asignación, un roll o un ajuste parcial).' : 'Importado automáticamente desde estado de cuenta de thinkorswim.') + (riskCalc.note ? ' ' + riskCalc.note : '')
       }
     });
   });
