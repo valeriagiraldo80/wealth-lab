@@ -1779,13 +1779,15 @@ async function deleteCustomOption(fieldType, value) {
   showToast('✦ Opción eliminada');
 }
 
-function newTradeForm() {
+async function newTradeForm() {
   editingTradeId = null;
   resetForm();
   showPage('nuevo');
   document.getElementById('tradeSubmitBtn').textContent = 'Guardar Trade';
   document.getElementById('pageTitle').textContent = 'Nuevo Trade';
   renderCustomOptionsIntoForm();
+  await refreshRealBalanceCache();
+  calcRiskPct();
 }
 
 function setSelectWithOther(selectId, otherId, value) {
@@ -1828,6 +1830,7 @@ async function editTrade(id) {
   set('f_followed_rules', t.followed_rules); set('f_rules_broken', t.rules_broken);
   set('f_well', t.what_went_well); set('f_improve', t.what_to_improve); set('f_notes', t.notes);
 
+  await refreshRealBalanceCache();
   calcPremiumTotal(); calcRiskPct(); calcTargetStopTotals(); calcNetPnl();
 
   // Cargar patas guardadas para este trade (si existen, el trade se guardó en modo Detallado)
@@ -1986,6 +1989,23 @@ async function loadMovements() {
   if (!currentAccountId) return [];
   const { data } = await sb.from('movements').select('*').eq('account_id', currentAccountId).order('movement_date', { ascending: false });
   return data || [];
+}
+
+// Balance real de la cuenta: saldo base + P&L acumulado de trades cerrados + depósitos - retiros.
+// Es la misma fórmula que usa el Dashboard para "Balance Total" — se usa para que el % de riesgo
+// de trades nuevos (manuales o importados) refleje el capital real actual, no un valor desactualizado.
+async function getRealAccountBalance(accountId) {
+  const acc = accounts.find(a => a.id === accountId);
+  if (!acc) return 0;
+  const s = calcStats();
+  const movs = await sb.from('movements').select('type, amount').eq('account_id', accountId).then(r => r.data || []);
+  const totalDeposits = movs.filter(m => m.type === 'Depósito').reduce((s,m) => s+(parseFloat(m.amount)||0), 0);
+  const totalWithdrawals = movs.filter(m => m.type === 'Retiro').reduce((s,m) => s+(parseFloat(m.amount)||0), 0);
+  return (parseFloat(acc.current_balance)||0) + s.totalPnl + totalDeposits - totalWithdrawals;
+}
+
+async function refreshRealBalanceCache() {
+  window.realBalance = await getRealAccountBalance(currentAccountId);
 }
 
 async function saveMovement() {
@@ -2458,8 +2478,7 @@ async function confirmImport() {
   btn.disabled = true;
   let successCount = 0, failCount = 0;
   let firstErrorMsg = null;
-  const acc = accounts.find(a => a.id === currentAccountId);
-  const balance = acc ? parseFloat(acc.current_balance) || 0 : 0;
+  const balance = await getRealAccountBalance(currentAccountId);
   for (const r of rows) {
     const riskPct = (r.trade.max_risk_usd != null && balance) ? (r.trade.max_risk_usd / balance * 100) : null;
     const payload = { ...r.trade, risk_pct: riskPct, account_id: currentAccountId, user_id: currentUser.id };
@@ -2685,8 +2704,7 @@ function toggleStatusFields() {
 
 function calcRiskPct() {
   const maxRisk = parseFloat(document.getElementById('f_max_risk')?.value) || 0;
-  const acc = accounts.find(a => a.id === currentAccountId);
-  const balance = acc ? parseFloat(acc.current_balance) || 0 : 0;
+  const balance = window.realBalance || 0;
   const field = document.getElementById('f_risk_pct');
   if (!field) return;
   if (maxRisk && balance) {
