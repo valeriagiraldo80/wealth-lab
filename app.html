@@ -988,7 +988,7 @@ function closeConfirmModal(confirmed) {
     <div class="form-grid" style="margin-bottom:16px">
       <div class="form-group full"><label>Nombre de la cuenta</label><input type="text" id="m_name" placeholder="ej. Personal, Prometido, Cliente..."/></div>
       <div class="form-group"><label>Balance inicial ($)</label><input type="number" id="m_initial" placeholder="ej. 15000"/></div>
-      <div class="form-group"><label>Balance base ($) <span class="tip" data-tip="Es el punto de partida para calcular tu balance real (se le suman automáticamente tus movimientos y P&L). No es necesario actualizarlo manualmente cada vez que deposites o retires — eso ya se suma solo.">ⓘ</span></label><input type="number" id="m_current" placeholder="ej. 15000"/><div id="m_real_balance_hint" class="hint-total"></div></div>
+      <div class="form-group"><label>Balance actual ($) <span class="tip" data-tip="El balance real de la cuenta hoy. Escribe el número que quieras que tenga — la app ajusta internamente lo necesario para que, sumando tus trades y movimientos futuros, siempre cuadre con este número.">ⓘ</span></label><input type="number" id="m_current" placeholder="ej. 15000"/></div>
     </div>
     <div style="margin-bottom:20px">
       <div class="form-section-title" style="margin-bottom:12px">Metas</div>
@@ -1638,12 +1638,11 @@ async function editAccount(id) {
   document.getElementById('m_name').value = a.name||'';
   document.getElementById('m_initial').value = a.initial_balance||'';
   document.getElementById('m_current').value = a.current_balance||'';
-  document.getElementById('m_real_balance_hint').textContent = '';
   document.getElementById('goalsList').innerHTML = '';
   if (goals.length) { goals.forEach(g => addGoalRow(g)); } 
   document.getElementById('accountModal').style.display='flex';
   const real = await getRealAccountBalance(id);
-  document.getElementById('m_real_balance_hint').textContent = `Balance real actualizado (con movimientos y P&L): $${real.toLocaleString('en-US',{maximumFractionDigits:2})}`;
+  document.getElementById('m_current').value = Math.round(real*100)/100;
 }
 
 function closeModal() { document.getElementById('accountModal').style.display='none'; }
@@ -1652,7 +1651,22 @@ async function saveAccount() {
   const name = document.getElementById('m_name').value.trim();
   if (!name) { alert('El nombre es obligatorio'); return; }
   const goals = collectGoalsFromForm();
-  const payload = { name, initial_balance: parseFloat(document.getElementById('m_initial').value)||0, current_balance: parseFloat(document.getElementById('m_current').value)||0, goals: JSON.stringify(goals) };
+  const typedBalance = parseFloat(document.getElementById('m_current').value)||0;
+
+  // El campo "Balance actual" es el número real que la persona quiere ver HOY.
+  // Si está editando una cuenta que ya tiene P&L o movimientos acumulados, calculamos
+  // hacia atrás cuál debe ser la base guardada para que, sumando todo eso, dé justo ese número.
+  let baseToStore = typedBalance;
+  if (editingAccountId) {
+    const { data: pnlRows } = await sb.from('trades').select('pnl').eq('account_id', editingAccountId).eq('status','closed');
+    const totalPnl = (pnlRows||[]).reduce((s,t)=>s+(parseFloat(t.pnl)||0),0);
+    const movs = await sb.from('movements').select('type, amount').eq('account_id', editingAccountId).then(r => r.data || []);
+    const totalDeposits = movs.filter(m => m.type === 'Depósito').reduce((s,m) => s+(parseFloat(m.amount)||0), 0);
+    const totalWithdrawals = movs.filter(m => m.type === 'Retiro').reduce((s,m) => s+(parseFloat(m.amount)||0), 0);
+    baseToStore = typedBalance - totalPnl - totalDeposits + totalWithdrawals;
+  }
+
+  const payload = { name, initial_balance: parseFloat(document.getElementById('m_initial').value)||0, current_balance: baseToStore, goals: JSON.stringify(goals) };
   if (editingAccountId) { await sb.from('accounts').update(payload).eq('id', editingAccountId); showToast('Cuenta actualizada'); }
   else { await sb.from('accounts').insert({ ...payload, user_id: currentUser.id }); showToast('Cuenta creada'); }
   closeModal(); await loadAccounts();
