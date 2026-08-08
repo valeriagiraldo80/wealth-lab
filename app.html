@@ -440,6 +440,12 @@ textarea { resize: vertical; line-height: 1.5; }
           <button type="button" class="btn-secondary" onclick="openCustomOptionsModal()" style="font-size:0.65rem;padding:8px 14px">Gestionar mis opciones personalizadas</button>
         </div>
         <form id="tradeForm" onsubmit="saveTrade(event)">
+          <div class="form-section" style="padding-bottom:8px">
+            <div class="toggle-group" id="tradeCategoryToggle">
+              <button type="button" class="toggle-btn active" id="catOptions" onclick="setTradeCategory('options')">Opciones Financieras</button>
+              <button type="button" class="toggle-btn" id="catOther" onclick="setTradeCategory('other')">Otros Instrumentos <span style="opacity:0.6">(acciones, cripto, futuros, forex)</span></button>
+            </div>
+          </div>
           <div class="form-section">
             <div class="form-section-title"><span style="font-family:'Cocogoose',sans-serif">1</span> · Identificación</div>
             <div class="form-grid">
@@ -448,8 +454,8 @@ textarea { resize: vertical; line-height: 1.5; }
               <div class="form-group"><label>Hora entrada</label><input type="time" id="f_entry_time"/></div>
               <div class="form-group"><label>Hora cierre</label><input type="time" id="f_exit_time"/></div>
               <div class="form-group"><label>Activo</label><input type="text" id="f_asset" value="SPX" required/></div>
-              <div class="form-group"><label>Tipo</label><select id="f_trade_type" style="font-family:'Cocogoose',sans-serif" onchange="toggleOtherField(this,'f_trade_type_other')"><option value="0DTE">0DTE</option><option value="Day Trade">Day Trade</option><option value="Swing">Swing</option><option value="Otro">Otro</option></select><input type="text" id="f_trade_type_other" placeholder="Especifica el tipo..." style="display:none;margin-top:8px"/></div>
-              <div class="form-group"><label>Estrategia</label><select id="f_strategy" onchange="toggleOtherField(this,'f_strategy_other'); suggestLegCount(this.value)">
+              <div class="form-group"><label>Tipo</label><select id="f_trade_type" style="font-family:'Cocogoose',sans-serif" onchange="toggleOtherField(this,'f_trade_type_other')"><option value="0DTE" id="opt0DTE">0DTE</option><option value="Day Trade">Day Trade</option><option value="Swing">Swing</option><option value="Otro">Otro</option></select><input type="text" id="f_trade_type_other" placeholder="Especifica el tipo..." style="display:none;margin-top:8px"/></div>
+              <div class="form-group" id="strategyFieldGroup"><label>Estrategia</label><select id="f_strategy" onchange="toggleOtherField(this,'f_strategy_other'); suggestLegCount(this.value)">
                 <optgroup label="1 pata — Single">
                   <option>Call Comprada</option><option>Call Vendida</option><option>Put Comprada</option><option>Put Vendida</option>
                 </optgroup>
@@ -464,10 +470,10 @@ textarea { resize: vertical; line-height: 1.5; }
                 </optgroup>
                 <option value="Otra">Otra</option>
               </select><input type="text" id="f_strategy_other" placeholder="Especifica la estrategia..." style="display:none;margin-top:8px"/></div>
-              <div class="form-group"><label>Dirección</label><select id="f_direction" onchange="toggleOtherField(this,'f_direction_other')"><option>Neutral</option><option>Alcista</option><option>Bajista</option><option>Otra</option></select><input type="text" id="f_direction_other" placeholder="Especifica la dirección..." style="display:none;margin-top:8px"/></div>
+              <div class="form-group"><label>Dirección</label><select id="f_direction" onchange="toggleOtherField(this,'f_direction_other')"><option>Neutral</option><option>Alcista</option><option>Bajista</option><option>Largo</option><option>Corto</option><option>Otra</option></select><input type="text" id="f_direction_other" placeholder="Especifica la dirección..." style="display:none;margin-top:8px"/></div>
             </div>
           </div>
-          <div class="form-section">
+          <div class="form-section" id="bloque2Section">
             <div class="form-section-title"><span style="font-family:'Cocogoose',sans-serif">2</span> · Contexto de mercado</div>
             <div class="form-grid">
               <div class="form-group"><label>Condición de mercado</label><select id="f_market_condition" onchange="toggleOtherField(this,'f_market_condition_other')"><option value="">Seleccionar...</option><option>Tendencia alcista</option><option>Tendencia bajista</option><option>Rango lateral</option><option>Alta volatilidad</option><option>Headlines/Noticias</option><option>Post-evento</option><option>Otra</option></select><input type="text" id="f_market_condition_other" placeholder="Especifica la condición..." style="display:none;margin-top:8px"/></div>
@@ -497,7 +503,7 @@ textarea { resize: vertical; line-height: 1.5; }
             <div class="form-group full" style="margin-top:14px"><label>Notas de contexto <span class="tip" data-tip="Cualquier observación adicional de mercado que no encaje en los campos de arriba — niveles clave, paredes de gamma, MVC del día, lo que sea relevante para ti.">ⓘ</span></label><textarea id="f_context_notes" rows="2" placeholder="ej. Nivel MVC en 5490, pared de gamma en 5500..."></textarea></div>
             <div class="form-group full" style="margin-top:14px"><label>Tesis del trade</label><textarea id="f_thesis" rows="2" placeholder="¿Por qué entras? ¿Qué esperas que haga el precio?" required></textarea></div>
           </div>
-          <div class="form-section">
+          <div class="form-section" id="bloque3Section">
             <div class="form-section-title"><span style="font-family:'Cocogoose',sans-serif">3</span> · Estructura del trade</div>
             <div class="form-grid">
               <div class="form-group full">
@@ -520,6 +526,16 @@ textarea { resize: vertical; line-height: 1.5; }
               <div class="form-group"><label>Target de ganancia — por contrato ($) <span class="tip" data-tip="El target de ganancia de UN solo contrato, no del trade completo. Si usas varios contratos, el total se calcula solo al lado.">ⓘ</span></label><input type="number" id="f_target" placeholder="ej. 200" oninput="calcTargetStopTotals()"/><div id="f_target_total_hint" class="hint-total"></div></div>
               <div class="form-group"><label>Stop loss — por contrato ($) <span class="tip" data-tip="El stop loss de UN solo contrato, no del trade completo. Si usas varios contratos, el total se calcula solo al lado.">ⓘ</span></label><input type="number" id="f_stop" placeholder="ej. -150" oninput="calcTargetStopTotals()"/><div id="f_stop_total_hint" class="hint-total"></div></div>
             </div>
+          </div>
+          <div class="form-section" id="otherAssetSection" style="display:none">
+            <div class="form-section-title"><span style="font-family:'Cocogoose',sans-serif">2</span> · Estructura de la posición</div>
+            <div class="form-grid">
+              <div class="form-group"><label>Precio de entrada</label><input type="number" step="any" id="f_entry_price" placeholder="ej. 185.20" oninput="calcOtherAssetPnl()"/></div>
+              <div class="form-group"><label>Precio de salida</label><input type="number" step="any" id="f_exit_price" placeholder="ej. 191.50" oninput="calcOtherAssetPnl()"/></div>
+              <div class="form-group"><label>Cantidad</label><input type="number" step="any" id="f_qty_other" placeholder="ej. 10 (acciones, unidades, contratos...)" oninput="calcOtherAssetPnl();calcOtherAssetRisk()"/></div>
+              <div class="form-group"><label>Stop Loss <span class="tip" data-tip="Opcional. Si lo llenas, el Riesgo Máximo del Bloque de abajo se calcula solo. Si no usas un stop formal, puedes escribir el riesgo directamente ahí.">ⓘ</span></label><input type="number" step="any" id="f_stop_other" placeholder="ej. 180.00" oninput="calcOtherAssetRisk()"/></div>
+            </div>
+            <p style="font-size:0.62rem;color:var(--text3);margin-top:10px">El P&L y el Riesgo Máximo se sugieren automáticamente en los bloques de abajo — siempre puedes editarlos a mano si tu instrumento (futuros, forex, etc.) necesita un cálculo distinto.</p>
           </div>
           <div class="form-section">
             <div class="form-section-title"><span style="font-family:'Cocogoose',sans-serif">4</span> · Gestión de riesgo</div>
@@ -557,7 +573,7 @@ textarea { resize: vertical; line-height: 1.5; }
               <label style="display:block;margin-bottom:8px">Errores cometidos</label>
               <div class="toggle-group" id="errorsGroup">
                 <button type="button" class="toggle-btn" onclick="toggleError(this,'Posiciones correlacionadas')">Posiciones correlacionadas</button>
-                <button type="button" class="toggle-btn" onclick="toggleError(this,'Ignoré GEX/flujo')">Ignoré GEX/flujo</button>
+                <button type="button" class="toggle-btn" id="errGexBtn" onclick="toggleError(this,'Ignoré GEX/flujo')">Ignoré GEX/flujo</button>
                 <button type="button" class="toggle-btn" onclick="toggleError(this,'Contra tendencia sin confirmación')">Contra tendencia</button>
                 <button type="button" class="toggle-btn" onclick="toggleError(this,'No respeté stop loss')">No respeté stop loss</button>
                 <button type="button" class="toggle-btn" onclick="toggleError(this,'Sizing incorrecto')">Sizing incorrecto</button>
@@ -1217,7 +1233,7 @@ function calcStats() {
 
   // P&L por estrategia
   const byStrategy = {};
-  closedTrades.forEach(t => { const k = t.strategy || 'Sin especificar'; byStrategy[k] = (byStrategy[k]||0) + (t.pnl||0); });
+  closedTrades.forEach(t => { if (!t.strategy) return; const k = t.strategy; byStrategy[k] = (byStrategy[k]||0) + (t.pnl||0); });
 
   // P&L por día de la semana
   const dayNames = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
@@ -1370,12 +1386,14 @@ async function renderDashboard() {
         <button class="${breakdownPct?'active':''}" onclick="setBreakdownView('%')">%</button>
       </div>
     </div>
+    ${stratRows ? `
     <div class="dash-section-title" style="margin-top:4px">P&L por Estrategia ${breakdownPct?'<span class="tip" data-tip="% que representa cada estrategia sobre el total de movimiento (ganancias + pérdidas en valor absoluto). Te dice qué estrategia realmente mueve la aguja de tus resultados.">ⓘ</span>':''}</div>
-    <div class="breakdown-list">${stratRows || '<div class="breakdown-row"><span>Aún no hay trades registrados</span></div>'}</div>
-    <div class="dash-section-title">P&L por Día de la Semana</div>
+    <div class="breakdown-list">${stratRows}</div>` : ''}
+    <div class="dash-section-title" style="margin-top:${stratRows?'18px':'4px'}">P&L por Día de la Semana</div>
     <div class="breakdown-list">${dayRows || '<div class="breakdown-row"><span>Aún no hay trades registrados</span></div>'}</div>
+    ${dteRows ? `
     <div class="dash-section-title">P&L por DTE <span class="tip" data-tip="Compara tus resultados según los días a la expiración (DTE) con los que abriste el trade. Te ayuda a ver si te va mejor con 0DTE, swings cortos, o plazos más largos.">ⓘ</span></div>
-    <div class="breakdown-list">${dteRows || '<div class="breakdown-row"><span>Aún no hay trades registrados</span></div>'}</div>
+    <div class="breakdown-list">${dteRows}</div>` : ''}
     </div>`;
 
   let extraContainer = document.getElementById('dashExtraMetrics');
@@ -1476,11 +1494,12 @@ async function renderDashboard() {
 
 function tradeCard(t) {
   const isOpen = t.status === 'open';
+  const isOther = t.trade_category === 'other';
   const pnl = t.pnl||0, pc = pnl>0?'badge-green':pnl<0?'badge-red':'badge-gray';
   const dots = Array.from({length:10},(_,i)=>`<div class="score-dot ${i<(t.execution_score||0)?'filled':''}"></div>`).join('');
   return `<div class="card">
     <div class="card-header">
-      <div><div class="card-title">${t.asset} · ${t.strategy}</div><div class="card-meta">${t.trade_date} · ${t.trade_type} · ${t.dte??'—'} DTE</div></div>
+      <div><div class="card-title">${t.asset}${isOther?'':' · '+t.strategy}</div><div class="card-meta">${t.trade_date} · ${t.trade_type}${isOther?'':' · '+(t.dte??'—')+' DTE'}</div></div>
       <div class="badges">
         ${isOpen ? '<span class="badge badge-warning">● Abierto</span>' : `<span class="badge ${pc}">${pnl>=0?'+':''}$${pnl}</span>`}
         <span class="badge badge-gold">${t.direction}</span>
@@ -1491,12 +1510,17 @@ function tradeCard(t) {
       </div>
     </div>
     ${t.thesis?`<div class="card-thesis">"${t.thesis}"</div>`:''}
-    ${(t.greeks_in_play?.length || t.greeks_confluence != null || t.context_notes) ? `<div style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+    ${!isOther && (t.greeks_in_play?.length || t.greeks_confluence != null || t.context_notes) ? `<div style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">
       ${(t.greeks_in_play||[]).map(g=>`<span class="badge badge-gray">${g}</span>`).join('')}
       ${t.greeks_confluence === true ? '<span class="badge badge-green">Confluencia ✓</span>' : t.greeks_confluence === false ? '<span class="badge badge-gray">Sin confluencia</span>' : ''}
     </div>` : ''}
-    ${t.context_notes?`<div class="notes-box" style="margin-bottom:10px">${t.context_notes}</div>`:''}
-    <div class="card-grid">
+    ${!isOther && t.context_notes?`<div class="notes-box" style="margin-bottom:10px">${t.context_notes}</div>`:''}
+    ${isOther ? `<div class="card-grid">
+      <div><div class="field-label">Entrada</div><div class="field-value">${t.entry_price?'$'+t.entry_price:'—'}</div></div>
+      <div><div class="field-label">Salida</div><div class="field-value">${t.exit_price?'$'+t.exit_price:'—'}</div></div>
+      <div><div class="field-label">Cantidad</div><div class="field-value">${t.contracts??'—'}</div></div>
+      <div><div class="field-label">Riesgo</div><div class="field-value">${t.max_risk_usd?'$'+t.max_risk_usd:'—'} ${t.risk_pct?'('+t.risk_pct+'%)':''}</div></div>
+    </div>` : `<div class="card-grid">
       <div><div class="field-label">Strikes</div><div class="field-value">${t.strikes||'—'}</div></div>
       <div><div class="field-label">Ancho</div><div class="field-value">${t.wing_width?t.wing_width+' pts':'—'}</div></div>
       <div><div class="field-label">Spot</div><div class="field-value">${t.spot?'$'+t.spot:'—'}</div></div>
@@ -1504,7 +1528,7 @@ function tradeCard(t) {
       <div><div class="field-label">Riesgo</div><div class="field-value">${t.max_risk_usd?'$'+t.max_risk_usd:'—'} ${t.risk_pct?'('+t.risk_pct+'%)':''}</div></div>
       <div><div class="field-label">GEX</div><div class="field-value">${t.gex_context||'—'}</div></div>
       <div><div class="field-label">Delta Neto</div><div class="field-value">${t.net_delta??'—'}</div></div>
-    </div>
+    </div>`}
     ${t.what_went_well||t.what_to_improve?`<div class="review-grid">
       ${t.what_went_well?`<div class="review-box good"><div class="review-box-label">✓ Lo que hice bien</div><div class="review-box-text">${t.what_went_well}</div></div>`:''}
       ${t.what_to_improve?`<div class="review-box improve"><div class="review-box-label">A mejorar</div><div class="review-box-text">${t.what_to_improve}</div></div>`:''}
@@ -2171,18 +2195,22 @@ async function editTrade(id) {
   renderCustomOptionsIntoForm();
 
   const set = (fid, val) => { const el = document.getElementById(fid); if (el) el.value = val ?? ''; };
+  setTradeCategory(t.trade_category === 'other' ? 'other' : 'options');
   set('f_status', t.status || 'closed'); toggleStatusFields();
   set('f_date', t.trade_date); set('f_entry_time', t.entry_time); set('f_exit_time', t.exit_time);
   set('f_asset', t.asset);
   setSelectWithOther('f_trade_type','f_trade_type_other', t.trade_type);
-  setSelectWithOther('f_strategy','f_strategy_other', t.strategy);
+  if (t.trade_category !== 'other') setSelectWithOther('f_strategy','f_strategy_other', t.strategy);
   setSelectWithOther('f_direction','f_direction_other', t.direction);
   setSelectWithOther('f_market_condition','f_market_condition_other', t.market_condition);
   set('f_gex_context', t.gex_context); set('f_vix_level', t.vix_level); set('f_mag7_sentiment', t.mag7_sentiment);
   set('f_context_notes', t.context_notes);
   set('f_thesis', t.thesis); set('f_wing_width', t.wing_width); set('f_spot', t.spot); set('f_dte', t.dte);
-  set('f_premium', t.premium_collected); set('f_target', t.profit_target); set('f_stop', t.stop_loss);
-  set('f_max_risk', t.max_risk_usd); set('f_contracts', t.contracts);
+  set('f_premium', t.premium_collected); set('f_target', t.profit_target);
+  set('f_entry_price', t.entry_price); set('f_exit_price', t.exit_price);
+  if (t.trade_category === 'other') { set('f_qty_other', t.contracts); set('f_stop_other', t.stop_loss); }
+  else { set('f_stop', t.stop_loss); set('f_contracts', t.contracts); }
+  set('f_max_risk', t.max_risk_usd);
   setSelectWithOther('f_close_type','f_close_type_other', t.close_type);
   set('f_partial_pct', t.partial_pct); set('f_partial_pnl', t.partial_pnl);
   set('f_pnl_gross', t.pnl_gross); set('f_fees', t.broker_fees);
@@ -2268,13 +2296,36 @@ async function saveTrade(e) {
     finalErrors.push(errorOtherVal.trim());
     customOptionsToSave.push({ field_type: 'error', value: errorOtherVal.trim() });
   }
-  const isDetailMode = window.strikesMode === 'detail';
+  const category = window.tradeCategory === 'other' ? 'other' : 'options';
+  const isOptionsCat = category === 'options';
+  const isDetailMode = isOptionsCat && window.strikesMode === 'detail';
   const legs = isDetailMode ? collectLegsFromForm() : [];
   const netDeltaVal = isDetailMode && g('f_net_delta') ? parseFloat(g('f_net_delta')) : null;
-  const strikesSummary = isDetailMode
+  const strikesSummary = !isOptionsCat ? null : (isDetailMode
     ? (legs.length ? legs.map(l => `${l.strike??'?'}${l.option_type?l.option_type[0]:''}`).join(' / ') : null)
-    : g('f_strikes_simple');
-  const payload = { account_id:currentAccountId, user_id:currentUser.id, status, trade_date:g('f_date'), entry_time:g('f_entry_time'), exit_time:g('f_exit_time'), asset:g('f_asset')||'SPX', trade_type:tradeType, strategy:strategy, direction:direction, market_condition:marketCondition, gex_context:g('f_gex_context'), vix_level:g('f_vix_level'), mag7_sentiment:g('f_mag7_sentiment'), net_delta:netDeltaVal, strikes:strikesSummary, greeks_in_play:selectedGreeks.length?selectedGreeks:null, greeks_confluence:selectedConfluence, context_notes:g('f_context_notes'), thesis:g('f_thesis'), wing_width:g('f_wing_width')?parseInt(g('f_wing_width')):null, spot:g('f_spot')?parseFloat(g('f_spot')):null, dte:g('f_dte')?parseInt(g('f_dte')):null, premium_collected:g('f_premium')?parseFloat(g('f_premium')):null, profit_target:g('f_target')?parseFloat(g('f_target')):null, stop_loss:g('f_stop')?parseFloat(g('f_stop')):null, max_risk_usd:g('f_max_risk')?parseFloat(g('f_max_risk')):null, risk_pct:g('f_risk_pct')?parseFloat(g('f_risk_pct')):null, close_type:closeType, partial_pct:g('f_partial_pct')?parseInt(g('f_partial_pct')):null, partial_pnl:g('f_partial_pnl')?parseFloat(g('f_partial_pnl')):null, pnl:g('f_pnl')?parseFloat(g('f_pnl')):null, pnl_gross:g('f_pnl_gross')?parseFloat(g('f_pnl_gross')):null, broker_fees:g('f_fees')?parseFloat(g('f_fees')):null, contracts:g('f_contracts')?parseInt(g('f_contracts')):null, premium_total:g('f_premium_total')?parseFloat(g('f_premium_total')):null, followed_rules:g('f_followed_rules'), rules_broken:g('f_rules_broken'), execution_score:selectedScore, what_went_well:g('f_well'), what_to_improve:g('f_improve'), errors:finalErrors.length?finalErrors:null, quality_trade:selectedQuality, notes:g('f_notes') };
+    : g('f_strikes_simple'));
+  const contracts = isOptionsCat
+    ? (g('f_contracts')?parseInt(g('f_contracts')):null)
+    : (g('f_qty_other')?parseFloat(g('f_qty_other')):null);
+  const payload = { account_id:currentAccountId, user_id:currentUser.id, status, trade_category:category, trade_date:g('f_date'), entry_time:g('f_entry_time'), exit_time:g('f_exit_time'), asset:g('f_asset')||'SPX', trade_type:tradeType, strategy: isOptionsCat ? strategy : null, direction:direction,
+    market_condition: isOptionsCat ? marketCondition : null,
+    gex_context: isOptionsCat ? g('f_gex_context') : null,
+    vix_level: isOptionsCat ? g('f_vix_level') : null,
+    mag7_sentiment: isOptionsCat ? g('f_mag7_sentiment') : null,
+    net_delta: isOptionsCat ? netDeltaVal : null,
+    strikes: strikesSummary,
+    greeks_in_play: isOptionsCat && selectedGreeks.length ? selectedGreeks : null,
+    greeks_confluence: isOptionsCat ? selectedConfluence : null,
+    context_notes: isOptionsCat ? g('f_context_notes') : null,
+    thesis:g('f_thesis'),
+    wing_width: isOptionsCat && g('f_wing_width') ? parseInt(g('f_wing_width')) : null,
+    spot: isOptionsCat && g('f_spot') ? parseFloat(g('f_spot')) : null,
+    dte: isOptionsCat && g('f_dte') ? parseInt(g('f_dte')) : null,
+    premium_collected: isOptionsCat && g('f_premium') ? parseFloat(g('f_premium')) : null,
+    entry_price: !isOptionsCat && g('f_entry_price') ? parseFloat(g('f_entry_price')) : null,
+    exit_price: !isOptionsCat && g('f_exit_price') ? parseFloat(g('f_exit_price')) : null,
+    profit_target:g('f_target')?parseFloat(g('f_target')):null, stop_loss: isOptionsCat ? (g('f_stop')?parseFloat(g('f_stop')):null) : (g('f_stop_other')?parseFloat(g('f_stop_other')):null),
+    max_risk_usd:g('f_max_risk')?parseFloat(g('f_max_risk')):null, risk_pct:g('f_risk_pct')?parseFloat(g('f_risk_pct')):null, close_type:closeType, partial_pct:g('f_partial_pct')?parseInt(g('f_partial_pct')):null, partial_pnl:g('f_partial_pnl')?parseFloat(g('f_partial_pnl')):null, pnl:g('f_pnl')?parseFloat(g('f_pnl')):null, pnl_gross:g('f_pnl_gross')?parseFloat(g('f_pnl_gross')):null, broker_fees:g('f_fees')?parseFloat(g('f_fees')):null, contracts:contracts, premium_total: isOptionsCat && g('f_premium_total') ? parseFloat(g('f_premium_total')) : null, followed_rules:g('f_followed_rules'), rules_broken:g('f_rules_broken'), execution_score:selectedScore, what_went_well:g('f_well'), what_to_improve:g('f_improve'), errors:finalErrors.length?finalErrors:null, quality_trade:selectedQuality, notes:g('f_notes') };
 
   let tradeId = editingTradeId;
   if (editingTradeId) {
@@ -2308,6 +2359,8 @@ function resetForm() {
   document.getElementById('f_asset').value = 'SPX';
   document.getElementById('f_status').value = 'closed';
   toggleStatusFields();
+  setTradeCategory('options');
+  ['f_entry_price','f_exit_price','f_qty_other','f_stop_other'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
   if(document.getElementById('f_premium_total')) document.getElementById('f_premium_total').value='';
   if(document.getElementById('f_pnl_gross')) document.getElementById('f_pnl_gross').value='';
   if(document.getElementById('f_fees')) document.getElementById('f_fees').value='';
@@ -3056,6 +3109,55 @@ function calcPremiumTotal() {
   if (contracts && premium) {
     document.getElementById('f_premium_total').value = (contracts * premium).toFixed(2);
   }
+}
+
+function setTradeCategory(cat) {
+  window.tradeCategory = cat;
+  document.getElementById('catOptions').classList.toggle('active', cat==='options');
+  document.getElementById('catOther').classList.toggle('active', cat==='other');
+  document.getElementById('bloque2Section').style.display = cat==='options' ? 'block' : 'none';
+  document.getElementById('bloque3Section').style.display = cat==='options' ? 'block' : 'none';
+  document.getElementById('otherAssetSection').style.display = cat==='other' ? 'block' : 'none';
+  document.getElementById('strategyFieldGroup').style.display = cat==='options' ? 'block' : 'none';
+
+  // "0DTE" y "Ignoré GEX/flujo" solo tienen sentido para opciones
+  const opt0DTE = document.getElementById('opt0DTE');
+  if (opt0DTE) {
+    opt0DTE.style.display = cat==='options' ? '' : 'none';
+    if (cat==='other' && document.getElementById('f_trade_type').value === '0DTE') {
+      document.getElementById('f_trade_type').value = 'Swing';
+    }
+  }
+  const errGexBtn = document.getElementById('errGexBtn');
+  if (errGexBtn) {
+    errGexBtn.style.display = cat==='options' ? '' : 'none';
+    if (cat==='other' && errGexBtn.classList.contains('active')) {
+      errGexBtn.classList.remove('active');
+      selectedErrors = selectedErrors.filter(e => e !== 'Ignoré GEX/flujo');
+    }
+  }
+}
+
+function calcOtherAssetPnl() {
+  const entry = parseFloat(document.getElementById('f_entry_price')?.value);
+  const exit = parseFloat(document.getElementById('f_exit_price')?.value);
+  const qty = parseFloat(document.getElementById('f_qty_other')?.value);
+  if (isNaN(entry) || isNaN(exit) || isNaN(qty)) return;
+  const direction = document.getElementById('f_direction')?.value;
+  const sign = (direction === 'Corto' || direction === 'Bajista') ? -1 : 1;
+  const pnl = (exit - entry) * qty * sign;
+  const field = document.getElementById('f_pnl_gross');
+  if (field) { field.value = pnl.toFixed(2); calcNetPnl(); }
+}
+
+function calcOtherAssetRisk() {
+  const entry = parseFloat(document.getElementById('f_entry_price')?.value);
+  const stop = parseFloat(document.getElementById('f_stop_other')?.value);
+  const qty = parseFloat(document.getElementById('f_qty_other')?.value);
+  if (isNaN(entry) || isNaN(stop) || isNaN(qty)) return;
+  const risk = Math.abs(entry - stop) * qty;
+  const field = document.getElementById('f_max_risk');
+  if (field) { field.value = risk.toFixed(2); calcRiskPct(); }
 }
 
 function toggleStatusFields() {
