@@ -1538,7 +1538,11 @@ function tradeCard(t) {
   const isOther = t.trade_category === 'other';
   const pnl = t.pnl||0, pc = pnl>0?'badge-green':pnl<0?'badge-red':'badge-gray';
   const dots = Array.from({length:10},(_,i)=>`<div class="score-dot ${i<(t.execution_score||0)?'filled':''}"></div>`).join('');
-  return `<div class="card">
+  return `<div class="card" style="${t.needs_review?'border-color:#facc15':''}">
+    ${t.needs_review ? `<div style="background:rgba(250,204,21,0.1);border-bottom:1px solid rgba(250,204,21,0.3);padding:8px 20px;display:flex;justify-content:space-between;align-items:center;font-size:0.65rem;color:#facc15;margin:-20px -20px 16px -20px;border-radius:12px 12px 0 0">
+      <span>⚠ Este trade quedó marcado para revisión al importarlo</span>
+      <button class="btn-secondary" style="padding:5px 10px;font-size:0.6rem" onclick="markTradeReviewed('${t.id}')">Marcar como revisado</button>
+    </div>` : ''}
     <div class="card-header">
       <div><div class="card-title">${t.asset}${isOther?'':' · '+t.strategy}</div><div class="card-meta">${t.trade_date} · ${t.trade_type}${isOther?'':' · '+(t.dte??'—')+' DTE'}</div></div>
       <div class="badges">
@@ -1697,15 +1701,28 @@ function renderCalendarView() {
 
 const TRADES_PER_PAGE = 25;
 
+async function markTradeReviewed(id) {
+  await sb.from('trades').update({ needs_review: false }).eq('id', id);
+  showToast('✦ Marcado como revisado');
+  await loadTrades();
+  if (window.bitacoraFilter === 'review' && !trades.some(t=>t.needs_review)) window.bitacoraFilter = 'todos';
+  renderBitacora();
+}
+
 function renderBitacora() {
+  const filter0 = window.bitacoraFilter || 'todos';
+  const reviewCount0 = trades.filter(t=>t.needs_review).length;
+  if (filter0 === 'review' && !reviewCount0) window.bitacoraFilter = 'todos';
   const filter = window.bitacoraFilter || 'todos';
   const openCount = trades.filter(t=>t.status==='open').length;
   const closedCount = trades.filter(t=>t.status!=='open').length;
+  const reviewCount = trades.filter(t=>t.needs_review).length;
   document.getElementById('bitacoraTabs').innerHTML = `
     <button class="${filter==='todos'?'active':''}" onclick="setBitacoraFilter('todos')">Todos (${trades.length})</button>
     <button class="${filter==='open'?'active':''}" onclick="setBitacoraFilter('open')">Abiertos (${openCount})</button>
-    <button class="${filter==='closed'?'active':''}" onclick="setBitacoraFilter('closed')">Cerrados (${closedCount})</button>`;
-  let filtered = filter==='todos' ? trades : filter==='open' ? trades.filter(t=>t.status==='open') : trades.filter(t=>t.status!=='open');
+    <button class="${filter==='closed'?'active':''}" onclick="setBitacoraFilter('closed')">Cerrados (${closedCount})</button>
+    ${reviewCount ? `<button class="${filter==='review'?'active':''}" style="color:#facc15" onclick="setBitacoraFilter('review')">⚠ Revisar (${reviewCount})</button>` : ''}`;
+  let filtered = filter==='todos' ? trades : filter==='open' ? trades.filter(t=>t.status==='open') : filter==='review' ? trades.filter(t=>t.needs_review) : trades.filter(t=>t.status!=='open');
   const c = document.getElementById('allTrades');
   let dateNotice = '';
   if (window.calendarDateFilter) {
@@ -2894,6 +2911,7 @@ function parseThinkorswimStatement(text) {
         pnl_gross: (isOpen || needsReview) ? null : pnlGross,
         broker_fees: fees,
         pnl: (isOpen || needsReview) ? null : (pnlGross - fees),
+        needs_review: needsReview || complexFillPattern,
         notes: noteText + (riskCalc.note ? ' ' + riskCalc.note : '')
       }
     });
