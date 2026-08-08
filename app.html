@@ -117,6 +117,21 @@ body { font-family: 'Cocogoose', Georgia, serif; background: var(--bg); color: v
 .cal-week-total { border-radius:8px; padding:8px; min-height:74px; background:var(--bg3); border:1px solid var(--border); display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
 .cal-week-total-label { font-size:0.55rem; color:var(--text3); text-transform:uppercase; letter-spacing:0.06em; }
 .cal-week-total-val { font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif; font-weight:700; font-size:0.8rem; margin-top:4px; }
+
+/* ===== ENCABEZADO PRINCIPAL DE BITÁCORA ===== */
+.bitacora-main-header { display:flex; justify-content:center; align-items:center; position:relative; margin-bottom:24px; }
+.view-toggle-big { transform: scale(1.15); }
+.view-toggle-big button { padding:10px 26px; font-size:0.75rem; }
+.add-trade-btn { position:absolute; right:0; top:50%; transform:translateY(-50%); width:38px; height:38px; border-radius:10px; background:var(--gold); color:var(--bg); border:none; font-size:1.3rem; font-weight:700; cursor:pointer; line-height:1; display:flex; align-items:center; justify-content:center; transition:background 0.15s, transform 0.15s; }
+.add-trade-btn:hover { background:var(--gold-light); transform:translateY(-50%) scale(1.05); }
+.add-trade-menu { position:absolute; right:0; top:calc(100% + 8px); background:var(--bg2); border:1px solid var(--border); border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.4); z-index:150; width:240px; overflow:hidden; }
+.add-trade-menu button { display:block; width:100%; text-align:left; background:transparent; border:none; padding:12px 16px; cursor:pointer; border-bottom:1px solid var(--border); }
+.add-trade-menu button:last-child { border-bottom:none; }
+.add-trade-menu button:hover { background:var(--bg3); }
+.add-trade-menu-title { display:block; font-size:0.75rem; color:var(--text); font-weight:700; }
+.add-trade-menu-sub { display:block; font-size:0.62rem; color:var(--text3); margin-top:2px; }
+.trash-link-btn { position:absolute; right:0; top:50%; transform:translateY(-50%); background:transparent; border:1px solid var(--border); color:var(--text3); padding:8px 14px; border-radius:8px; font-size:0.65rem; cursor:pointer; }
+.trash-link-btn:hover { border-color:var(--gold); color:var(--gold); }
 .progress-title { font-size: 0.65rem; color: var(--gold-light); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 16px; font-weight: 700; }
 .progress-item { margin-bottom: 14px; }
 .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
@@ -371,7 +386,19 @@ textarea { resize: vertical; line-height: 1.5; }
       </div>
       <div class="topbar-right">
         <div class="date-badge" id="todayDate"></div>
-        <button class="btn-primary" onclick="newTradeForm()">+ Trade</button>
+        <div style="position:relative">
+          <button class="btn-primary" id="addTradeTriggerBtn" onclick="toggleAddTradeMenu()">+ Trade</button>
+          <div id="addTradeMenu" class="add-trade-menu" style="display:none">
+            <button onclick="closeAddTradeMenu(); newTradeForm()">
+              <span class="add-trade-menu-title">Agregar manualmente</span>
+              <span class="add-trade-menu-sub">Llena el formulario trade por trade</span>
+            </button>
+            <button onclick="closeAddTradeMenu(); openImportModal()">
+              <span class="add-trade-menu-title">Importar trades</span>
+              <span class="add-trade-menu-sub">Automático — sube el archivo de tu broker</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -395,19 +422,16 @@ textarea { resize: vertical; line-height: 1.5; }
 
       <!-- BITÁCORA -->
       <div class="page" id="page-bitacora">
-        <div style="display:flex;justify-content:flex-end;gap:10px;margin-bottom:20px">
-          <button class="btn-secondary" onclick="newTradeForm()">Llenar manualmente</button>
-          <button class="btn-primary" onclick="openImportModal()">Importar trades</button>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
-          <div class="view-toggle" id="bitacoraTabs"></div>
-          <div class="view-toggle">
-            <button id="bitacoraViewList" class="active" onclick="setBitacoraViewMode('list')">Lista</button>
-            <button id="bitacoraViewCalendar" onclick="setBitacoraViewMode('calendar')">Calendario</button>
+        <div class="bitacora-main-header">
+          <div class="view-toggle view-toggle-big" id="bitacoraViewToggle">
+            <button id="bitacoraViewCalendar" class="active" onclick="setBitacoraViewMode('calendar')">Calendario</button>
+            <button id="bitacoraViewList" onclick="setBitacoraViewMode('list')">Lista</button>
           </div>
+          <button class="trash-link-btn" onclick="openTrashModal()">Papelera</button>
         </div>
-        <div id="allTrades"></div>
-        <div id="calendarView" style="display:none"></div>
+        <div class="view-toggle" id="bitacoraTabs" style="margin-bottom:20px;display:none"></div>
+        <div id="allTrades" style="display:none"></div>
+        <div id="calendarView"></div>
       </div>
 
       <!-- NUEVO TRADE -->
@@ -972,6 +996,20 @@ function closeConfirmModal(confirmed) {
 }
 </script>
 
+<!-- MODAL PAPELERA -->
+<div id="trashModal" class="modal-overlay" style="display:none">
+  <div class="modal" style="max-width:640px;max-height:75vh;overflow-y:auto">
+    <div class="modal-title">Papelera</div>
+    <p style="font-size:0.7rem;color:var(--text2);line-height:1.5;margin-bottom:16px">
+      Los trades eliminados se guardan aquí por 10 días antes de borrarse para siempre. Puedes recuperarlos cuando quieras dentro de ese plazo.
+    </p>
+    <div id="trashList"></div>
+    <div class="form-actions" style="margin-top:16px">
+      <button class="btn-secondary" onclick="document.getElementById('trashModal').style.display='none'">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL GESTIONAR OPCIONES PERSONALIZADAS -->
 <div id="customOptionsModal" class="modal-overlay" style="display:none">
   <div class="modal" style="max-width:480px;max-height:75vh;overflow-y:auto">
@@ -1087,7 +1125,7 @@ function showPage(id) {
   document.getElementById('pageTitle').textContent = pages[id]?.title || '';
   document.getElementById('pageSubtitle').textContent = pages[id]?.subtitle || '';
   if (id === 'dashboard') renderDashboard();
-  if (id === 'bitacora') renderBitacora();
+  if (id === 'bitacora') { setBitacoraViewMode(window.bitacoraViewMode || 'calendar'); }
   if (id === 'cuentas') renderAccounts();
   if (id === 'semanal') renderWeekly();
   if (id === 'ciclos') { initCiclos(); }
@@ -1120,7 +1158,7 @@ async function changeAccount() {
 
 async function loadTrades() {
   if (!currentAccountId) return;
-  const { data } = await sb.from('trades').select('*').eq('account_id', currentAccountId).order('trade_date', { ascending: false });
+  const { data } = await sb.from('trades').select('*').eq('account_id', currentAccountId).is('deleted_at', null).order('trade_date', { ascending: false });
   trades = data || [];
 }
 
@@ -1248,7 +1286,7 @@ async function renderDashboard() {
   const totalPnlPct = balance ? (s.totalPnl/balance*100) : 0;
   const pct = window.dashboardViewMode === '%';
 
-  const fmtMoney = (v) => `${v>=0?'+':''}$${Math.abs(v).toFixed(0)}`;
+  const fmtMoney = (v) => `${v>=0?'+':'-'}$${Math.abs(v).toFixed(0)}`;
   const fmtPct = (v) => `${v>=0?'+':''}${v.toFixed(1)}%`;
 
   document.getElementById('statsGrid').innerHTML = `
@@ -1478,6 +1516,19 @@ function tradeCard(t) {
 }
 
 // ===== VISTA CALENDARIO DE BITÁCORA =====
+function toggleAddTradeMenu() {
+  const menu = document.getElementById('addTradeMenu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+function closeAddTradeMenu() {
+  document.getElementById('addTradeMenu').style.display = 'none';
+}
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('addTradeMenu');
+  if (!menu || menu.style.display === 'none') return;
+  if (!e.target.closest('#addTradeMenu') && !e.target.closest('#addTradeTriggerBtn')) closeAddTradeMenu();
+});
+
 function setBitacoraViewMode(mode) {
   window.bitacoraViewMode = mode;
   document.getElementById('bitacoraViewList').classList.toggle('active', mode==='list');
@@ -1486,6 +1537,7 @@ function setBitacoraViewMode(mode) {
   document.getElementById('bitacoraTabs').style.display = mode==='list' ? 'flex' : 'none';
   document.getElementById('calendarView').style.display = mode==='calendar' ? 'block' : 'none';
   if (mode === 'calendar') renderCalendarView();
+  else renderBitacora();
 }
 
 function calNavMonth(delta) {
@@ -1499,7 +1551,6 @@ function calGoToDay(dateStr) {
   window.bitacoraFilter = 'todos';
   window.calendarDateFilter = dateStr;
   setBitacoraViewMode('list');
-  renderBitacora();
 }
 
 const CAL_MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -1607,11 +1658,57 @@ function setBitacoraFilter(f) {
   renderBitacora();
 }
 
+async function openTrashModal() {
+  document.getElementById('trashModal').style.display = 'flex';
+  await renderTrashList();
+}
+
+async function renderTrashList() {
+  const { data } = await sb.from('trades').select('*').eq('account_id', currentAccountId).not('deleted_at', 'is', null).order('deleted_at', { ascending: false });
+  const trashed = data || [];
+  const container = document.getElementById('trashList');
+  if (!trashed.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-title">La papelera está vacía</div></div>';
+    return;
+  }
+  container.innerHTML = trashed.map(t => {
+    const deletedDate = new Date(t.deleted_at);
+    const daysLeft = Math.max(0, 10 - Math.floor((Date.now() - deletedDate.getTime()) / 86400000));
+    return `<div class="discipline-item">
+      <div class="discipline-item-text">${t.asset} · ${t.strategy} · ${t.trade_date}
+        <div class="discipline-item-scope">Se elimina para siempre en ${daysLeft} día${daysLeft!==1?'s':''}</div>
+      </div>
+      <div class="discipline-item-actions">
+        <button class="btn-secondary" style="padding:6px 10px;font-size:0.62rem" onclick="restoreTrade('${t.id}')">Restaurar</button>
+        <button class="btn-danger" onclick="purgeTrade('${t.id}')">Eliminar ya</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function restoreTrade(id) {
+  await sb.from('trades').update({ deleted_at: null }).eq('id', id);
+  showToast('✦ Trade restaurado');
+  await loadTrades();
+  await renderTrashList();
+  const active = document.querySelector('.page.active')?.id?.replace('page-','');
+  if (active==='dashboard') renderDashboard();
+  if (active==='bitacora') renderBitacora();
+}
+
+function purgeTrade(id) {
+  showConfirmModal('Esta acción no se puede deshacer. El trade se eliminará para siempre, sin poder recuperarlo.', async () => {
+    await sb.from('trades').delete().eq('id', id);
+    showToast('✦ Eliminado para siempre');
+    await renderTrashList();
+  }, '¿Eliminar para siempre?', 'Sí, eliminar para siempre');
+}
+
 async function deleteTrade(id) {
-  showConfirmModal('Esta acción no se puede deshacer. El trade se eliminará permanentemente de tu bitácora.', async () => {
-    const { error, count } = await sb.from('trades').delete({ count: 'exact' }).eq('id', id);
+  showConfirmModal('El trade se moverá a la Papelera. Vas a poder recuperarlo desde ahí durante 10 días antes de que se elimine para siempre.', async () => {
+    const { error, count } = await sb.from('trades').update({ deleted_at: new Date().toISOString() }, { count: 'exact' }).eq('id', id);
     if (error) { alert('No se pudo eliminar el trade: ' + error.message); return; }
-    await loadTrades(); showToast(count ? '✦ Trade eliminado' : 'No se encontró el trade a eliminar');
+    await loadTrades(); showToast(count ? '✦ Trade movido a la Papelera' : 'No se encontró el trade a eliminar');
     const active = document.querySelector('.page.active')?.id?.replace('page-','');
     if (active==='dashboard') renderDashboard();
     if (active==='bitacora') renderBitacora();
