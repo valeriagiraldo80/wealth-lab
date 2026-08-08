@@ -3121,11 +3121,18 @@ function setTradeCategory(cat) {
   document.getElementById('strategyFieldGroup').style.display = cat==='options' ? 'block' : 'none';
 
   // "0DTE" y "Ignoré GEX/flujo" solo tienen sentido para opciones
-  const opt0DTE = document.getElementById('opt0DTE');
-  if (opt0DTE) {
-    opt0DTE.style.display = cat==='options' ? '' : 'none';
-    if (cat==='other' && document.getElementById('f_trade_type').value === '0DTE') {
-      document.getElementById('f_trade_type').value = 'Swing';
+  const typeSelect = document.getElementById('f_trade_type');
+  let opt0DTE = document.getElementById('opt0DTE');
+  if (cat === 'options') {
+    if (!opt0DTE && typeSelect) {
+      opt0DTE = document.createElement('option');
+      opt0DTE.value = '0DTE'; opt0DTE.id = 'opt0DTE'; opt0DTE.textContent = '0DTE';
+      typeSelect.insertBefore(opt0DTE, typeSelect.firstChild);
+    }
+  } else {
+    if (opt0DTE) {
+      if (typeSelect.value === '0DTE') typeSelect.value = 'Swing';
+      opt0DTE.remove();
     }
   }
   const errGexBtn = document.getElementById('errGexBtn');
