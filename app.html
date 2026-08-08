@@ -130,7 +130,10 @@ body { font-family: 'Cocogoose', Georgia, serif; background: var(--bg); color: v
 .add-trade-menu button:hover { background:var(--bg3); }
 .add-trade-menu-title { display:block; font-size:0.75rem; color:var(--text); font-weight:700; }
 .add-trade-menu-sub { display:block; font-size:0.62rem; color:var(--text3); margin-top:2px; }
-.trash-link-btn { position:absolute; right:0; top:50%; transform:translateY(-50%); background:transparent; border:1px solid var(--border); color:var(--text3); padding:8px 14px; border-radius:8px; font-size:0.65rem; cursor:pointer; }
+.bitacora-header-actions { position:absolute; right:0; top:50%; transform:translateY(-50%); display:flex; gap:8px; }
+.bitacora-pagination { display:flex; justify-content:center; align-items:center; gap:16px; margin-top:20px; font-size:0.68rem; color:var(--text2); }
+.bitacora-pagination button:disabled { opacity:0.35; cursor:default; }
+.trash-link-btn { background:transparent; border:1px solid var(--border); color:var(--text3); padding:8px 14px; border-radius:8px; font-size:0.65rem; cursor:pointer; }
 .trash-link-btn:hover { border-color:var(--gold); color:var(--gold); }
 .progress-title { font-size: 0.65rem; color: var(--gold-light); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 16px; font-weight: 700; }
 .progress-item { margin-bottom: 14px; }
@@ -217,7 +220,42 @@ textarea { resize: vertical; line-height: 1.5; }
   #sidebar { transform: translateX(-100%); } #sidebar.open { transform: translateX(0); }
   #main { margin-left: 0; } .hamburger { display: block; }
   .content { padding: 20px 16px; } .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .review-grid { grid-template-columns: 1fr; } .topbar { padding: 16px 20px; }
+  .review-grid { grid-template-columns: 1fr; } .topbar { padding: 14px 16px; }
+  .topbar-right { gap: 8px; }
+  .topbar .btn-primary, .topbar .btn-secondary { padding: 8px 12px; font-size: 0.65rem; }
+  .date-badge { display: none; }
+
+  /* Modales: ocupar casi todo el ancho, sin desbordar */
+  .modal-overlay { padding: 12px; }
+  .modal { padding: 18px; max-width: 100% !important; }
+
+  /* Formularios: una sola columna, patas y metas apilados */
+  .goal-row { grid-template-columns: 1fr; }
+  .goal-row-remove { justify-self: end; }
+  .leg-row { grid-template-columns: 1fr 1fr; }
+  .leg-row .goal-row-remove { grid-column: span 2; justify-self: center; }
+
+  /* Encabezado de Bitácora: apilar en vez de forzar en una fila */
+  .bitacora-main-header { flex-direction: column; gap: 12px; align-items: stretch; }
+  .bitacora-header-actions { position: static; transform: none; align-self: center; justify-content: center; }
+  .view-toggle-big { transform: none; align-self: center; }
+  .view-toggle-big button { padding: 8px 18px; font-size: 0.68rem; }
+  .add-trade-menu { right: auto; left: 0; width: 100%; max-width: 300px; }
+
+  /* Calendario: scroll horizontal en vez de comprimir columnas ilegibles */
+  .cal-grid { grid-template-columns: repeat(7, 92px) 80px; overflow-x: auto; }
+  .cal-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  #calendarView { overflow-x: auto; }
+  #calendarView .cal-grid { width: max-content; }
+
+  /* Tarjetas de trade: badges se apilan mejor */
+  .card-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .badges { flex-wrap: wrap; }
+
+  /* Toggles y botones que suelen desbordar en pantallas chicas */
+  .toggle-group { flex-wrap: wrap; }
+  #tradeCategoryToggle { flex-direction: column; }
+  #tradeCategoryToggle button { width: 100%; }
 }
 
 /* CICLOS */
@@ -427,7 +465,10 @@ textarea { resize: vertical; line-height: 1.5; }
             <button id="bitacoraViewCalendar" class="active" onclick="setBitacoraViewMode('calendar')">Calendario</button>
             <button id="bitacoraViewList" onclick="setBitacoraViewMode('list')">Lista</button>
           </div>
-          <button class="trash-link-btn" onclick="openTrashModal()">Papelera</button>
+          <div class="bitacora-header-actions">
+            <button class="trash-link-btn" onclick="openTrashModal()">Papelera</button>
+            <button class="trash-link-btn" onclick="exportTradesToCsv()">Exportar</button>
+          </div>
         </div>
         <div class="view-toggle" id="bitacoraTabs" style="margin-bottom:20px;display:none"></div>
         <div id="allTrades" style="display:none"></div>
@@ -1574,6 +1615,7 @@ function calNavMonth(delta) {
 function calGoToDay(dateStr) {
   window.bitacoraFilter = 'todos';
   window.calendarDateFilter = dateStr;
+  window.bitacoraPage = 1;
   setBitacoraViewMode('list');
 }
 
@@ -1653,6 +1695,8 @@ function renderCalendarView() {
   `;
 }
 
+const TRADES_PER_PAGE = 25;
+
 function renderBitacora() {
   const filter = window.bitacoraFilter || 'todos';
   const openCount = trades.filter(t=>t.status==='open').length;
@@ -1668,16 +1712,39 @@ function renderBitacora() {
     filtered = filtered.filter(t => t.trade_date === window.calendarDateFilter);
     dateNotice = `<div class="breakdown-row" style="margin-bottom:14px"><span>Mostrando solo trades del <strong style="color:var(--gold-light)">${window.calendarDateFilter}</strong></span><button class="btn-secondary" style="padding:6px 12px;font-size:0.65rem" onclick="clearCalendarDateFilter()">Ver todos ✕</button></div>`;
   }
-  c.innerHTML = dateNotice + (filtered.length ? filtered.map(tradeCard).join('') : `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M9 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-3"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg></div><div class="empty-title">No hay trades</div></div>`);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / TRADES_PER_PAGE));
+  window.bitacoraPage = Math.min(window.bitacoraPage || 1, totalPages);
+  const startIdx = (window.bitacoraPage - 1) * TRADES_PER_PAGE;
+  const pageTrades = filtered.slice(startIdx, startIdx + TRADES_PER_PAGE);
+
+  let paginationHtml = '';
+  if (filtered.length > TRADES_PER_PAGE) {
+    paginationHtml = `<div class="bitacora-pagination">
+      <button class="btn-secondary" ${window.bitacoraPage<=1?'disabled':''} onclick="changeBitacoraPage(-1)">‹ Anterior</button>
+      <span>Página ${window.bitacoraPage} de ${totalPages} · ${filtered.length} trades</span>
+      <button class="btn-secondary" ${window.bitacoraPage>=totalPages?'disabled':''} onclick="changeBitacoraPage(1)">Siguiente ›</button>
+    </div>`;
+  }
+
+  c.innerHTML = dateNotice + (filtered.length ? pageTrades.map(tradeCard).join('') + paginationHtml : `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M9 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-3"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg></div><div class="empty-title">No hay trades</div></div>`);
+}
+
+function changeBitacoraPage(delta) {
+  window.bitacoraPage = (window.bitacoraPage || 1) + delta;
+  renderBitacora();
+  document.getElementById('allTrades').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function clearCalendarDateFilter() {
   window.calendarDateFilter = null;
+  window.bitacoraPage = 1;
   renderBitacora();
 }
 
 function setBitacoraFilter(f) {
   window.bitacoraFilter = f;
+  window.bitacoraPage = 1;
   window.calendarDateFilter = null;
   renderBitacora();
 }
@@ -2163,6 +2230,11 @@ async function deleteCustomOption(fieldType, value) {
 }
 
 async function newTradeForm() {
+  if (!currentAccountId || !accounts.length) {
+    alert('Primero necesitas crear una cuenta en "Mis Cuentas" antes de poder registrar trades — todo trade debe pertenecer a una cuenta.');
+    showPage('cuentas');
+    return;
+  }
   editingTradeId = null;
   resetForm();
   showPage('nuevo');
@@ -2271,6 +2343,7 @@ async function editTrade(id) {
 
 async function saveTrade(e) {
   e.preventDefault();
+  if (!currentAccountId) { alert('No hay una cuenta seleccionada. Ve a "Mis Cuentas" y crea o selecciona una cuenta antes de guardar un trade.'); return; }
   const g = id => document.getElementById(id)?.value||null;
   const status = g('f_status') || 'closed';
   if (status === 'closed' && !g('f_pnl')) { alert('Para guardar un trade como Cerrado, necesitas el P&L (llena P&L Bruto en el Bloque 5).'); return; }
@@ -2539,6 +2612,11 @@ function downloadCsvTemplate() {
 }
 
 function openImportModal() {
+  if (!currentAccountId || !accounts.length) {
+    alert('Primero necesitas crear una cuenta en "Mis Cuentas" antes de poder importar trades — todo trade debe pertenecer a una cuenta.');
+    showPage('cuentas');
+    return;
+  }
   document.getElementById('csvFileInput').value = '';
   document.getElementById('importPreview').innerHTML = '';
   document.getElementById('confirmImportBtn').style.display = 'none';
@@ -2824,6 +2902,20 @@ function parseThinkorswimStatement(text) {
   return { results, error: null };
 }
 
+// Detecta posibles duplicados comparando fecha+activo+P&L contra lo que ya existe en la cuenta,
+// y también entre sí dentro del mismo archivo (por si el archivo trae la misma fila repetida).
+async function detectDuplicateTrades(rows) {
+  const { data: existing } = await sb.from('trades').select('trade_date, asset, pnl').eq('account_id', currentAccountId).is('deleted_at', null);
+  const existingFingerprints = new Set((existing||[]).map(t => `${t.trade_date}|${t.asset}|${t.pnl}`));
+  const seenInBatch = new Set();
+  return rows.map(r => {
+    const fp = `${r.trade.trade_date}|${r.trade.asset}|${r.trade.pnl}`;
+    const isDuplicate = existingFingerprints.has(fp) || seenInBatch.has(fp);
+    seenInBatch.add(fp);
+    return { ...r, isDuplicate };
+  });
+}
+
 function handleCsvFile(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -2840,21 +2932,26 @@ function handleCsvFile(event) {
         document.getElementById('confirmImportBtn').style.display = 'none';
         return;
       }
-      window._importValidRows = results.map(r => ({ errors: [], trade: r.trade, legs: [], needsReview: r.needsReview, complexFill: r.complexFill, summary: r.summary }));
-      const okCount = results.filter(r => !r.needsReview).length;
-      const reviewCount = results.filter(r => r.needsReview).length;
-      let html = `<div style="font-size:0.7rem;color:var(--gold-light);margin-bottom:8px">Formato detectado: estado de cuenta de thinkorswim</div>
-      <div style="font-size:0.75rem;color:var(--text2);margin-bottom:10px">
-        Se reconstruyeron <strong style="color:var(--gold-light)">${results.length}</strong> trades ·
-        <strong style="color:#4ade80">${okCount}</strong> con P&L calculado ${reviewCount ? `· <strong style="color:#facc15">${reviewCount}</strong> requieren revisión (se importan sin P&L)` : ''}
-      </div>`;
-      html += '<div class="breakdown-list" style="max-height:280px;overflow-y:auto">' + results.map(r => {
-        const badge = r.needsReview ? '<span class="metric-badge warn">Revisar</span>' : r.complexFill ? '<span class="metric-badge warn">Verificar</span>' : (r.trade.status==='open' ? '<span class="metric-badge neutral">Abierto</span>' : '<span class="metric-badge good">Cerrado</span>');
-        const pnlTxt = r.trade.pnl!=null ? `${r.trade.pnl>=0?'+':''}$${r.trade.pnl.toFixed(2)}` : '—';
-        return `<div class="breakdown-row"><span>${r.summary}</span><span style="display:flex;gap:8px;align-items:center">${badge}<span class="bval ${r.trade.pnl>=0?'text-success':'text-danger'}">${pnlTxt}</span></span></div>`;
-      }).join('') + '</div>';
-      document.getElementById('importPreview').innerHTML = html;
-      document.getElementById('confirmImportBtn').style.display = results.length ? 'inline-block' : 'none';
+      detectDuplicateTrades(results).then(withDup => {
+        const nonDup = withDup.filter(r => !r.isDuplicate);
+        const dupCount = withDup.length - nonDup.length;
+        window._importValidRows = nonDup.map(r => ({ errors: [], trade: r.trade, legs: [], needsReview: r.needsReview, complexFill: r.complexFill, summary: r.summary }));
+        const okCount = nonDup.filter(r => !r.needsReview).length;
+        const reviewCount = nonDup.filter(r => r.needsReview).length;
+        let html = `<div style="font-size:0.7rem;color:var(--gold-light);margin-bottom:8px">Formato detectado: estado de cuenta de thinkorswim</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-bottom:10px">
+          Se reconstruyeron <strong style="color:var(--gold-light)">${withDup.length}</strong> trades ·
+          <strong style="color:#4ade80">${okCount}</strong> con P&L calculado ${reviewCount ? `· <strong style="color:#facc15">${reviewCount}</strong> requieren revisión` : ''}
+          ${dupCount ? `· <strong style="color:var(--danger)">${dupCount}</strong> posibles duplicados (no se importarán)` : ''}
+        </div>`;
+        html += '<div class="breakdown-list" style="max-height:280px;overflow-y:auto">' + withDup.map(r => {
+          const badge = r.isDuplicate ? '<span class="metric-badge bad">Duplicado</span>' : r.needsReview ? '<span class="metric-badge warn">Revisar</span>' : r.complexFill ? '<span class="metric-badge warn">Verificar</span>' : (r.trade.status==='open' ? '<span class="metric-badge neutral">Abierto</span>' : '<span class="metric-badge good">Cerrado</span>');
+          const pnlTxt = r.trade.pnl!=null ? `${r.trade.pnl>=0?'+':''}$${r.trade.pnl.toFixed(2)}` : '—';
+          return `<div class="breakdown-row" style="${r.isDuplicate?'opacity:0.5':''}"><span>${r.summary}</span><span style="display:flex;gap:8px;align-items:center">${badge}<span class="bval ${r.trade.pnl>=0?'text-success':'text-danger'}">${pnlTxt}</span></span></div>`;
+        }).join('') + '</div>';
+        document.getElementById('importPreview').innerHTML = html;
+        document.getElementById('confirmImportBtn').style.display = nonDup.length ? 'inline-block' : 'none';
+      });
       return;
     }
 
@@ -2866,29 +2963,60 @@ function handleCsvFile(event) {
         const parsed = results.data.map((row, i) => validateCsvRow(row, i+1));
         const valid = parsed.filter(p => p.errors.length === 0);
         const invalid = parsed.filter(p => p.errors.length > 0);
-        window._importValidRows = valid;
+        detectDuplicateTrades(valid).then(withDup => {
+          const nonDup = withDup.filter(r => !r.isDuplicate);
+          const dupCount = withDup.length - nonDup.length;
+          window._importValidRows = nonDup;
 
-        let html = `<div style="font-size:0.7rem;color:var(--gold-light);margin-bottom:8px">Formato detectado: plantilla genérica</div>
-        <div style="font-size:0.75rem;color:var(--text2);margin-bottom:10px">
-          <strong style="color:var(--gold-light)">${valid.length}</strong> fila${valid.length!==1?'s':''} lista${valid.length!==1?'s':''} para importar
-          ${invalid.length ? `· <strong style="color:var(--danger)">${invalid.length}</strong> con errores (no se importarán)` : ''}
-        </div>`;
-        if (invalid.length) {
-          html += '<div class="breakdown-list" style="margin-bottom:12px">' + invalid.map(p =>
-            `<div class="breakdown-row"><span>Fila ${p.index}</span><span style="color:var(--danger);font-size:0.65rem">${p.errors.join(', ')}</span></div>`
-          ).join('') + '</div>';
-        }
-        document.getElementById('importPreview').innerHTML = html;
-        document.getElementById('confirmImportBtn').style.display = valid.length ? 'inline-block' : 'none';
+          let html = `<div style="font-size:0.7rem;color:var(--gold-light);margin-bottom:8px">Formato detectado: plantilla genérica</div>
+          <div style="font-size:0.75rem;color:var(--text2);margin-bottom:10px">
+            <strong style="color:var(--gold-light)">${nonDup.length}</strong> fila${nonDup.length!==1?'s':''} lista${nonDup.length!==1?'s':''} para importar
+            ${invalid.length ? `· <strong style="color:var(--danger)">${invalid.length}</strong> con errores` : ''}
+            ${dupCount ? `· <strong style="color:var(--danger)">${dupCount}</strong> posibles duplicados (no se importarán)` : ''}
+          </div>`;
+          if (invalid.length) {
+            html += '<div class="breakdown-list" style="margin-bottom:12px">' + invalid.map(p =>
+              `<div class="breakdown-row"><span>Fila ${p.index}</span><span style="color:var(--danger);font-size:0.65rem">${p.errors.join(', ')}</span></div>`
+            ).join('') + '</div>';
+          }
+          document.getElementById('importPreview').innerHTML = html;
+          document.getElementById('confirmImportBtn').style.display = nonDup.length ? 'inline-block' : 'none';
+        });
       }
     });
   };
   reader.readAsText(file);
 }
 
+function exportTradesToCsv() {
+  if (!trades.length) { showToast('No hay trades para exportar en esta cuenta'); return; }
+  const rows = [CSV_TEMPLATE_HEADERS];
+  trades.forEach(t => {
+    const legRow = ['','','',''];
+    // Nota: el export usa el resumen de strikes en texto; el detalle por pata (si existía) no se re-exporta aquí.
+    rows.push([
+      t.trade_date||'', t.asset||'', t.strategy||'', t.trade_type||'', t.direction||'',
+      t.status==='open'?'abierto':'cerrado', t.strikes||'', t.contracts??'', t.premium_collected??'',
+      t.dte??'', t.wing_width??'', t.spot??'', t.max_risk_usd??'', t.close_type||'',
+      t.pnl_gross??'', t.broker_fees??'', t.pnl??'', (t.notes||'').replace(/\n/g,' '),
+      '','','','', '','','','', '','','','', '','','',''
+    ]);
+  });
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const acc = accounts.find(a => a.id === currentAccountId);
+  a.href = url; a.download = `wealthlab_trades_${(acc?.name||'cuenta').replace(/\s+/g,'_')}_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast(`✦ ${trades.length} trades exportados`);
+}
+
 async function confirmImport() {
   const rows = window._importValidRows || [];
   if (!rows.length) return;
+  if (!currentAccountId) { alert('No hay una cuenta seleccionada. Ve a "Mis Cuentas" y crea o selecciona una cuenta antes de importar.'); closeImportModal(); return; }
   const btn = document.getElementById('confirmImportBtn');
   btn.disabled = true;
   let successCount = 0, failCount = 0;
