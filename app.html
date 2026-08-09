@@ -470,7 +470,7 @@ textarea { resize: vertical; line-height: 1.5; }
           </div>
           <div class="bitacora-header-actions">
             <button class="trash-link-btn" onclick="openTrashModal()">Papelera</button>
-            <button class="trash-link-btn" onclick="exportTradesToCsv()">Exportar</button>
+            <button class="trash-link-btn" onclick="openExportModal()">Exportar</button>
           </div>
         </div>
         <div class="view-toggle" id="bitacoraTabs" style="margin-bottom:20px;display:none"></div>
@@ -1057,6 +1057,28 @@ function closeConfirmModal(confirmed) {
   if (confirmed && cb) cb();
 }
 </script>
+
+<!-- MODAL EXPORTAR -->
+<div id="exportModal" class="modal-overlay" style="display:none">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-title">Exportar trades</div>
+    <div style="background:rgba(74,222,128,0.08);border-left:2px solid #4ade80;border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:16px;font-size:0.68rem;color:var(--text2);line-height:1.6">
+      <strong style="color:#4ade80">Es solo una copia:</strong> esto NO elimina ni mueve tus trades. Se quedan exactamente igual, intactos, dentro de tu Bitácora — solo se descarga un archivo nuevo con esa información.
+    </div>
+    <p style="font-size:0.72rem;color:var(--text2);line-height:1.7;margin-bottom:16px">
+      Vas a descargar un archivo CSV con <strong id="exportTradeCount" style="color:var(--gold-light)">0</strong> trades de tu cuenta activa (<strong id="exportAccountName" style="color:var(--gold-light)">—</strong>). Puedes:
+    </p>
+    <ul style="font-size:0.7rem;color:var(--text2);line-height:1.9;margin:0 0 16px 18px;padding:0">
+      <li>Abrirlo en Excel o Google Sheets para revisarlo o analizarlo fuera de la app</li>
+      <li>Guardarlo como respaldo de tu información</li>
+      <li>Volver a subirlo aquí mismo más adelante (con el botón "+ Trade" → Importar trades) si algún día lo necesitas</li>
+    </ul>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="document.getElementById('exportModal').style.display='none'">Cancelar</button>
+      <button class="btn-primary" onclick="exportTradesToCsv(); document.getElementById('exportModal').style.display='none'">Descargar CSV</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL PAPELERA -->
 <div id="trashModal" class="modal-overlay" style="display:none">
@@ -3010,6 +3032,14 @@ function handleCsvFile(event) {
     });
   };
   reader.readAsText(file);
+}
+
+function openExportModal() {
+  if (!trades.length) { showToast('No hay trades para exportar en esta cuenta'); return; }
+  const acc = accounts.find(a => a.id === currentAccountId);
+  document.getElementById('exportTradeCount').textContent = trades.length;
+  document.getElementById('exportAccountName').textContent = acc ? acc.name : '—';
+  document.getElementById('exportModal').style.display = 'flex';
 }
 
 function exportTradesToCsv() {
