@@ -133,6 +133,9 @@ body { font-family: 'Cocogoose', Georgia, serif; background: var(--bg); color: v
 .bitacora-header-actions { position:absolute; right:0; top:50%; transform:translateY(-50%); display:flex; gap:8px; }
 .bitacora-pagination { display:flex; justify-content:center; align-items:center; gap:16px; margin-top:20px; font-size:0.68rem; color:var(--text2); }
 .bitacora-pagination button:disabled { opacity:0.35; cursor:default; }
+.review-banner { background:rgba(250,204,21,0.14); border-bottom:2px solid #facc15; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; font-size:0.72rem; font-weight:700; color:#facc15; margin:-20px -20px 16px -20px; border-radius:12px 12px 0 0; }
+.review-resolve-btn { background:#facc15; color:#1a1a0a; border:none; padding:9px 18px; border-radius:8px; font-size:0.68rem; font-weight:700; cursor:pointer; transition:background 0.15s, transform 0.15s; }
+.review-resolve-btn:hover { background:#fde047; transform:scale(1.03); }
 .trash-link-btn { background:transparent; border:1px solid var(--border); color:var(--text3); padding:8px 14px; border-radius:8px; font-size:0.65rem; cursor:pointer; }
 .trash-link-btn:hover { border-color:var(--gold); color:var(--gold); }
 .progress-title { font-size: 0.65rem; color: var(--gold-light); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 16px; font-weight: 700; }
@@ -496,7 +499,7 @@ textarea { resize: vertical; line-height: 1.5; }
               <div class="form-group"><label>Hora cierre</label><input type="time" id="f_exit_time"/></div>
               <div class="form-group"><label>Activo</label><input type="text" id="f_asset" value="SPX" required/></div>
               <div class="form-group"><label>Tipo</label><select id="f_trade_type" style="font-family:'Cocogoose',sans-serif" onchange="toggleOtherField(this,'f_trade_type_other')"><option value="0DTE" id="opt0DTE">0DTE</option><option value="Day Trade">Day Trade</option><option value="Swing">Swing</option><option value="Otro">Otro</option></select><input type="text" id="f_trade_type_other" placeholder="Especifica el tipo..." style="display:none;margin-top:8px"/></div>
-              <div class="form-group" id="strategyFieldGroup"><label>Estrategia</label><select id="f_strategy" onchange="toggleOtherField(this,'f_strategy_other'); suggestLegCount(this.value)">
+              <div class="form-group" id="strategyFieldGroup"><label>Estrategia</label><select id="f_strategy" onchange="toggleOtherField(this,'f_strategy_other'); suggestLegCount(this.value); updateOpenActionVisibility()">
                 <optgroup label="1 pata — Single">
                   <option>Call Comprada</option><option>Call Vendida</option><option>Put Comprada</option><option>Put Vendida</option>
                 </optgroup>
@@ -511,6 +514,7 @@ textarea { resize: vertical; line-height: 1.5; }
                 </optgroup>
                 <option value="Otra">Otra</option>
               </select><input type="text" id="f_strategy_other" placeholder="Especifica la estrategia..." style="display:none;margin-top:8px"/></div>
+              <div class="form-group" id="openActionGroup" style="display:none"><label>¿Compraste o vendiste al abrir? <span class="tip" data-tip="Esta estrategia no deja claro por su nombre si fue una compra o una venta — dínoslo para calcular bien el P&L.">ⓘ</span></label><select id="f_open_action" onchange="calcOptionsPnlFromClosePremium()"><option value="">Seleccionar...</option><option value="venta">Vendí</option><option value="compra">Compré</option></select></div>
               <div class="form-group"><label>Dirección</label><select id="f_direction" onchange="toggleOtherField(this,'f_direction_other')"><option>Neutral</option><option>Alcista</option><option>Bajista</option><option>Largo</option><option>Corto</option><option>Otra</option></select><input type="text" id="f_direction_other" placeholder="Especifica la dirección..." style="display:none;margin-top:8px"/></div>
             </div>
           </div>
@@ -542,7 +546,7 @@ textarea { resize: vertical; line-height: 1.5; }
               </div>
             </div>
             <div class="form-group full" style="margin-top:14px"><label>Notas de contexto <span class="tip" data-tip="Cualquier observación adicional de mercado que no encaje en los campos de arriba — niveles clave, paredes de gamma, MVC del día, lo que sea relevante para ti.">ⓘ</span></label><textarea id="f_context_notes" rows="2" placeholder="ej. Nivel MVC en 5490, pared de gamma en 5500..."></textarea></div>
-            <div class="form-group full" style="margin-top:14px"><label>Tesis del trade</label><textarea id="f_thesis" rows="2" placeholder="¿Por qué entras? ¿Qué esperas que haga el precio?" required></textarea></div>
+            <div class="form-group full" style="margin-top:14px"><label>Tesis del trade</label><textarea id="f_thesis" rows="2" placeholder="¿Por qué entras? ¿Qué esperas que haga el precio?"></textarea></div>
           </div>
           <div class="form-section" id="bloque3Section">
             <div class="form-section-title"><span style="font-family:'Cocogoose',sans-serif">3</span> · Estructura del trade</div>
@@ -560,10 +564,10 @@ textarea { resize: vertical; line-height: 1.5; }
               <div class="form-group" id="netDeltaGroup" style="display:none"><label>Delta Neto de la Posición <span class="tip" data-tip="Suma de los deltas de tus patas (ajustando signo por compra/venta). Cerca de 0 = estrategias neutrales. Lejos de 0 = estrategias direccionales.">ⓘ</span></label><input type="text" id="f_net_delta" placeholder="Auto" style="background:var(--bg4);color:var(--gold-light)" readonly/></div>
               <div class="form-group"><label>Ancho / Distancia entre strikes (pts) <span class="tip" data-tip="Aplica a cualquier estructura con más de un strike: verticales, mariposas, cóndores, etc. Déjalo vacío si es un solo contrato (single). Soporte para estructuras asimétricas (broken wing) llega en una próxima actualización.">ⓘ</span></label><input type="number" id="f_wing_width" placeholder="ej. 20"/></div>
               <div class="form-group"><label>Spot <span class="tip" data-tip="Precio del subyacente (ej. SPX, SPY) en el momento en que entraste al trade.">ⓘ</span></label><input type="number" step="0.01" id="f_spot" placeholder="ej. 5820.50"/></div>
-              <div class="form-group"><label>Cantidad de contratos</label><input type="number" id="f_contracts" placeholder="ej. 1" min="1" oninput="calcPremiumTotal();calcTargetStopTotals()"/></div>
+              <div class="form-group"><label>Cantidad de contratos</label><input type="number" id="f_contracts" placeholder="ej. 1" min="1" oninput="calcPremiumTotal();calcTargetStopTotals();calcOptionsPnlFromClosePremium()"/></div>
               <div class="form-group"><label>DTE</label><input type="number" id="f_dte" placeholder="ej. 0"/></div>
-              <div class="form-group"><label>Prima por contrato ($) <span class="tip" data-tip="En dólares totales por contrato, no por acción (ej. si tu prima es $2.00 por acción, aquí pones $200).">ⓘ</span></label><input type="number" id="f_premium" placeholder="ej. 350" oninput="calcPremiumTotal()"/></div>
-              <div class="form-group"><label>Prima total ($)</label><input type="number" id="f_premium_total" placeholder="Auto" style="background:var(--bg4);color:var(--gold-light)" readonly/></div>
+              <div class="form-group"><label>Precio de apertura — por contrato ($) <span class="tip" data-tip="En dólares totales por contrato, no por acción (ej. si es $2.00 por acción, aquí pones $200).">ⓘ</span></label><input type="number" step="any" id="f_premium" placeholder="ej. 350" oninput="calcPremiumTotal();calcOptionsPnlFromClosePremium()"/></div>
+              <div class="form-group"><label>Precio total ($) <span class="tip" data-tip="Se calcula automáticamente: Precio de apertura × Cantidad de contratos.">ⓘ</span></label><input type="number" id="f_premium_total" placeholder="Auto" style="background:var(--bg4);color:var(--gold-light)" readonly/></div>
               <div class="form-group"><label>Target de ganancia — por contrato ($) <span class="tip" data-tip="El target de ganancia de UN solo contrato, no del trade completo. Si usas varios contratos, el total se calcula solo al lado.">ⓘ</span></label><input type="number" id="f_target" placeholder="ej. 200" oninput="calcTargetStopTotals()"/><div id="f_target_total_hint" class="hint-total"></div></div>
               <div class="form-group"><label>Stop loss — por contrato ($) <span class="tip" data-tip="El stop loss de UN solo contrato, no del trade completo. Si usas varios contratos, el total se calcula solo al lado.">ⓘ</span></label><input type="number" id="f_stop" placeholder="ej. -150" oninput="calcTargetStopTotals()"/><div id="f_stop_total_hint" class="hint-total"></div></div>
             </div>
@@ -591,7 +595,8 @@ textarea { resize: vertical; line-height: 1.5; }
               <div class="form-group"><label>Tipo de cierre</label><select id="f_close_type" onchange="toggleOtherField(this,'f_close_type_other')"><option value="">Seleccionar...</option><option value="Target">Target alcanzado</option><option value="Stop Loss">Stop loss</option><option value="Cierre Parcial">Cierre parcial</option><option value="Expiró">Expiró sin valor</option><option value="Cambió Tesis">Cambió la tesis</option><option value="Manual">Cierre manual</option><option value="Otro">Otro</option></select><input type="text" id="f_close_type_other" placeholder="Especifica el tipo de cierre..." style="display:none;margin-top:8px"/></div>
               <div class="form-group" id="partialGroup" style="display:none"><label>% cerrado</label><input type="number" id="f_partial_pct" placeholder="ej. 50"/></div>
               <div class="form-group" id="partialPnlGroup" style="display:none"><label>P&L parcial ($)</label><input type="number" id="f_partial_pnl"/></div>
-              <div class="form-group"><label>P&L bruto ($) <span class="tip" data-tip="P&L total de la posición completa (todos los contratos juntos), antes de comisiones del broker.">ⓘ</span></label><input type="number" id="f_pnl_gross" placeholder="ej. 350" oninput="calcNetPnl()"/></div>
+              <div class="form-group" id="closePremiumGroup"><label>Precio de cierre — por contrato ($) <span class="tip" data-tip="Cuánto costó por contrato al CERRAR el trade. Con esto y el precio de apertura, el P&L Bruto se calcula solo (según si compraste o vendiste al abrir).">ⓘ</span></label><input type="number" step="any" id="f_close_premium" placeholder="ej. 120" oninput="calcOptionsPnlFromClosePremium()"/></div>
+              <div class="form-group"><label>P&L bruto ($) <span class="tip" data-tip="P&L total del trade completo, antes de comisiones del broker.">ⓘ</span></label><input type="number" step="any" id="f_pnl_gross" placeholder="ej. 350" oninput="calcNetPnl()"/></div>
               <div class="form-group"><label>Fees del broker ($) <span class="tip" data-tip="Total de comisiones cobradas por tu broker en este trade. Acepta centavos (ej. 2.50).">ⓘ</span></label><input type="number" step="0.01" id="f_fees" placeholder="ej. 2.50" oninput="calcNetPnl()"/></div>
               <div class="form-group"><label>P&L neto ($) <span class="tip" data-tip="Se calcula automáticamente: P&L Bruto menos Fees del Broker.">ⓘ</span></label><input type="number" id="f_pnl" placeholder="Auto" style="background:var(--bg4);color:var(--gold-light)" readonly/></div>
               <div class="form-group"><label>¿Seguí mis reglas?</label><select id="f_followed_rules"><option value="Sí">Sí</option><option value="No">No</option><option value="Parcialmente">Parcialmente</option></select></div>
@@ -998,7 +1003,7 @@ textarea { resize: vertical; line-height: 1.5; }
     </div>
     <button class="btn-secondary" style="margin-bottom:8px" onclick="downloadCsvTemplate()">Descargar plantilla</button>
     <p style="font-size:0.65rem;color:var(--text3);line-height:1.5;margin-bottom:16px">
-      Obligatorios: <strong style="color:var(--text2)">fecha, activo, contratos, prima_por_contrato</strong> (y <strong style="color:var(--text2)">pnl</strong> si el trade ya está cerrado). El resto de columnas son opcionales — déjalas vacías si no aplican.
+      Obligatorios: <strong style="color:var(--text2)">fecha, activo, contratos, precio_por_contrato</strong> (y <strong style="color:var(--text2)">pnl</strong> si el trade ya está cerrado). El resto de columnas son opcionales — déjalas vacías si no aplican.
     </p>
     <div style="background:rgba(250,204,21,0.08);border-left:2px solid var(--warning);border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:16px;font-size:0.68rem;color:var(--text2);line-height:1.6">
       <strong style="color:#facc15">Ten en cuenta:</strong> cuando la app reconstruye trades automáticamente desde el reporte de tu broker, es un proceso automático que puede no migrar el 100% perfecto en casos raros (ajustes, rolls, asignaciones de acciones). Revisa siempre la vista previa antes de confirmar — los trades marcados como "Requiere revisión" se importan sin P&L calculado, para que los completes o corrijas manualmente después.
@@ -1538,10 +1543,10 @@ function tradeCard(t) {
   const isOther = t.trade_category === 'other';
   const pnl = t.pnl||0, pc = pnl>0?'badge-green':pnl<0?'badge-red':'badge-gray';
   const dots = Array.from({length:10},(_,i)=>`<div class="score-dot ${i<(t.execution_score||0)?'filled':''}"></div>`).join('');
-  return `<div class="card" style="${t.needs_review?'border-color:#facc15':''}">
-    ${t.needs_review ? `<div style="background:rgba(250,204,21,0.1);border-bottom:1px solid rgba(250,204,21,0.3);padding:8px 20px;display:flex;justify-content:space-between;align-items:center;font-size:0.65rem;color:#facc15;margin:-20px -20px 16px -20px;border-radius:12px 12px 0 0">
+  return `<div class="card" style="${t.needs_review?'border-color:#facc15;border-width:2px':''}">
+    ${t.needs_review ? `<div class="review-banner">
       <span>⚠ Este trade quedó marcado para revisión al importarlo</span>
-      <button class="btn-secondary" style="padding:5px 10px;font-size:0.6rem" onclick="markTradeReviewed('${t.id}')">Marcar como revisado</button>
+      <button class="review-resolve-btn" onclick="markTradeReviewed('${t.id}')">✓ Marcar como revisado</button>
     </div>` : ''}
     <div class="card-header">
       <div><div class="card-title">${t.asset}${isOther?'':' · '+t.strategy}</div><div class="card-meta">${t.trade_date} · ${t.trade_type}${isOther?'':' · '+(t.dte??'—')+' DTE'}</div></div>
@@ -1569,7 +1574,7 @@ function tradeCard(t) {
       <div><div class="field-label">Strikes</div><div class="field-value">${t.strikes||'—'}</div></div>
       <div><div class="field-label">Ancho</div><div class="field-value">${t.wing_width?t.wing_width+' pts':'—'}</div></div>
       <div><div class="field-label">Spot</div><div class="field-value">${t.spot?'$'+t.spot:'—'}</div></div>
-      <div><div class="field-label">Prima</div><div class="field-value">${t.premium_collected?'$'+t.premium_collected:'—'}</div></div>
+      <div><div class="field-label">Precio apertura</div><div class="field-value">${t.premium_collected?'$'+t.premium_collected:'—'}</div></div>
       <div><div class="field-label">Riesgo</div><div class="field-value">${t.max_risk_usd?'$'+t.max_risk_usd:'—'} ${t.risk_pct?'('+t.risk_pct+'%)':''}</div></div>
       <div><div class="field-label">GEX</div><div class="field-value">${t.gex_context||'—'}</div></div>
       <div><div class="field-label">Delta Neto</div><div class="field-value">${t.net_delta??'—'}</div></div>
@@ -2289,7 +2294,7 @@ async function editTrade(id) {
   set('f_date', t.trade_date); set('f_entry_time', t.entry_time); set('f_exit_time', t.exit_time);
   set('f_asset', t.asset);
   setSelectWithOther('f_trade_type','f_trade_type_other', t.trade_type);
-  if (t.trade_category !== 'other') setSelectWithOther('f_strategy','f_strategy_other', t.strategy);
+  if (t.trade_category !== 'other') { setSelectWithOther('f_strategy','f_strategy_other', t.strategy); updateOpenActionVisibility(); }
   setSelectWithOther('f_direction','f_direction_other', t.direction);
   setSelectWithOther('f_market_condition','f_market_condition_other', t.market_condition);
   set('f_gex_context', t.gex_context); set('f_vix_level', t.vix_level); set('f_mag7_sentiment', t.mag7_sentiment);
@@ -2450,6 +2455,7 @@ function resetForm() {
   document.getElementById('f_status').value = 'closed';
   toggleStatusFields();
   setTradeCategory('options');
+  updateOpenActionVisibility();
   ['f_entry_price','f_exit_price','f_qty_other','f_stop_other'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
   if(document.getElementById('f_premium_total')) document.getElementById('f_premium_total').value='';
   if(document.getElementById('f_pnl_gross')) document.getElementById('f_pnl_gross').value='';
@@ -2613,7 +2619,7 @@ let diModalType = null;
 let diModalEditId = null;
 
 // ===== IMPORTAR CSV =====
-const CSV_TEMPLATE_HEADERS = ['fecha','activo','estrategia','tipo','direccion','estado','strikes','contratos','prima_por_contrato','dte','ancho','spot','riesgo_maximo','tipo_cierre','pnl_bruto','fees','pnl','notas','pata1_strike','pata1_tipo','pata1_accion','pata1_delta','pata2_strike','pata2_tipo','pata2_accion','pata2_delta','pata3_strike','pata3_tipo','pata3_accion','pata3_delta','pata4_strike','pata4_tipo','pata4_accion','pata4_delta'];
+const CSV_TEMPLATE_HEADERS = ['fecha','activo','estrategia','tipo','direccion','estado','strikes','contratos','precio_por_contrato','dte','ancho','spot','riesgo_maximo','tipo_cierre','pnl_bruto','fees','pnl','notas','pata1_strike','pata1_tipo','pata1_accion','pata1_delta','pata2_strike','pata2_tipo','pata2_accion','pata2_delta','pata3_strike','pata3_tipo','pata3_accion','pata3_delta','pata4_strike','pata4_tipo','pata4_accion','pata4_delta'];
 
 function downloadCsvTemplate() {
   const exampleSimple = ['2026-07-15','SPX','Iron Butterfly','0DTE','Neutral','closed','5480/5500/5520','1','350','0','20','5500','150','Target','400','2.5','397.5','Ejemplo simple, sin detalle de patas — BORRA ESTA FILA antes de subir','','','','','','','','','','','','','','',''];
@@ -2649,13 +2655,13 @@ function validateCsvRow(row, index) {
   const date = (row.fecha || '').trim();
   const asset = (row.activo || '').trim();
   const contracts = parseInt(row.contratos);
-  const premium = parseFloat(row.prima_por_contrato);
+  const premium = parseFloat(row.precio_por_contrato ?? row.prima_por_contrato);
   const status = (row.estado || 'closed').trim().toLowerCase() === 'open' || (row.estado||'').trim().toLowerCase() === 'abierto' ? 'open' : 'closed';
 
   if (!date || isNaN(Date.parse(date))) errors.push('fecha inválida o faltante');
   if (!asset) errors.push('activo faltante');
   if (!contracts || contracts <= 0) errors.push('contratos faltante o inválido');
-  if (isNaN(premium)) errors.push('prima por contrato faltante o inválida');
+  if (isNaN(premium)) errors.push('precio por contrato faltante o inválido');
   if (status === 'closed' && (row.pnl === undefined || row.pnl === '' || isNaN(parseFloat(row.pnl)))) {
     errors.push('P&L faltante (obligatorio para trades Cerrados)');
   }
@@ -3257,6 +3263,44 @@ function calcPremiumTotal() {
   }
 }
 
+// Estrategias cuyo propio nombre ya dice si fue compra o venta al abrir — no hace falta preguntar nada aparte.
+const STRATEGY_OPEN_ACTION_MAP = {
+  'Call Comprada': 'compra', 'Put Comprada': 'compra',
+  'Call Vendida': 'venta', 'Put Vendida': 'venta',
+  'Call Vertical (Débito)': 'compra', 'Put Vertical (Débito)': 'compra',
+  'Call Vertical (Crédito)': 'venta', 'Put Vertical (Crédito)': 'venta'
+};
+
+function updateOpenActionVisibility() {
+  const strategyVal = document.getElementById('f_strategy')?.value;
+  const group = document.getElementById('openActionGroup');
+  if (!group) return;
+  const isKnown = STRATEGY_OPEN_ACTION_MAP.hasOwnProperty(strategyVal);
+  group.style.display = isKnown ? 'none' : 'block';
+  if (isKnown) { const sel = document.getElementById('f_open_action'); if (sel) sel.value = ''; }
+  calcOptionsPnlFromClosePremium();
+}
+
+function getOpenActionForPnl() {
+  const strategyVal = document.getElementById('f_strategy')?.value;
+  if (STRATEGY_OPEN_ACTION_MAP.hasOwnProperty(strategyVal)) return STRATEGY_OPEN_ACTION_MAP[strategyVal];
+  return document.getElementById('f_open_action')?.value || null;
+}
+
+// Calcula el P&L Bruto solo, a partir del precio de apertura y de cierre (por contrato),
+// usando si fue compra o venta al abrir (leído del nombre de la estrategia, o del campo manual).
+function calcOptionsPnlFromClosePremium() {
+  const contracts = parseFloat(document.getElementById('f_contracts')?.value) || 0;
+  const openPrice = parseFloat(document.getElementById('f_premium')?.value);
+  const closePrice = parseFloat(document.getElementById('f_close_premium')?.value);
+  if (!contracts || isNaN(openPrice) || isNaN(closePrice)) return;
+  const action = getOpenActionForPnl();
+  if (!action) return; // aún no sabemos si fue compra o venta — no calculamos a ciegas
+  const pnlGross = action === 'venta' ? (openPrice - closePrice) * contracts : (closePrice - openPrice) * contracts;
+  const field = document.getElementById('f_pnl_gross');
+  if (field) { field.value = pnlGross.toFixed(2); calcNetPnl(); }
+}
+
 function setTradeCategory(cat) {
   window.tradeCategory = cat;
   document.getElementById('catOptions').classList.toggle('active', cat==='options');
@@ -3265,6 +3309,7 @@ function setTradeCategory(cat) {
   document.getElementById('bloque3Section').style.display = cat==='options' ? 'block' : 'none';
   document.getElementById('otherAssetSection').style.display = cat==='other' ? 'block' : 'none';
   document.getElementById('strategyFieldGroup').style.display = cat==='options' ? 'block' : 'none';
+  document.getElementById('closePremiumGroup').style.display = cat==='options' ? 'block' : 'none';
 
   // "0DTE" y "Ignoré GEX/flujo" solo tienen sentido para opciones
   const typeSelect = document.getElementById('f_trade_type');
