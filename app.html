@@ -2376,6 +2376,7 @@ function setSelectWithOther(selectId, otherId, value) {
 async function editTrade(id) {
   const t = trades.find(x => x.id === id);
   if (!t) return;
+  showPage('nuevo');
   editingTradeId = id;
   resetForm();
   renderCustomOptionsIntoForm();
