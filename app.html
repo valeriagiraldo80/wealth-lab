@@ -396,17 +396,18 @@ textarea { resize: vertical; line-height: 1.5; }
     <nav class="sidebar-nav">
       <div class="nav-section">
         <div class="nav-label">Principal</div>
-        <button class="nav-item active" onclick="showPage('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</button>
-        <button class="nav-item" onclick="showPage('bitacora')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-3"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg> Bitácora</button>
+        <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</button>
+        <button class="nav-item" data-page="bitacora" onclick="showPage('bitacora')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-3"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg> Bitácora</button>
         <button class="nav-item" onclick="newTradeForm()"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Nuevo Trade</button>
       </div>
       <div class="nav-section">
         <div class="nav-label">Sistema</div>
-        <button class="nav-item" onclick="showPage('cuentas')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Mis Cuentas</button>
-        <button class="nav-item" onclick="showPage('movimientos')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg> Movimientos</button>
-        <button class="nav-item" onclick="showPage('ciclos')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Sincronías</button>
-        <button class="nav-item" onclick="showPage('reglas')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7l-3 6a3 3 0 0 0 6 0l-3-6zM19 7l-3 6a3 3 0 0 0 6 0l-3-6zM5 7h14M9 21h6"/></svg> Protocolo de Trading</button>
-        <button class="nav-item" onclick="showPage('semanal')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> Revisión Semanal</button>
+        <button class="nav-item" data-page="cuentas" onclick="showPage('cuentas')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> Mis Cuentas</button>
+        <button class="nav-item" data-page="movimientos" onclick="showPage('movimientos')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg> Movimientos</button>
+        <button class="nav-item" data-page="estudios" onclick="showPage('estudios')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Mis Estudios</button>
+        <button class="nav-item" data-page="calfin" onclick="showPage('calfin')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Calendario Financiero</button>
+        <button class="nav-item" data-page="reglas" onclick="showPage('reglas')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7l-3 6a3 3 0 0 0 6 0l-3-6zM19 7l-3 6a3 3 0 0 0 6 0l-3-6zM5 7h14M9 21h6"/></svg> Protocolo de Trading</button>
+        <button class="nav-item" data-page="semanal" onclick="showPage('semanal')"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> Revisión Semanal</button>
       </div>
     </nav>
     <div class="sidebar-footer">
@@ -707,219 +708,228 @@ textarea { resize: vertical; line-height: 1.5; }
 
 
       <!-- CICLOS -->
-      <div class="page" id="page-ciclos">
+      <div class="page" id="page-estudios">
 
-        <!-- INTRO BOX -->
-        <div style="background:rgba(170,146,82,0.06);border:1px solid rgba(170,146,82,0.2);border-radius:12px;padding:16px 20px;margin-bottom:16px">
-          <div style="font-size:0.65rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:8px">✦ Geometría del Mercado — W.D. Gann</div>
-          <p style="font-size:0.72rem;color:var(--text2);line-height:1.7;margin-bottom:8px">Gann descubrió que el precio y el tiempo se mueven en ciclos matemáticos predecibles. La clave es partir siempre desde el <strong style="color:var(--gold-light)">punto de origen correcto</strong> — un mínimo o máximo significativo desde donde comenzó un movimiento importante.</p>
-          <p style="font-size:0.72rem;color:var(--text2);line-height:1.7"><strong style="color:var(--gold-light)">Pivote:</strong> el mínimo o máximo desde donde comenzó el movimiento que estudias. <strong style="color:var(--gold-light)">Precio actual:</strong> el precio del instrumento en este momento. <strong style="color:var(--gold-light)">Fecha de origen:</strong> la fecha exacta en que se formó ese pivote.</p>
-          <div style="margin-top:12px;padding:10px 14px;background:rgba(40,63,50,0.5);border-left:2px solid var(--gold);border-radius:0 8px 8px 0">
-            <p style="font-size:0.7rem;color:var(--gold-light);line-height:1.7">"Usa el mínimo o máximo más reciente y significativo para análisis de corto y mediano plazo. Usa mínimos históricos para análisis de largo plazo. Siempre en el timeframe que estás operando." — W.D. Gann</p>
+        <!-- Selector de estudio -->
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+          <div class="toggle-group" id="estudioSelectorGroup">
+            <button type="button" class="toggle-btn active" onclick="switchEstudio(this,'gann')">🌀 Gann</button>
+            <button type="button" class="toggle-btn" onclick="switchEstudio(this,'luna')">🌙 Luna</button>
+            <button type="button" class="toggle-btn" disabled style="opacity:0.4;cursor:default" title="Próximamente">Elliott Wave</button>
+            <button type="button" class="toggle-btn" disabled style="opacity:0.4;cursor:default" title="Próximamente">Griegas</button>
+            <button type="button" class="toggle-btn" disabled style="opacity:0.4;cursor:default" title="Próximamente">Campana de Gauss</button>
           </div>
+          <button class="ciclo-tab" style="border-color:var(--gold-dark);color:var(--gold-light)" onclick="switchEstudio(this,'observaciones')">📝 Observaciones</button>
         </div>
 
-        <!-- PIVOTE GLOBAL COMPARTIDO -->
-        <div style="background:var(--bg2);border:1px solid var(--gold-dark);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end">
-          <div style="display:flex;align-items:center;gap:8px;margin-right:8px">
-            <span style="font-size:0.7rem;color:var(--gold);font-weight:700;letter-spacing:0.1em">◈ PIVOTE GLOBAL</span>
-            <span style="font-size:0.6rem;color:var(--text3)">— todos los cálculos usan estos valores</span>
-          </div>
-          <div class="form-group" style="margin:0;min-width:150px">
-            <label>Pivote (mín/máx)</label>
-            <input type="number" id="global_pivot" placeholder="ej. 5400" style="padding:7px 10px;font-size:0.72rem" oninput="syncGlobalPivot()"/>
-          </div>
-          <div class="form-group" style="margin:0;min-width:150px">
-            <label>Fecha de origen</label>
-            <input type="date" id="global_date" style="padding:7px 10px;font-size:0.72rem" oninput="syncGlobalPivot()"/>
-          </div>
-          <div class="form-group" style="margin:0;min-width:150px">
-            <label>Precio actual</label>
-            <input type="number" id="global_price" placeholder="ej. 5600" style="padding:7px 10px;font-size:0.72rem" oninput="onManualPriceEdit()"/>
-            <div id="marketPriceLabel" style="font-size:0.58rem;color:var(--text3);margin-top:3px"></div>
-          </div>
-        </div>
+        <!-- ===== ESTUDIO: GANN ===== -->
+        <div class="estudio-panel active" id="estudio-gann">
 
-        <!-- Categorías -->
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-          <div class="toggle-group" id="ciclosCategoryGroup">
+          <!-- INTRO BOX -->
+          <div style="background:rgba(170,146,82,0.06);border:1px solid rgba(170,146,82,0.2);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+            <div style="font-size:0.65rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:8px">✦ Geometría del Mercado — W.D. Gann</div>
+            <p style="font-size:0.72rem;color:var(--text2);line-height:1.7;margin-bottom:8px">Gann descubrió que el precio y el tiempo se mueven en ciclos matemáticos predecibles. La clave es partir siempre desde el <strong style="color:var(--gold-light)">punto de origen correcto</strong> — un mínimo o máximo significativo desde donde comenzó un movimiento importante.</p>
+            <p style="font-size:0.72rem;color:var(--text2);line-height:1.7"><strong style="color:var(--gold-light)">Pivote:</strong> el mínimo o máximo desde donde comenzó el movimiento que estudias. <strong style="color:var(--gold-light)">Precio actual:</strong> el precio del instrumento en este momento. <strong style="color:var(--gold-light)">Fecha de origen:</strong> la fecha exacta en que se formó ese pivote.</p>
+            <div style="margin-top:12px;padding:10px 14px;background:rgba(40,63,50,0.5);border-left:2px solid var(--gold);border-radius:0 8px 8px 0">
+              <p style="font-size:0.7rem;color:var(--gold-light);line-height:1.7">"Usa el mínimo o máximo más reciente y significativo para análisis de corto y mediano plazo. Usa mínimos históricos para análisis de largo plazo. Siempre en el timeframe que estás operando." — W.D. Gann</p>
+            </div>
+          </div>
+
+          <!-- PIVOTE GLOBAL — específico de Gann (y compartido con Luna, que lo referencia) -->
+          <div style="background:var(--bg2);border:1px solid var(--gold-dark);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end">
+            <div style="display:flex;align-items:center;gap:8px;margin-right:8px">
+              <span style="font-size:0.7rem;color:var(--gold);font-weight:700;letter-spacing:0.1em">◈ PIVOTE GLOBAL</span>
+              <span style="font-size:0.6rem;color:var(--text3)">— usado por todos los cálculos de Gann</span>
+            </div>
+            <div class="form-group" style="margin:0;min-width:150px">
+              <label>Pivote (mín/máx)</label>
+              <input type="number" id="global_pivot" placeholder="ej. 5400" style="padding:7px 10px;font-size:0.72rem" oninput="syncGlobalPivot()"/>
+            </div>
+            <div class="form-group" style="margin:0;min-width:150px">
+              <label>Fecha de origen</label>
+              <input type="date" id="global_date" style="padding:7px 10px;font-size:0.72rem" oninput="syncGlobalPivot()"/>
+            </div>
+            <div class="form-group" style="margin:0;min-width:150px">
+              <label>Precio actual</label>
+              <input type="number" id="global_price" placeholder="ej. 5600" style="padding:7px 10px;font-size:0.72rem" oninput="onManualPriceEdit()"/>
+              <div id="marketPriceLabel" style="font-size:0.58rem;color:var(--text3);margin-top:3px"></div>
+            </div>
+            <div class="form-group" style="margin:0;min-width:150px">
+              <label>Colchón de stop (lost motion) <span class="tip" data-tip="Gann observó que el precio casi siempre se pasa un poco de un nivel antes de respetarlo — en su época, ~3 puntos. Ese número no aplica igual al SPX hoy; ponlo tú según lo que observes en tu propio historial, y ajústalo con el tiempo usando Observaciones.">ⓘ</span></label>
+              <input type="number" id="lost_motion" placeholder="ej. 15" style="padding:7px 10px;font-size:0.72rem" oninput="syncGlobalPivot()"/>
+            </div>
+          </div>
+
+          <!-- Categorías -->
+          <div class="toggle-group" id="ciclosCategoryGroup" style="margin-bottom:14px">
             <button type="button" class="toggle-btn active" onclick="switchCategory(this,'precio')">🌀 Geometría del Precio</button>
             <button type="button" class="toggle-btn" onclick="switchCategory(this,'tiempo')">⏱ Geometría del Tiempo</button>
-            <button type="button" class="toggle-btn" onclick="switchCategory(this,'contexto')">🌙 Contexto Natural</button>
+            <button type="button" class="toggle-btn" onclick="switchCategory(this,'tendencia')">📐 Tendencia y Confirmación</button>
           </div>
-          <button class="ciclo-tab" style="border-color:var(--gold-dark);color:var(--gold-light)" onclick="switchTab('observaciones',this)">📝 Observaciones</button>
-        </div>
 
-        <!-- Tab navigation -->
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:16px">
-          <button class="ciclo-tab active" data-cat="precio" onclick="switchTab('mapa',this)">🌀 Mapa de Ciclos</button>
-          <button class="ciclo-tab" data-cat="precio" onclick="switchTab('angulos',this)">📐 Ángulos</button>
-          <button class="ciclo-tab" data-cat="precio" onclick="switchTab('maestros',this)">✦ Números Maestros</button>
-          <button class="ciclo-tab" data-cat="precio" onclick="switchTab('rango',this)">📊 Rango de Apertura</button>
-          <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('temporales',this)">⏱ Ciclos Temporales</button>
-          <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('rueda',this)">☯ Rueda de <span style="font-family:'Cocogoose',sans-serif">24</span></button>
-          <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('calendario',this)">📅 Calendario</button>
-          <button class="ciclo-tab" data-cat="contexto" style="display:none" onclick="switchTab('estacionalidad',this)">🌿 Estacionalidad</button>
-          <button class="ciclo-tab" data-cat="contexto" style="display:none" onclick="switchTab('vibracion',this)">〰 Vibración</button>
-          <button class="ciclo-tab" data-cat="contexto" style="display:none" onclick="switchTab('luna',this)">🌙 Luna</button>
-        </div>
+          <!-- Tab navigation -->
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:16px">
+            <button class="ciclo-tab active" data-cat="precio" onclick="switchTab('mapa',this)">🌀 Mapa de Ciclos</button>
+            <button class="ciclo-tab" data-cat="precio" onclick="switchTab('angulos',this)">📐 Ángulos</button>
+            <button class="ciclo-tab" data-cat="precio" onclick="switchTab('maestros',this)">✦ Números Maestros</button>
+            <button class="ciclo-tab" data-cat="precio" onclick="switchTab('rango',this)">📊 Rango de Apertura</button>
+            <button class="ciclo-tab" data-cat="precio" onclick="switchTab('vibracion',this)">〰 Vibración</button>
+            <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('temporales',this)">⏱ Ciclos Temporales</button>
+            <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('rueda',this)">☯ Rueda de <span style="font-family:'Cocogoose',sans-serif">24</span></button>
+            <button class="ciclo-tab" data-cat="tendencia" style="display:none" onclick="switchTab('swing',this)">📐 Swing Charting</button>
+            <button class="ciclo-tab" id="tabBtnHexagono" data-cat="tendencia" style="display:none" onclick="switchTab('hexagono',this)">⬡ Hexágono</button>
+            <button class="ciclo-tab" id="tabBtnMaster12" data-cat="tendencia" style="display:none" onclick="switchTab('master12',this)">⚹ Master 12</button>
+          </div>
 
-        <!-- 1. MAPA DE CICLOS - Square of Nine -->
-        <div class="ciclo-panel active" id="tab-mapa">
-          <div class="form-section">
-            <div class="form-section-title">Mapa de Ciclos — Espiral de Precio</div>
-            <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:20px">
-              <div class="form-group full" style="max-width:500px;margin:0">
-                <label>Dirección del pivote</label>
-                <div class="toggle-group" id="gannDirectionGroup">
-                  <button type="button" class="toggle-btn active" onclick="setGannDirection(this,'ambas')">Ambas <span class="tip" data-tip="Úsalo solo si aún no sabes si este pivote fue el inicio de una tendencia o un punto de equilibrio — mientras el mercado confirma, ver las dos tablas te deja comparar ambos escenarios.">ⓘ</span></button>
-                  <button type="button" class="toggle-btn" onclick="setGannDirection(this,'alcista')">▲ Alcista <span class="tip" data-tip="Úsalo cuando ya confirmaste que el pivote fue el inicio de una tendencia al alza. Solo verás la tabla alcista, con resistencias y soportes calculados sobre esa misma estructura.">ⓘ</span></button>
-                  <button type="button" class="toggle-btn" onclick="setGannDirection(this,'bajista')">▼ Bajista <span class="tip" data-tip="Úsalo cuando ya confirmaste que el pivote fue el inicio de una tendencia a la baja. Solo verás la tabla bajista, con resistencias y soportes calculados sobre esa misma estructura.">ⓘ</span></button>
+          <!-- 1. MAPA DE CICLOS - Square of Nine -->
+          <div class="ciclo-panel active" id="tab-mapa">
+            <div class="form-section">
+              <div class="form-section-title">Mapa de Ciclos — Espiral de Precio</div>
+              <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:20px">
+                <div class="form-group full" style="max-width:500px;margin:0">
+                  <label>Dirección del pivote</label>
+                  <div class="toggle-group" id="gannDirectionGroup">
+                    <button type="button" class="toggle-btn active" onclick="setGannDirection(this,'ambas')">Ambas <span class="tip" data-tip="Úsalo solo si aún no sabes si este pivote fue el inicio de una tendencia o un punto de equilibrio — mientras el mercado confirma, ver las dos tablas te deja comparar ambos escenarios.">ⓘ</span></button>
+                    <button type="button" class="toggle-btn" onclick="setGannDirection(this,'alcista')">▲ Alcista <span class="tip" data-tip="Úsalo cuando ya confirmaste que el pivote fue el inicio de una tendencia al alza. Solo verás la tabla alcista, con resistencias y soportes calculados sobre esa misma estructura.">ⓘ</span></button>
+                    <button type="button" class="toggle-btn" onclick="setGannDirection(this,'bajista')">▼ Bajista <span class="tip" data-tip="Úsalo cuando ya confirmaste que el pivote fue el inicio de una tendencia a la baja. Solo verás la tabla bajista, con resistencias y soportes calculados sobre esa misma estructura.">ⓘ</span></button>
+                  </div>
+                </div>
+                <div class="form-group full" style="max-width:340px;margin:0">
+                  <label>Vista</label>
+                  <div class="toggle-group" id="gannViewGroup">
+                    <button type="button" class="toggle-btn active" onclick="setGannView(this,'tabla')">📋 Tabla <span class="tip" data-tip="Todos los niveles, ordenados por cercanía al precio — mejor para anticipar y planear.">ⓘ</span></button>
+                    <button type="button" class="toggle-btn" onclick="setGannView(this,'espiral')">🌀 Espiral <span class="tip" data-tip="La geometría real del Square of Nine, con opción de ver el recorrido del precio.">ⓘ</span></button>
+                  </div>
                 </div>
               </div>
-              <div class="form-group full" style="max-width:340px;margin:0">
-                <label>Vista</label>
-                <div class="toggle-group" id="gannViewGroup">
-                  <button type="button" class="toggle-btn active" onclick="setGannView(this,'tabla')">📋 Tabla <span class="tip" data-tip="Todos los niveles, ordenados por cercanía al precio — mejor para anticipar y planear.">ⓘ</span></button>
-                  <button type="button" class="toggle-btn" onclick="setGannView(this,'espiral')">🌀 Espiral <span class="tip" data-tip="La geometría real del Square of Nine, con opción de ver el recorrido del precio.">ⓘ</span></button>
+              <div id="gann_result"></div>
+            </div>
+          </div>
+
+          <!-- 2. ÁNGULOS DE GANN -->
+          <div class="ciclo-panel" id="tab-angulos">
+            <div class="form-section">
+              <div class="form-section-title">Ángulos de Gann</div>
+              <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">La línea <span style="font-family:'Cocogoose',sans-serif">1x1</span> es la línea de equilibrio perfecta. Por encima = alcista. Por debajo = bajista.</p>
+              <div class="form-grid" style="max-width:340px;margin-bottom:8px">
+                <div class="form-group">
+                  <label>Puntos por día <span class="tip" data-tip="Define qué tan inclinada es tu línea de equilibrio (1x1): cuántos puntos 'debería' avanzar el precio por cada día que pasa, según Gann. No hay un número universal correcto — depende del instrumento. Gann originalmente usaba 1 punto = 1 día para acciones bajo $100. Para el SPX, muchos traders lo ajustan según el rango diario promedio reciente del índice. Si no estás segura, prueba con tu propio promedio observado y ajústalo con el tiempo.">ⓘ</span></label>
+                  <input type="number" id="ang_unit" placeholder="ej. 10" oninput="calcAngulos()"/>
                 </div>
               </div>
+              <p style="font-size:0.6rem;color:var(--text3);margin-bottom:20px">Origen y días transcurridos se toman del Pivote Global de arriba.</p>
+              <div id="angulos_result"></div>
             </div>
-            <div id="gann_result"></div>
           </div>
-        </div>
 
-        <!-- 2. ÁNGULOS DE GANN -->
-        <div class="ciclo-panel" id="tab-angulos">
-          <div class="form-section">
-            <div class="form-section-title">Ángulos de Gann</div>
-            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">La línea <span style="font-family:'Cocogoose',sans-serif">1x1</span> es la línea de equilibrio perfecta. Por encima = alcista. Por debajo = bajista.</p>
-            <div class="form-grid" style="max-width:340px;margin-bottom:8px">
-              <div class="form-group">
-                <label>Puntos por día <span class="tip" data-tip="Define qué tan inclinada es tu línea de equilibrio (1x1): cuántos puntos 'debería' avanzar el precio por cada día que pasa, según Gann. No hay un número universal correcto — depende del instrumento. Gann originalmente usaba 1 punto = 1 día para acciones bajo $100. Para el SPX, muchos traders lo ajustan según el rango diario promedio reciente del índice. Si no estás segura, prueba con tu propio promedio observado y ajústalo con el tiempo.">ⓘ</span></label>
-                <input type="number" id="ang_unit" placeholder="ej. 10" oninput="calcAngulos()"/>
-              </div>
+          <!-- 3. RUEDA DE 24 -->
+          <div class="ciclo-panel" id="tab-rueda">
+            <div class="form-section">
+              <div class="form-section-title">Rueda de <span style="font-family:'Cocogoose',sans-serif">24</span> — El Año en Ciclos</div>
+              <p style="font-size:0.72rem;color:var(--text2);margin-bottom:20px;line-height:1.6">Gann dividía el año en <span style="font-family:'Cocogoose',sans-serif">24</span> segmentos de ~<span style="font-family:'Cocogoose',sans-serif">15</span> días. Cada punto de inflexión del año está marcado aquí.</p>
+              <div id="rueda_result"></div>
             </div>
-            <p style="font-size:0.6rem;color:var(--text3);margin-bottom:20px">Origen y días transcurridos se toman del Pivote Global de arriba.</p>
-            <div id="angulos_result"></div>
           </div>
-        </div>
 
-        <!-- 3. RUEDA DE 24 -->
-        <div class="ciclo-panel" id="tab-rueda">
-          <div class="form-section">
-            <div class="form-section-title">Rueda de <span style="font-family:'Cocogoose',sans-serif">24</span> — El Año en Ciclos</div>
-            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:20px;line-height:1.6">Gann dividía el año en <span style="font-family:'Cocogoose',sans-serif">24</span> segmentos de ~<span style="font-family:'Cocogoose',sans-serif">15</span> días. Cada punto de inflexión del año está marcado aquí.</p>
-            <div id="rueda_result"></div>
+          <!-- 4. NÚMEROS MAESTROS -->
+          <div class="ciclo-panel" id="tab-maestros">
+            <div class="form-section">
+              <div class="form-section-title">Números Maestros de Gann</div>
+              <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6"><span style="font-family:'Cocogoose',sans-serif">144 · 90 · 45 · 360 · 30 · 120</span> — estos números aparecen constantemente como niveles de soporte, resistencia y tiempo.</p>
+              <p style="font-size:0.6rem;color:var(--text3);margin-bottom:16px">El precio base se toma del Pivote Global de arriba.</p>
+              <div id="maestros_result"></div>
+            </div>
           </div>
-        </div>
 
-        <!-- 4. NÚMEROS MAESTROS -->
-        <div class="ciclo-panel" id="tab-maestros">
-          <div class="form-section">
-            <div class="form-section-title">Números Maestros de Gann</div>
-            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6"><span style="font-family:'Cocogoose',sans-serif">144 · 90 · 45 · 360 · 30 · 120</span> — estos números aparecen constantemente como niveles de soporte, resistencia y tiempo.</p>
-            <p style="font-size:0.6rem;color:var(--text3);margin-bottom:16px">El precio base se toma del Pivote Global de arriba.</p>
-            <div id="maestros_result"></div>
-          </div>
-        </div>
-
-        <!-- 5. RANGO DE APERTURA -->
-        <div class="ciclo-panel" id="tab-rango">
-          <div class="form-section">
-            <div class="form-section-title">Rango de Apertura</div>
-            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">El rango del primer día del año, mes o semana proyecta el movimiento futuro según Gann.</p>
-            <div class="form-grid" style="max-width:500px;margin-bottom:20px">
-              <div class="form-group"><label>Máximo del período</label><input type="number" id="rango_high" placeholder="ej. 5450" oninput="calcRango()"/></div>
-              <div class="form-group"><label>Mínimo del período</label><input type="number" id="rango_low" placeholder="ej. 5380" oninput="calcRango()"/></div>
-              <div class="form-group full">
-                <label>Tipo de período</label>
-                <div class="toggle-group">
-                  <button type="button" class="toggle-btn active" onclick="setRangoTipo(this,'Año')">Año</button>
-                  <button type="button" class="toggle-btn" onclick="setRangoTipo(this,'Mes')">Mes</button>
-                  <button type="button" class="toggle-btn" onclick="setRangoTipo(this,'Semana')">Semana</button>
+          <!-- 5. RANGO DE APERTURA -->
+          <div class="ciclo-panel" id="tab-rango">
+            <div class="form-section">
+              <div class="form-section-title">Rango de Apertura</div>
+              <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">El rango del primer día del año, mes o semana proyecta el movimiento futuro según Gann.</p>
+              <div class="form-grid" style="max-width:500px;margin-bottom:20px">
+                <div class="form-group"><label>Máximo del período</label><input type="number" id="rango_high" placeholder="ej. 5450" oninput="calcRango()"/></div>
+                <div class="form-group"><label>Mínimo del período</label><input type="number" id="rango_low" placeholder="ej. 5380" oninput="calcRango()"/></div>
+                <div class="form-group full">
+                  <label>Tipo de período</label>
+                  <div class="toggle-group">
+                    <button type="button" class="toggle-btn active" onclick="setRangoTipo(this,'Año')">Año</button>
+                    <button type="button" class="toggle-btn" onclick="setRangoTipo(this,'Mes')">Mes</button>
+                    <button type="button" class="toggle-btn" onclick="setRangoTipo(this,'Semana')">Semana</button>
+                  </div>
                 </div>
               </div>
+              <div id="rango_result"></div>
             </div>
-            <div id="rango_result"></div>
           </div>
-        </div>
 
-        <!-- 6. CICLOS TEMPORALES -->
-        <div class="ciclo-panel" id="tab-temporales">
-          <div class="form-section">
-            <div class="form-section-title">Ciclos Temporales</div>
-            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Gann identificó ciclos de <span style="font-family:'Cocogoose',sans-serif">90, 144, 365</span> días y <span style="font-family:'Cocogoose',sans-serif">10</span> años como los más importantes en el mercado.</p>
-            <p style="font-size:0.6rem;color:var(--text3);margin-bottom:16px">La fecha de inicio se toma del Pivote Global de arriba.</p>
-            <div id="temporales_result"></div>
+          <!-- 6. CICLOS TEMPORALES -->
+          <div class="ciclo-panel" id="tab-temporales">
+            <div class="form-section">
+              <div class="form-section-title">Ciclos Temporales</div>
+              <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Gann identificó ciclos de <span style="font-family:'Cocogoose',sans-serif">90, 144, 365</span> días y <span style="font-family:'Cocogoose',sans-serif">10</span> años como los más importantes en el mercado.</p>
+              <p style="font-size:0.6rem;color:var(--text3);margin-bottom:16px">La fecha de inicio se toma del Pivote Global de arriba.</p>
+              <div id="temporales_result"></div>
+            </div>
           </div>
-        </div>
 
-        <!-- 7. VIBRACIÓN DEL PRECIO -->
-        <div class="ciclo-panel" id="tab-vibracion">
-          <div class="form-section">
-            <div class="form-section-title">Vibración del Precio</div>
-            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">"Cada instrumento tiene su propia vibración natural. Si encuentras el número correcto, el mercado te dirá exactamente a dónde va." — W.D. Gann</p>
-            <div class="form-grid" style="max-width:340px;margin-bottom:8px">
-              <div class="form-group">
-                <label>Origen de vibración <span class="tip" data-tip="No tiene que ser el mínimo histórico absoluto del instrumento — de hecho, casi nunca conviene que lo sea. Si el origen queda demasiado lejos del precio actual, la tabla se vuelve poco práctica (demasiados pasos entre uno y otro). Funciona mejor con un mínimo significativo más reciente: un piso importante de los últimos años, no el mínimo de toda la historia.">ⓘ</span></label>
-                <input type="number" id="vib_origin" placeholder="ej. tu mínimo significativo más reciente" oninput="calcVibracion()"/>
+          <!-- 7. VIBRACIÓN DEL PRECIO -->
+          <div class="ciclo-panel" id="tab-vibracion">
+            <div class="form-section">
+              <div class="form-section-title">Vibración del Precio</div>
+              <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">"Cada instrumento tiene su propia vibración natural. Si encuentras el número correcto, el mercado te dirá exactamente a dónde va." — W.D. Gann</p>
+              <div class="form-grid" style="max-width:340px;margin-bottom:8px">
+                <div class="form-group">
+                  <label>Origen de vibración <span class="tip" data-tip="No tiene que ser el mínimo histórico absoluto del instrumento — de hecho, casi nunca conviene que lo sea. Si el origen queda demasiado lejos del precio actual, la tabla se vuelve poco práctica (demasiados pasos entre uno y otro). Funciona mejor con un mínimo significativo más reciente: un piso importante de los últimos años, no el mínimo de toda la historia.">ⓘ</span></label>
+                  <input type="number" id="vib_origin" placeholder="ej. tu mínimo significativo más reciente" oninput="calcVibracion()"/>
+                </div>
               </div>
+              <p style="font-size:0.6rem;color:var(--text3);margin-bottom:20px">Este campo es independiente del Pivote Global — Vibración usa su propio origen. El precio actual sí se toma del Pivote Global de arriba.</p>
+              <div id="vibracion_result"></div>
             </div>
-            <p style="font-size:0.6rem;color:var(--text3);margin-bottom:20px">Este campo es independiente del Pivote Global — Vibración usa su propio origen. El precio actual sí se toma del Pivote Global de arriba.</p>
-            <div id="vibracion_result"></div>
           </div>
+
+          <!-- 8. SWING CHARTING (placeholder) -->
+          <div class="ciclo-panel" id="tab-swing">
+            <div class="form-section">
+              <div class="form-section-title">📐 Swing Charting</div>
+              <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Detección objetiva de tendencia: 2 máximos consecutivos más altos confirman un giro alcista, 2 mínimos consecutivos más bajos confirman uno bajista. Sin interpretación a ojo.</p>
+              <div id="swing_result"></div>
+            </div>
+          </div>
+
+          <div class="ciclo-panel" id="tab-hexagono">
+            <div class="form-section">
+              <div class="form-section-title">⬡ Hexágono</div>
+              <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Otra espiral de Gann, esta hexagonal en vez de cuadrada. Gann la usaba para <strong style="color:var(--gold-light)">confirmar</strong> — si un nivel importante en Mapa de Ciclos también sale fuerte aquí, la señal pesa más.</p>
+              <div id="hexagono_result"></div>
+            </div>
+          </div>
+
+          <div class="ciclo-panel" id="tab-master12">
+            <div class="form-section">
+              <div class="form-section-title">⚹ Master 12</div>
+              <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Divide el círculo en 12 en vez de 8 — "12 es 9 con un tercio de 9 sumado," decía Gann. Otra herramienta de confirmación cruzada, no una nueva forma de calcular desde cero.</p>
+              <div id="master12_result"></div>
+            </div>
+          </div>
+
         </div>
 
-        <!-- 7b. LUNA -->
-        <div class="ciclo-panel" id="tab-luna">
+
+        <!-- ===== ESTUDIO: LUNA ===== -->
+        <div class="estudio-panel" id="estudio-luna" style="display:none">
           <div class="form-section">
             <div class="form-section-title">🌙 Luna</div>
-            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:20px;line-height:1.6">Gann estudiaba el ciclo lunar como uno más de sus ciclos de tiempo, y buscaba confluencias entre la fase de la luna y la posición del precio en su propia espiral. Aquí comparamos ambos ángulos — el de la luna en su ciclo de fase, y el del precio en su Square of Nine.</p>
+            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:12px;line-height:1.6">Gann estudiaba el ciclo lunar como uno más de sus ciclos de tiempo, y buscaba confluencias entre la fase de la luna y la posición del precio en su propia espiral. Aquí comparamos ambos ángulos — el de la luna en su ciclo de fase, y el del precio en su Square of Nine.</p>
+            <div id="lunaPivotRef" style="font-size:0.65rem;color:var(--text3);background:var(--bg3);border-radius:8px;padding:8px 12px;margin-bottom:20px"></div>
             <div id="luna_result"></div>
           </div>
         </div>
 
-        <!-- 8. CALENDARIO DE CICLOS -->
-        <div class="ciclo-panel" id="tab-calendario">
+        <!-- ===== OBSERVACIONES (no es un estudio — notas sobre cualquiera de ellos) ===== -->
+        <div class="estudio-panel" id="estudio-observaciones" style="display:none">
           <div class="form-section">
-            <div class="form-section-title">Calendario de Fechas Clave</div>
-            <div class="form-grid" style="margin-bottom:16px">
-              <div class="form-group"><label>Fecha</label><input type="date" id="cal_date"/></div>
-              <div class="form-group"><label>Tipo</label>
-                <select id="cal_type">
-                  <option>OPEX</option>
-                  <option>Triple Witching</option>
-                  <option>Fed / FOMC</option>
-                  <option>NFP</option>
-                  <option>CPI</option>
-                  <option>Equinoccio</option>
-                  <option>Solsticio</option>
-                  <option>Rueda de 24</option>
-                  <option>Otro</option>
-                </select>
-              </div>
-              <div class="form-group"><label>Descripción</label><input type="text" id="cal_desc" placeholder="ej. OPEX Junio" style="font-family:'Cocogoose',sans-serif"/></div>
-            </div>
-            <div class="form-actions" style="justify-content:flex-start;margin-top:0;margin-bottom:20px">
-              <button class="btn-primary" onclick="saveCalEvent()">+ Agregar Fecha</button>
-            </div>
-            <div id="calendario_result"></div>
-          </div>
-        </div>
-
-        <!-- 9. ESTACIONALIDAD -->
-        <div class="ciclo-panel" id="tab-estacionalidad">
-          <div class="form-section">
-            <div class="form-section-title">Estacionalidad del SPX</div>
-            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:20px;line-height:1.6">Comportamiento histórico promedio del SPX por mes. El tiempo tiene memoria.</p>
-            <div id="estacionalidad_result"></div>
-          </div>
-        </div>
-
-        <div class="ciclo-panel" id="tab-observaciones">
-          <div class="form-section">
-            <div class="form-section-title">📝 Observaciones — ¿Funciona Gann?</div>
+            <div class="form-section-title">📝 Observaciones — ¿Funciona lo que estudio?</div>
             <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Registra qué hizo el precio cuando confluyó una fecha, un ángulo, o una fase lunar — hayas tomado un trade o no. Con el tiempo, esto te dice objetivamente qué técnicas te funcionan de verdad.</p>
             <div id="obsStatsBox" style="margin-bottom:20px"></div>
 
@@ -957,10 +967,70 @@ textarea { resize: vertical; line-height: 1.5; }
             </div>
           </div>
 
-          <div id="observacionesList" style="margin-top:24px"></div>
+          <div style="margin-top:24px">
+            <div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Filtrar por tipo</div>
+            <div class="toggle-group" id="obsFilterGroup">
+              <button type="button" class="toggle-btn active" onclick="setObsFilter(this,'todas')">Todas</button>
+              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'ciclo_temporal')">⏱ Ciclo Temporal</button>
+              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'angulo')">📐 Ángulo</button>
+              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'mapa_ciclos')">🌀 Mapa de Ciclos</button>
+              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'numero_maestro')">✦ Número Maestro</button>
+              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'vibracion')">〰 Vibración</button>
+              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'luna')">🌙 Luna</button>
+              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'calendario')">📅 Calendario</button>
+              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'otro')">Otro</button>
+            </div>
+          </div>
+
+          <div id="observacionesList" style="margin-top:16px"></div>
         </div>
 
       </div>
+
+      <!-- CALENDARIO FINANCIERO -->
+      <div class="page" id="page-calfin">
+        <div class="toggle-group" id="calfinGroup" style="margin-bottom:20px">
+          <button type="button" class="toggle-btn active" onclick="switchCalfin(this,'calendario')">📅 Calendario</button>
+          <button type="button" class="toggle-btn" onclick="switchCalfin(this,'estacionalidad')">🌿 Estacionalidad</button>
+        </div>
+
+        <div class="calfin-panel active" id="calfin-calendario">
+          <div class="form-section">
+            <div class="form-section-title">Calendario Financiero</div>
+            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Fechas que mueven el mercado — Fed, inflación, empleo, vencimientos — en un solo lugar, sin tener que buscarlas en otro sitio.</p>
+            <div class="form-grid" style="margin-bottom:16px">
+              <div class="form-group"><label>Fecha</label><input type="date" id="cal_date"/></div>
+              <div class="form-group"><label>Tipo</label>
+                <select id="cal_type">
+                  <option>OPEX</option>
+                  <option>Triple Witching</option>
+                  <option>Fed / FOMC</option>
+                  <option>NFP</option>
+                  <option>CPI</option>
+                  <option>Equinoccio</option>
+                  <option>Solsticio</option>
+                  <option>Rueda de 24</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Descripción</label><input type="text" id="cal_desc" placeholder="ej. OPEX Junio" style="font-family:'Cocogoose',sans-serif"/></div>
+            </div>
+            <div class="form-actions" style="justify-content:flex-start;margin-top:0;margin-bottom:20px">
+              <button class="btn-primary" onclick="saveCalEvent()">+ Agregar Fecha</button>
+            </div>
+            <div id="calendario_result"></div>
+          </div>
+        </div>
+
+        <div class="calfin-panel" id="calfin-estacionalidad" style="display:none">
+          <div class="form-section">
+            <div class="form-section-title">Estacionalidad del SPX</div>
+            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:20px;line-height:1.6">Comportamiento histórico promedio del SPX por mes. El tiempo tiene memoria.</p>
+            <div id="estacionalidad_result"></div>
+          </div>
+        </div>
+      </div>
+
 
       <!-- REVISIÓN SEMANAL -->
       <div class="page" id="page-semanal">
@@ -1196,23 +1266,23 @@ const pages = {
   reglas: { title: 'Reglas del Sistema', subtitle: 'Estas reglas son ley' },
   semanal: { title: 'Revisión Semanal', subtitle: 'Análisis y mejora continua' },
   movimientos: { title: 'Movimientos', subtitle: 'Depósitos y retiros de la cuenta' },
-  ciclos: { title: 'Ciclos', subtitle: 'Geometría del mercado · Herramientas de W.D. Gann' },
+  estudios: { title: 'Mis Estudios', subtitle: 'Gann, Luna, y lo que venga después' },
+  calfin: { title: 'Calendario Financiero', subtitle: 'Fechas que mueven el mercado, en un solo lugar' },
 };
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => {
-    if (n.textContent.includes(pages[id]?.title?.slice(0,4) || id)) n.classList.add('active');
-  });
+  document.querySelectorAll(`.nav-item[data-page="${id}"]`).forEach(n => n.classList.add('active'));
   document.getElementById('pageTitle').textContent = pages[id]?.title || '';
   document.getElementById('pageSubtitle').textContent = pages[id]?.subtitle || '';
   if (id === 'dashboard') renderDashboard();
   if (id === 'bitacora') { setBitacoraViewMode(window.bitacoraViewMode || 'calendar'); }
   if (id === 'cuentas') renderAccounts();
   if (id === 'semanal') renderWeekly();
-  if (id === 'ciclos') { initCiclos(); }
+  if (id === 'estudios') { initEstudios(); }
+  if (id === 'calfin') { initCalfin(); }
   if (id === 'reglas') { renderProtocolo(); }
   if (id === 'movimientos') { renderMovimientos(); document.getElementById('m_mov_date').value = new Date().toISOString().split('T')[0]; }
   if (window.innerWidth < 768) document.getElementById('sidebar').classList.remove('open');
@@ -1352,7 +1422,7 @@ function renderGoalBanner(acc) {
   const pending = goals.filter(g => g.achieved && !g.resolved);
   if (!pending.length) { container.innerHTML = ''; return; }
   container.innerHTML = pending.map(g => `
-    <div class="goal-banner" onclick="showPage('cuentas')">
+    <div class="goal-banner" data-page="cuentas" onclick="showPage('cuentas')">
       <span class="goal-banner-text">${g.achieved_via==='trading' ? `🎯 ¡Alcanzaste tu meta "${g.name}" con tu trading!` : `Tu meta "${g.name}" llegó al 100%.`}</span>
       <span class="goal-banner-arrow">Ver en Mis Cuentas →</span>
     </div>`).join('');
@@ -1556,7 +1626,7 @@ async function renderDashboard() {
     </div>
     <div class="dash-accordion-body ${window.dashOpen?.recent?'open':''}" id="dashBody_recent">
       <div class="recent-trades-list">${closedTradesList.slice(0,5).map(t => compactRow(t, false)).join('') || '<div class="breakdown-row"><span>Aún no hay trades cerrados</span></div>'}</div>
-      <div style="text-align:center;margin-top:14px"><button class="btn-secondary" onclick="showPage('bitacora')">Ver toda la bitácora →</button></div>
+      <div style="text-align:center;margin-top:14px"><button class="btn-secondary" data-page="bitacora" onclick="showPage('bitacora')">Ver toda la bitácora →</button></div>
     </div>`;
 }
 
@@ -3448,6 +3518,7 @@ function syncGlobalPivot() {
   calcMaestros();
   calcTemporales();
   calcLuna();
+  updateTendenciaTabVisibility();
   saveCiclosPivote();
 }
 
@@ -3459,8 +3530,9 @@ function saveCiclosPivote() {
     const pivot_price = parseFloat(document.getElementById('global_pivot').value) || null;
     const pivot_date = document.getElementById('global_date').value || null;
     const current_price = parseFloat(document.getElementById('global_price').value) || null;
+    const lost_motion = parseFloat(document.getElementById('lost_motion').value) || null;
     await sb.from('ciclos_pivote').upsert({
-      user_id: currentUser.id, pivot_price, pivot_date, current_price, updated_at: new Date().toISOString()
+      user_id: currentUser.id, pivot_price, pivot_date, current_price, lost_motion, updated_at: new Date().toISOString()
     });
   }, 800);
 }
@@ -3470,8 +3542,9 @@ async function loadLatestMarketPrice() {
   const { data } = await sb.from('market_snapshot').select('*').eq('ticker', 'SPX').order('fetched_at', { ascending: false }).limit(1).maybeSingle();
   if (data && data.price != null) {
     document.getElementById('global_price').value = data.price;
+    window.lastPriceDate = data.price_date || null;
     const d = new Date(data.fetched_at);
-    if (label) label.textContent = `Actualizado automáticamente · ${d.toLocaleDateString('es-PA')} ${d.toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit' })}`;
+    if (label) label.textContent = `Actualizado automáticamente · ${d.toLocaleDateString('es-PA', { timeZone: 'America/New_York' })} ${d.toLocaleTimeString('es-PA', { hour: '2-digit', minute: '2-digit', timeZone: 'America/New_York' })} hora NY`;
   }
 }
 
@@ -3489,6 +3562,7 @@ async function loadCiclosPivote(todayFallback) {
     document.getElementById('global_pivot').value = data.pivot_price;
     dateEl.value = data.pivot_date || todayFallback;
     if (data.current_price != null) document.getElementById('global_price').value = data.current_price;
+    if (data.lost_motion != null) document.getElementById('lost_motion').value = data.lost_motion;
   } else {
     dateEl.value = todayFallback;
   }
@@ -3499,6 +3573,7 @@ async function loadCiclosPivote(todayFallback) {
   calcMaestros();
   calcTemporales();
   calcLuna();
+  updateTendenciaTabVisibility();
 }
 
 function switchTab(tab, btn) {
@@ -3506,7 +3581,9 @@ function switchTab(tab, btn) {
   document.querySelectorAll('.ciclo-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   if (btn) btn.classList.add('active');
-  if (tab === 'observaciones') loadObservaciones();
+  if (tab === 'swing') renderSwingChart();
+  if (tab === 'hexagono') calcHexagono();
+  if (tab === 'master12') calcMaster12();
 }
 
 function switchCategory(btn, cat) {
@@ -3515,17 +3592,90 @@ function switchCategory(btn, cat) {
   document.querySelectorAll('.ciclo-tab[data-cat]').forEach(t => {
     t.style.display = t.dataset.cat === cat ? '' : 'none';
   });
-  const firstTab = document.querySelector(`.ciclo-tab[data-cat="${cat}"]`);
+  updateTendenciaTabVisibility();
+  const firstTab = document.querySelector('.ciclo-tab[data-cat="' + cat + '"]:not([style*="display: none"])') || document.querySelector('.ciclo-tab[data-cat="' + cat + '"]');
   if (firstTab) firstTab.click();
 }
 
-async function initCiclos() {
+// Esconde Hexágono/Master 12 solas cuando el pivote quedó fuera de su rango documentado,
+// y las vuelve a mostrar solas en cuanto un pivote nuevo las haga relevantes otra vez —
+// para no dejar pestañas visibles que hoy no dan ningún dato útil.
+function nearestCanonicalDist(pivot, price, kind) {
+  if (!price || !pivot) return Infinity;
+  let best = Infinity;
+  if (kind === 'hex') {
+    for (let n = 1; n <= 11; n++) {
+      const h = 3 * n * (n + 1) + 1;
+      [pivot + h, pivot - h].forEach(l => { const d = Math.abs(l - price); if (d < best) best = d; });
+    }
+  } else if (kind === 'master12') {
+    for (let m = 12; m <= 144; m += 12) {
+      [pivot + m, pivot - m].forEach(l => { const d = Math.abs(l - price); if (d < best) best = d; });
+    }
+  }
+  return best;
+}
+
+function updateTendenciaTabVisibility() {
+  const pivot = parseFloat(document.getElementById('global_pivot')?.value);
+  const price = parseFloat(document.getElementById('global_price')?.value);
+  const hexTab = document.getElementById('tabBtnHexagono');
+  const m12Tab = document.getElementById('tabBtnMaster12');
+  if (!hexTab || !m12Tab) return;
+  if (!pivot || !price) { hexTab.style.display = 'none'; m12Tab.style.display = 'none'; return; }
+
+  const catActive = document.querySelector('#ciclosCategoryGroup .toggle-btn.active');
+  const inTendenciaView = catActive && catActive.textContent.includes('Tendencia');
+  const RANGE_MARGIN = 50; // más amplio que la alerta de 20, para no ocultarlas de más
+
+  const hexOk = nearestCanonicalDist(pivot, price, 'hex') <= RANGE_MARGIN;
+  const m12Ok = nearestCanonicalDist(pivot, price, 'master12') <= RANGE_MARGIN;
+
+  hexTab.style.display = (inTendenciaView && hexOk) ? '' : 'none';
+  m12Tab.style.display = (inTendenciaView && m12Ok) ? '' : 'none';
+}
+
+async function initEstudios() {
   renderRueda();
+  const today = new Date().toISOString().split('T')[0];
+  await loadCiclosPivote(today);
+}
+
+function initCalfin() {
   renderEstacionalidad();
   loadCalEvents();
   const today = new Date().toISOString().split('T')[0];
   if (document.getElementById('cal_date')) document.getElementById('cal_date').value = today;
-  await loadCiclosPivote(today);
+}
+
+function switchEstudio(btn, view) {
+  document.querySelectorAll('#estudioSelectorGroup .toggle-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#page-estudios > div > .ciclo-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.estudio-panel').forEach(p => { p.style.display = 'none'; p.classList.remove('active'); });
+  const panel = document.getElementById('estudio-' + view);
+  if (panel) { panel.style.display = 'block'; panel.classList.add('active'); }
+  if (view === 'luna') {
+    const pivot = document.getElementById('global_pivot').value;
+    const price = document.getElementById('global_price').value;
+    const date = document.getElementById('global_date').value;
+    const ref = document.getElementById('lunaPivotRef');
+    if (ref) {
+      ref.innerHTML = (pivot && price)
+        ? `Usando el Pivote de Gann: <strong style="color:var(--gold-light)">${pivot}</strong> (${date}) · Precio actual: <strong style="color:var(--gold-light)">${price}</strong> — <span style="text-decoration:underline;cursor:pointer" onclick="document.querySelector('#estudioSelectorGroup .toggle-btn').click()">cambiarlo en Gann</span>`
+        : `Todavía no hay un Pivote configurado — <span style="text-decoration:underline;cursor:pointer" onclick="document.querySelector('#estudioSelectorGroup .toggle-btn').click()">configúralo en Gann</span> primero.`;
+    }
+    calcLuna();
+  }
+  if (view === 'observaciones') loadObservaciones();
+}
+
+function switchCalfin(btn, view) {
+  document.querySelectorAll('#calfinGroup .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.calfin-panel').forEach(p => { p.style.display = 'none'; p.classList.remove('active'); });
+  const panel = document.getElementById('calfin-' + view);
+  if (panel) { panel.style.display = 'block'; panel.classList.add('active'); }
 }
 
 // 1. MAPA DE CICLOS - Square of Nine
@@ -3568,6 +3718,250 @@ async function runBackfill() {
   } catch (e) {
     if (status) status.textContent = 'Error de conexión: ' + e;
   }
+}
+
+// SWING CHARTING — detección objetiva de tendencia (Krausz), soporte/resistencia, Hi-Lo Activator
+function computeSwings(rows) {
+  let trend = null;
+  let higherHighCount = 0, lowerLowCount = 0;
+  const swings = [];
+  let extremeHigh = rows.length ? rows[0].high : null, extremeHighDate = rows.length ? rows[0].price_date : null;
+  let extremeLow = rows.length ? rows[0].low : null, extremeLowDate = rows.length ? rows[0].price_date : null;
+
+  for (let i = 1; i < rows.length; i++) {
+    const today = rows[i], yest = rows[i - 1];
+    if (today.high > yest.high) higherHighCount++; else higherHighCount = 0;
+    if (today.low < yest.low) lowerLowCount++; else lowerLowCount = 0;
+
+    // Solo se sigue el extremo relevante a la tendencia vigente — el máximo mientras se está en
+    // alza, el mínimo mientras se está en baja. Esto evita que una fecha vieja de antes del último
+    // giro confirmado se cuele en el siguiente giro (el bug que hacía que las fechas salieran
+    // desordenadas y que el último giro se quedara "atascado" en el pasado).
+    if (trend !== 'down' && today.high > extremeHigh) { extremeHigh = today.high; extremeHighDate = today.price_date; }
+    if (trend !== 'up' && today.low < extremeLow) { extremeLow = today.low; extremeLowDate = today.price_date; }
+
+    if (higherHighCount >= 2 && trend !== 'up') {
+      swings.push({ type: 'low', price: extremeLow, date: extremeLowDate });
+      trend = 'up';
+      extremeHigh = today.high; extremeHighDate = today.price_date;
+    }
+    if (lowerLowCount >= 2 && trend !== 'down') {
+      swings.push({ type: 'high', price: extremeHigh, date: extremeHighDate });
+      trend = 'down';
+      extremeLow = today.low; extremeLowDate = today.price_date;
+    }
+  }
+  return { trend, swings };
+}
+
+function hiLoActivator(rows, trend) {
+  if (rows.length < 3 || !trend) return null;
+  const last3 = rows.slice(-3);
+  if (trend === 'up') return last3.reduce((s, r) => s + r.low, 0) / 3;
+  return last3.reduce((s, r) => s + r.high, 0) / 3;
+}
+
+async function renderSwingChart() {
+  const pivotDate = document.getElementById('global_date').value;
+  const el = document.getElementById('swing_result');
+  if (!pivotDate) { el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">Configura la fecha del Pivote Global arriba para ver esta sección.</p>'; return; }
+
+  el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">Cargando historial…</p>';
+
+  const { data } = await sb.from('market_snapshot').select('price_date,high,low,price').eq('ticker', 'SPX').gte('price_date', pivotDate).not('high', 'is', null).order('price_date', { ascending: true });
+
+  if (!data || data.length < 5) {
+    el.innerHTML = `<div style="text-align:center;padding:30px 20px;background:var(--bg3);border-radius:10px">
+      <p style="font-size:0.75rem;color:var(--text2);margin-bottom:16px">Se necesitan al menos 5 días de historial con máximo/mínimo para detectar giros. Hoy tienes ${data ? data.length : 0}.</p>
+      <button class="btn-primary" onclick="runSwingBackfill()">Traer / actualizar historial</button>
+      <div id="swingBackfillStatus" style="font-size:0.68rem;color:var(--text3);margin-top:10px"></div>
+    </div>`;
+    return;
+  }
+
+  const { trend, swings } = computeSwings(data);
+  const activator = hiLoActivator(data, trend);
+  const lastSwingLow = [...swings].reverse().find(s => s.type === 'low');
+  const lastSwingHigh = [...swings].reverse().find(s => s.type === 'high');
+  const currentPrice = data[data.length - 1].price;
+
+  let html = `<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+    <div class="stat-card" style="flex:1;min-width:150px">
+      <div class="stat-label">Tendencia actual</div>
+      <div class="stat-value ${trend === 'up' ? 'text-success' : trend === 'down' ? 'text-danger' : ''}">${trend === 'up' ? '▲ Alcista' : trend === 'down' ? '▼ Bajista' : 'Sin definir'}</div>
+    </div>
+    <div class="stat-card" style="flex:1;min-width:150px">
+      <div class="stat-label">Soporte (último giro bajo)</div>
+      <div class="stat-value text-success">${lastSwingLow ? lastSwingLow.price.toFixed(0) : '—'}</div>
+      <div class="stat-sub">${lastSwingLow ? lastSwingLow.date : ''}</div>
+    </div>
+    <div class="stat-card" style="flex:1;min-width:150px">
+      <div class="stat-label">Resistencia (último giro alto)</div>
+      <div class="stat-value text-danger">${lastSwingHigh ? lastSwingHigh.price.toFixed(0) : '—'}</div>
+      <div class="stat-sub">${lastSwingHigh ? lastSwingHigh.date : ''}</div>
+    </div>
+    <div class="stat-card" style="flex:1;min-width:150px">
+      <div class="stat-label">Hi-Lo Activator <span class="tip" data-tip="Promedio de 3 días de mínimos (en tendencia alcista) o máximos (en bajista) — línea de referencia para entrada y stop dinámico.">ⓘ</span></div>
+      <div class="stat-value text-gold">${activator ? activator.toFixed(0) : '—'}</div>
+    </div>
+  </div>`;
+
+  html += `<div style="margin-bottom:12px"><button class="btn-secondary" style="padding:6px 14px;font-size:0.65rem" onclick="runSwingBackfill()">↻ Actualizar historial</button> <span id="swingBackfillStatus" style="font-size:0.62rem;color:var(--text3);margin-left:8px"></span></div>`;
+
+  html += `<div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Giros confirmados (${swings.length}) — del más reciente al más antiguo</div>`;
+  if (!swings.length) {
+    html += `<p style="font-size:0.7rem;color:var(--text3)">Todavía no se ha confirmado ningún giro con este historial.</p>`;
+  } else {
+    html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Fecha</th><th>Tipo</th><th>Precio</th></tr></thead><tbody>`;
+    [...swings].reverse().forEach(s => {
+      html += `<tr><td>${s.date}</td><td style="color:${s.type === 'low' ? 'var(--success)' : 'var(--danger)'}">${s.type === 'low' ? '▲ Giro bajo (soporte)' : '▼ Giro alto (resistencia)'}</td><td>${s.price.toFixed(0)}</td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  el.innerHTML = html;
+  wrapNumbersJosefin(el);
+}
+
+async function runSwingBackfill() {
+  const pivotDate = document.getElementById('global_date').value;
+  const status = document.getElementById('swingBackfillStatus');
+  if (status) status.textContent = 'Trayendo historial…';
+  try {
+    const res = await fetch(`https://nidteoxdxmmtupovcxnv.supabase.co/functions/v1/backfill-market-history?from=${pivotDate}`);
+    const json = await res.json();
+    if (json.ok) {
+      if (status) status.textContent = `Listo — ${json.inserted} días traídos.`;
+      renderSwingChart();
+    } else {
+      if (status) status.textContent = 'Error: ' + (json.error || 'desconocido');
+    }
+  } catch (e) {
+    if (status) status.textContent = 'Error de conexión: ' + e;
+  }
+}
+
+// HEXÁGONO — espiral hexagonal de Gann (números hexagonales centrados), herramienta de confirmación
+function proximityAlertHtml(dist, levelLabel, alertId) {
+  if (dist > 20) return '';
+  const isTouch = dist <= 10;
+  let dateNote = '';
+  if (window.lastPriceDate) {
+    const d = new Date(window.lastPriceDate + 'T12:00:00');
+    dateNote = ` (precio del ${d.toLocaleDateString('es-PA', { timeZone: 'America/New_York' })})`;
+  }
+  const color = isTouch ? 'var(--danger)' : 'var(--gold-light)';
+  const bg = isTouch ? 'rgba(248,113,113,0.1)' : 'rgba(170,146,82,0.1)';
+  const border = isTouch ? 'var(--danger)' : 'var(--gold-dark)';
+  const verb = isTouch ? 'tocó' : 'se está acercando a';
+  const id = alertId || ('alert_' + Math.random().toString(36).slice(2));
+  return `<div id="${id}" style="background:${bg};border:1px solid ${border};border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:1.1rem">🔔</span>
+      <span style="font-size:0.75rem;color:${color};font-weight:600">El precio ${verb} ${levelLabel} — a ${dist.toFixed(0)} pts${dateNote}.</span>
+    </div>
+    <span style="cursor:pointer;color:${color};font-size:0.9rem;padding:0 6px" onclick="document.getElementById('${id}').style.display='none'" title="Cerrar">✕</span>
+  </div>`;
+}
+
+function calcHexagono() {
+  const pivot = parseFloat(document.getElementById('global_pivot').value);
+  const price = parseFloat(document.getElementById('global_price').value);
+  const el = document.getElementById('hexagono_result');
+  if (!pivot) { el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">Configura el Pivote Global arriba para ver esta sección.</p>'; return; }
+
+  // Números hexagonales centrados: H(n) = 3n(n+1)+1 → 1, 7, 19, 37, 61, 91, 127, 169, 217, 271, 331, 397.
+  // Estructura documentada: 11 círculos, terminando en H(11)=397 (ganancia de 66). No se estira más
+  // allá de eso — si el precio ya se movió más lejos que esto desde el pivote, es una señal real de
+  // que el pivote quedó viejo para esta herramienta específica, no algo que debamos disimular
+  // inventando más vueltas de las que la fuente describe.
+  const hexNumbers = [];
+  for (let n = 1; n <= 11; n++) hexNumbers.push(3 * n * (n + 1) + 1);
+
+  let nearestLevel = null, nearestDist = Infinity;
+  const rows = hexNumbers.map(h => {
+    const up = pivot + h;
+    const down = pivot - h;
+    if (price) {
+      [up, down].forEach(lvl => {
+        const d = Math.abs(lvl - price);
+        if (d < nearestDist) { nearestDist = d; nearestLevel = lvl; }
+      });
+    }
+    return { h, up, down };
+  });
+
+  let html = '';
+  if (price && nearestDist <= 20) {
+    html += proximityAlertHtml(nearestDist, `un nivel del Hexágono (${nearestLevel.toFixed(0)})`, 'alertHex');
+  } else if (price) {
+    html += `<div style="background:var(--bg3);border-radius:10px;padding:12px 16px;margin-bottom:16px">
+      <p style="font-size:0.7rem;color:var(--text2);line-height:1.6">Con tu pivote actual, ningún nivel del Hexágono cae cerca del precio de hoy — el más cercano está a ${nearestDist.toFixed(0)} puntos. No significa que la herramienta esté rota: probablemente el precio ya se movió más de lo que cubren los 11 círculos del Hexágono desde tu pivote. Si quieres que esta confirmación te sirva ahora, considera marcar un pivote más reciente.</p>
+    </div>`;
+  }
+
+  html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>H(n) <span class="tip" data-tip="El número hexagonal de esa vuelta de la espiral — cuantas más vueltas, más lejos del pivote, en puntos de precio.">ⓘ</span></th><th>Pivote + H</th><th>Pivote − H</th></tr></thead><tbody>`;
+  rows.forEach(r => {
+    const isNear = price && (Math.abs(r.up - price) === nearestDist || Math.abs(r.down - price) === nearestDist);
+    html += `<tr class="${isNear ? 'nearest' : ''}">
+      <td style="color:var(--gold-light);font-weight:600">${r.h}</td>
+      <td style="color:var(--success)">${r.up.toFixed(0)}</td>
+      <td style="color:var(--danger)">${r.down.toFixed(0)}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+
+  el.innerHTML = html;
+  wrapNumbersJosefin(el);
+}
+
+// MASTER 12 — círculo dividido en 12 en vez de 8, herramienta de confirmación
+function calcMaster12() {
+  const pivot = parseFloat(document.getElementById('global_pivot').value);
+  const price = parseFloat(document.getElementById('global_price').value);
+  const el = document.getElementById('master12_result');
+  if (!pivot) { el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">Configura el Pivote Global arriba para ver esta sección.</p>'; return; }
+
+  // Múltiplos de 12 hasta 144 (12×12, "el cuadrado" — la estructura documentada). No se estira más
+  // allá — mismo criterio honesto que Hexágono.
+  const multiples = [];
+  for (let m = 12; m <= 144; m += 12) multiples.push(m);
+
+  let nearestLevel = null, nearestDist = Infinity;
+  const rows = multiples.map(m => {
+    const up = pivot + m;
+    const down = pivot - m;
+    if (price) {
+      [up, down].forEach(lvl => {
+        const d = Math.abs(lvl - price);
+        if (d < nearestDist) { nearestDist = d; nearestLevel = lvl; }
+      });
+    }
+    return { m, up, down };
+  });
+
+  let html = '';
+  if (price && nearestDist <= 20) {
+    html += proximityAlertHtml(nearestDist, `un nivel del Master 12 (${nearestLevel.toFixed(0)})`, 'alertMaster12');
+  } else if (price) {
+    html += `<div style="background:var(--bg3);border-radius:10px;padding:12px 16px;margin-bottom:16px">
+      <p style="font-size:0.7rem;color:var(--text2);line-height:1.6">Con tu pivote actual, ningún nivel de Master 12 cae cerca del precio de hoy — el más cercano está a ${nearestDist.toFixed(0)} puntos. Igual que con Hexágono: probablemente el precio ya se movió más allá de lo que cubre este cuadrado de 144 desde tu pivote. Considera un pivote más reciente si quieres que esta confirmación aplique ahora.</p>
+    </div>`;
+  }
+
+  html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Múltiplo de 12</th><th>Pivote + m</th><th>Pivote − m</th></tr></thead><tbody>`;
+  rows.forEach(r => {
+    const isNear = price && (Math.abs(r.up - price) === nearestDist || Math.abs(r.down - price) === nearestDist);
+    html += `<tr class="${isNear ? 'nearest' : r.m === 144 ? 'cardinal' : ''}">
+      <td style="color:var(--gold-light);font-weight:600">${r.m}</td>
+      <td style="color:var(--success)">${r.up.toFixed(0)}</td>
+      <td style="color:var(--danger)">${r.down.toFixed(0)}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+
+  el.innerHTML = html;
+  wrapNumbersJosefin(el);
 }
 
 async function renderGannRecorrido() {
@@ -3761,6 +4155,7 @@ function renderGannSpiral(bullLevels, bearLevels, showBull, showBear, nearest, p
 function calcGann() {
   const pivot = parseFloat(document.getElementById('global_pivot').value);
   const price = parseFloat(document.getElementById('global_price').value);
+  const lostMotion = parseFloat(document.getElementById('lost_motion').value) || 0;
   const el = document.getElementById('gann_result');
   if (!pivot || pivot <= 0) { el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">Configura el Pivote Global arriba para ver esta sección.</p>'; return; }
 
@@ -3825,12 +4220,19 @@ function calcGann() {
   }
 
   let html = '';
+
+  if (price && nearest) {
+    const dist = Math.abs(price - nearest.price);
+    html += proximityAlertHtml(dist, `el nivel de ${nearest.price.toFixed(0)}`, 'alertMapa');
+  }
   
   if (price && nearest) {
+    const stopSugerido = lostMotion ? (price > nearest.price ? nearest.price - lostMotion : nearest.price + lostMotion) : null;
     html += `<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
       <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Nivel más cercano</div><div class="stat-value text-gold">${nearest.price.toFixed(0)}</div><div class="stat-sub">${nearest.angle} · Anillo <span style="font-family:Cocogoose,sans-serif">${nearest.ring}</span> · ${nearest.source === 'bull' ? 'Alcista' : 'Bajista'}</div></div>
       <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Distancia</div><div class="stat-value ${price > nearest.price ? 'text-success' : 'text-danger'}">${Math.abs(price - nearest.price).toFixed(0)} pts</div><div class="stat-sub">${price > nearest.price ? 'Por encima' : 'Por debajo'}</div></div>
       <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Fase del ciclo</div><div class="stat-value text-gold" style="font-size:1rem">${quadrant}</div></div>
+      ${stopSugerido !== null ? `<div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Stop sugerido <span class="tip" data-tip="Nivel más cercano ± tu colchón de lost motion, para no salir del trade por ruido normal antes de que el nivel realmente falle.">ⓘ</span></div><div class="stat-value text-danger">${stopSugerido.toFixed(0)}</div></div>` : ''}
     </div>`;
   }
 
@@ -3934,16 +4336,22 @@ function calcGann() {
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
         <div style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:8px;padding:12px">
           <div style="font-size:0.58rem;color:var(--success);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px">▲ Resistencias clave</div>
-          ${top3Bull.map(l => `<div style="display:flex;justify-content:space-between;margin-bottom:4px">
-            <span style="font-family:'Cocogoose',sans-serif;font-size:0.75rem;font-weight:700;color:var(--success)">${l.price.toFixed(0)}</span>
-            <span style="font-size:0.6rem;color:var(--text3)">${l.angle} · ${l.type}</span>
+          ${top3Bull.map(l => `<div style="margin-bottom:6px">
+            <div style="display:flex;justify-content:space-between">
+              <span style="font-family:'Cocogoose',sans-serif;font-size:0.75rem;font-weight:700;color:var(--success)">${l.price.toFixed(0)}</span>
+              <span style="font-size:0.6rem;color:var(--text3)">${l.angle} · ${l.type}</span>
+            </div>
+            ${lostMotion ? `<div style="font-size:0.55rem;color:var(--text3)">stop sugerido: ${(l.price + lostMotion).toFixed(0)}</div>` : ''}
           </div>`).join('')}
         </div>
         <div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:12px">
           <div style="font-size:0.58rem;color:var(--danger);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px">▼ Soportes clave</div>
-          ${top3Bear.map(l => `<div style="display:flex;justify-content:space-between;margin-bottom:4px">
-            <span style="font-family:'Cocogoose',sans-serif;font-size:0.75rem;font-weight:700;color:var(--danger)">${l.price.toFixed(0)}</span>
-            <span style="font-size:0.6rem;color:var(--text3)">${l.angle} · ${l.type}</span>
+          ${top3Bear.map(l => `<div style="margin-bottom:6px">
+            <div style="display:flex;justify-content:space-between">
+              <span style="font-family:'Cocogoose',sans-serif;font-size:0.75rem;font-weight:700;color:var(--danger)">${l.price.toFixed(0)}</span>
+              <span style="font-size:0.6rem;color:var(--text3)">${l.angle} · ${l.type}</span>
+            </div>
+            ${lostMotion ? `<div style="font-size:0.55rem;color:var(--text3)">stop sugerido: ${(l.price - lostMotion).toFixed(0)}</div>` : ''}
           </div>`).join('')}
         </div>
         <div style="background:rgba(170,146,82,0.08);border:1px solid rgba(170,146,82,0.2);border-radius:8px;padding:12px">
@@ -3981,7 +4389,11 @@ function calcAngulos() {
     { ratio: '<span style="font-family:Cocogoose,sans-serif">1x4</span>', mult: 0.25, label: '1x4 — débil' },
     { ratio: '<span style="font-family:Cocogoose,sans-serif">1x3</span>', mult: 0.333, label: '1x3 — moderado' },
     { ratio: '<span style="font-family:Cocogoose,sans-serif">1x2</span>', mult: 0.5, label: '1x2 — neutral' },
+    { ratio: '<span style="font-family:Cocogoose,sans-serif">2x3</span>', mult: 0.667, label: '2x3 — casi neutral' },
+    { ratio: '<span style="font-family:Cocogoose,sans-serif">3x4</span>', mult: 0.75, label: '3x4 — cerca del equilibrio (bajista)' },
     { ratio: '<span style="font-family:Cocogoose,sans-serif">1x1</span>', mult: 1, label: '1x1 — Línea de equilibrio ★' },
+    { ratio: '<span style="font-family:Cocogoose,sans-serif">4x3</span>', mult: 1.333, label: '4x3 — cerca del equilibrio (alcista)' },
+    { ratio: '<span style="font-family:Cocogoose,sans-serif">3x2</span>', mult: 1.5, label: '3x2 — casi fuerte' },
     { ratio: '<span style="font-family:Cocogoose,sans-serif">2x1</span>', mult: 2, label: '2x1 — fuerte' },
     { ratio: '<span style="font-family:Cocogoose,sans-serif">3x1</span>', mult: 3, label: '3x1 — muy fuerte' },
     { ratio: '<span style="font-family:Cocogoose,sans-serif">4x1</span>', mult: 4, label: '4x1 — impulso extremo' },
@@ -4085,36 +4497,94 @@ function renderRueda() {
 
 // 4. NÚMEROS MAESTROS
 function calcMaestros() {
-  const price = parseFloat(document.getElementById('global_pivot').value);
-  const dateStr = document.getElementById('global_date').value;
+  const pivot = parseFloat(document.getElementById('global_pivot').value);
+  const price = parseFloat(document.getElementById('global_price').value);
   const el = document.getElementById('maestros_result');
-  if (!price) { el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">Configura el Pivote Global arriba para ver esta sección.</p>'; return; }
+  if (!pivot) { el.innerHTML = '<p style="font-size:0.72rem;color:var(--text3)">Configura el Pivote Global arriba para ver esta sección.</p>'; return; }
 
+  // Los números maestros de Gann (30°, 45°, 90°, 120°, 144°, 180°, 270°, 360°) son grados —
+  // fracciones del mismo círculo de 360° que ya usa Mapa de Ciclos, no puntos que se suman directo
+  // al precio. Se aplican con la misma raíz cuadrada, extendida en "vueltas" — es la misma espiral
+  // infinita de Mapa de Ciclos, así que sí es correcto seguir extendiéndola (a diferencia de
+  // Hexágono/Master 12, que tienen una estructura documentada con un límite fijo).
   const masters = [30, 45, 90, 120, 144, 180, 270, 360];
-  
-  let html = `<div class="master-grid">`;
-  masters.forEach(m => {
+  const sqrtP = Math.sqrt(pivot);
+
+  const gap = price ? Math.abs(Math.sqrt(price) - sqrtP) : 3;
+  const maxRing = Math.max(2, Math.ceil(gap) + 1);
+
+  let nearestLevel = null, nearestDist = Infinity, nearestKey = null;
+  const rows = [];
+  masters.forEach(deg => {
+    const frac = deg / 360;
+    for (let ring = 0; ring <= maxRing; ring++) {
+      const up = Math.pow(sqrtP + ring + frac, 2);
+      const downBase = sqrtP - ring - frac;
+      const down = downBase > 0 ? Math.pow(downBase, 2) : null;
+      if (price) {
+        const dUp = Math.abs(up - price);
+        if (dUp < nearestDist) { nearestDist = dUp; nearestLevel = up; nearestKey = `${deg}-${ring}-up`; }
+        if (down !== null) {
+          const dDown = Math.abs(down - price);
+          if (dDown < nearestDist) { nearestDist = dDown; nearestLevel = down; nearestKey = `${deg}-${ring}-down`; }
+        }
+      }
+      rows.push({ deg, ring, up, down });
+    }
+  });
+
+  let html = '';
+  if (price && nearestLevel !== null) html += proximityAlertHtml(nearestDist, `un Número Maestro (${nearestLevel.toFixed(0)})`, 'alertMaestros');
+
+  // Tarjetas de referencia — la vuelta MÁS CERCANA al precio actual de cada grado, no siempre la
+  // vuelta 0. Así las tarjetas siguen siendo relevantes sin importar qué tan viejo esté el pivote,
+  // hoy y con cualquier pivote futuro.
+  html += `<div class="master-grid">`;
+  masters.forEach(deg => {
+    let best = null, bestDist = Infinity, bestSide = 'up';
+    rows.filter(r => r.deg === deg).forEach(r => {
+      const dUp = price ? Math.abs(r.up - price) : Infinity;
+      if (dUp < bestDist) { bestDist = dUp; best = r; bestSide = 'up'; }
+      if (r.down !== null) {
+        const dDown = price ? Math.abs(r.down - price) : Infinity;
+        if (dDown < bestDist) { bestDist = dDown; best = r; bestSide = 'down'; }
+      }
+      if (!price && best === null) best = r;
+    });
+    const val = bestSide === 'up' ? best.up : best.down;
     html += `<div class="master-card">
-      <div class="master-num">${m}° / ${m} días</div>
-      <div class="master-val">${(price + m).toFixed(0)}</div>
-      <div style="font-size:0.58rem;color:var(--text3);margin-top:2px">Resistencia: +${m} pts</div>
-      <div style="font-size:0.58rem;color:var(--text3)">Soporte: ${(price - m).toFixed(0)} (−${m} pts)</div>
+      <div class="master-num">${deg}°</div>
+      <div class="master-val">${val.toFixed(0)}</div>
+      <div style="font-size:0.58rem;color:var(--text3);margin-top:2px">Vuelta ${best.ring} · ${bestSide === 'up' ? 'alcista' : 'bajista'}</div>
+      ${price ? `<div style="font-size:0.58rem;color:var(--text3)">a ${bestDist.toFixed(0)} pts del precio</div>` : ''}
     </div>`;
   });
   html += `</div>`;
 
-  html += `<div style="margin-top:20px;overflow-x:auto"><table class="gann-table"><thead><tr><th>Número Maestro</th><th>Precio + Factor</th><th>Precio − Factor</th><th>Fecha (pivote +N días)</th></tr></thead><tbody>`;
-  const baseDate = dateStr ? new Date(dateStr) : null;
-  masters.forEach(m => {
-    const futureDate = baseDate ? new Date(baseDate.getTime() + m * 24*60*60*1000) : null;
-    html += `<tr>
-      <td style="color:var(--gold-light);font-weight:600">${m}</td>
-      <td style="color:var(--success)">${(price + m).toFixed(0)}</td>
-      <td style="color:var(--danger)">${(price - m).toFixed(0)}</td>
-      <td>${futureDate ? futureDate.toLocaleDateString('es-PA') : '—'}</td>
-    </tr>`;
-  });
-  html += `</tbody></table></div>`;
+  // Tabla extendida — solo la ventana de vueltas cerca del precio actual (las tarjetas de arriba
+  // ya cubren la referencia de "vuelta 0" de cada grado, así que aquí no se repite, para que la
+  // tabla no quede salpicada de fragmentos sueltos).
+  const nearIdx = rows.findIndex(r => `${r.deg}-${r.ring}-up` === nearestKey || `${r.deg}-${r.ring}-down` === nearestKey);
+
+  if (price && nearIdx >= 0) {
+    const from = Math.max(0, nearIdx - 5);
+    const to = Math.min(rows.length - 1, nearIdx + 5);
+    html += `<div style="margin-top:20px;font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Niveles extendidos cerca del precio actual</div>`;
+    html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Grado</th><th>Vuelta <span class="tip" data-tip="Cuántas veces se completó el círculo de 360° desde el pivote — vuelta 0 es el nivel original de ese grado, vuelta 1 es una revolución más lejos, y así sucesivamente.">ⓘ</span></th><th>Nivel alcista</th><th>Nivel bajista</th><th>Distancia al precio</th></tr></thead><tbody>`;
+    for (let i = from; i <= to; i++) {
+      const r = rows[i];
+      const key = `${r.deg}-${r.ring}`;
+      const isNear = nearestKey === `${key}-up` || nearestKey === `${key}-down`;
+      html += `<tr class="${isNear ? 'nearest' : r.ring === 0 ? 'cardinal' : ''}">
+        <td style="color:var(--gold-light);font-weight:600">${r.deg}°</td>
+        <td>${r.ring}</td>
+        <td style="color:var(--success)">${r.up.toFixed(0)}</td>
+        <td style="color:var(--danger)">${r.down !== null ? r.down.toFixed(0) : '—'}</td>
+        <td style="color:var(--text3)">${Math.min(Math.abs(r.up - price), r.down !== null ? Math.abs(r.down - price) : Infinity).toFixed(0)}</td>
+      </tr>`;
+    }
+    html += `</tbody></table></div>`;
+  }
 
   el.innerHTML = html;
   wrapNumbersJosefin(el);
@@ -4201,7 +4671,7 @@ function calcTemporales() {
         </div>
         <div style="text-align:right">
           <span style="font-size:0.65rem;font-family:'Cocogoose',sans-serif;color:${isCompletionDay ? 'var(--gold-light)' : 'var(--gold)'}">${pct}%${isCompletionDay ? ' ★ HOY' : ''}</span>
-          <span style="font-size:0.6rem;color:var(--text3);margin-left:6px">próximo: <span style="font-family:'Cocogoose',sans-serif">${nextDate.toLocaleDateString('es-PA')}</span></span>
+          <span style="font-size:0.6rem;color:var(--text3);margin-left:6px">próximo: <span style="font-family:'Cocogoose',sans-serif">${nextDate.toLocaleDateString('es-PA', { timeZone: 'America/New_York' })}</span></span>
         </div>
       </div>
       <div class="progress-bar">
@@ -4226,7 +4696,7 @@ function calcTemporales() {
         const modDays = daysPassed % c.days;
         const rem = (daysPassed > 0 && modDays === 0) ? 0 : c.days - modDays;
         const nd = new Date(today.getTime() + rem*24*60*60*1000);
-        const remText = rem === 0 ? '¡HOY se completa!' : ('Faltan ' + rem + ' días · ' + nd.toLocaleDateString("es-PA"));
+        const remText = rem === 0 ? '¡HOY se completa!' : ('Faltan ' + rem + ' días · ' + nd.toLocaleDateString("es-PA", { timeZone: 'America/New_York' }));
         return '<div style="display:flex;justify-content:space-between;padding:8px 12px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:6px;margin-bottom:6px"><span style="font-size:0.7rem;color:var(--text)">' + c.label + '</span><span style="font-family:Cocogoose,sans-serif;font-size:0.7rem;color:var(--warning)">' + remText + '</span></div>';
       }).join('')}
     </div>` : '<div style="font-size:0.7rem;color:var(--text2);margin-bottom:12px">No hay ciclos críticos en los próximos 21 días.</div>'}
@@ -4319,8 +4789,49 @@ function calcVibracion() {
     </div>`;
   }
 
+  html += `<div id="vibChangesBox" style="margin-top:16px"></div>`;
+
   el.innerHTML = html;
   wrapNumbersJosefin(el);
+  if (origin) renderVibChanges(origin);
+}
+
+async function renderVibChanges(origin) {
+  const box = document.getElementById('vibChangesBox');
+  if (!box) return;
+  const pivotDate = document.getElementById('global_date').value;
+  if (!pivotDate) return;
+
+  const { data } = await sb.from('market_snapshot').select('price_date,price').eq('ticker', 'SPX').gte('price_date', pivotDate).order('price_date', { ascending: true });
+  if (!data || data.length < 2) { box.innerHTML = ''; return; }
+
+  const sqrtOrigin = Math.sqrt(origin);
+  const nearestIdxFor = price => Math.round(Math.sqrt(price) - sqrtOrigin);
+
+  const changes = [];
+  let prevIdx = nearestIdxFor(data[0].price);
+  for (let i = 1; i < data.length; i++) {
+    const idx = nearestIdxFor(data[i].price);
+    if (idx !== prevIdx) {
+      changes.push({ date: data[i].price_date, from: prevIdx, to: idx, price: data[i].price });
+      prevIdx = idx;
+    }
+  }
+
+  if (!changes.length) {
+    box.innerHTML = `<p style="font-size:0.68rem;color:var(--text3)">La vibración más cercana no ha cambiado desde tu pivote.</p>`;
+    return;
+  }
+
+  box.innerHTML = `<div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Cambios recientes de vibración</div>
+    <div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Fecha</th><th>Cambio</th><th>Precio</th></tr></thead><tbody>
+    ${[...changes].reverse().slice(0, 10).map(c => `<tr>
+      <td>${c.date}</td>
+      <td>vibración ${c.from} → ${c.to > c.from ? '' : ''}${c.to}</td>
+      <td>${c.price.toFixed(0)}</td>
+    </tr>`).join('')}
+    </tbody></table></div>`;
+  wrapNumbersJosefin(box);
 }
 
 // OBSERVACIONES — diario de "¿funciona Gann?", independiente de la Bitácora
@@ -4413,12 +4924,25 @@ const OBS_TIPO_LABELS = {
 };
 
 let lastObsRows = [];
+let obsFilterTipo = 'todas';
 async function loadObservaciones() {
   if (!currentUser) return;
   const { data } = await sb.from('sincronias_observaciones').select('*').eq('user_id', currentUser.id).order('fecha', { ascending: false });
   lastObsRows = data || [];
   renderObsStats(lastObsRows);
-  renderObsList(lastObsRows);
+  applyObsFilter();
+}
+
+function setObsFilter(btn, tipo) {
+  obsFilterTipo = tipo;
+  document.querySelectorAll('#obsFilterGroup .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyObsFilter();
+}
+
+function applyObsFilter() {
+  const filtered = obsFilterTipo === 'todas' ? lastObsRows : lastObsRows.filter(r => r.fuente_tipo === obsFilterTipo);
+  renderObsList(filtered);
 }
 
 function startObsEditById(id) {
