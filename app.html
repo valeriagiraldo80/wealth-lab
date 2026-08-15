@@ -470,8 +470,8 @@ textarea { resize: vertical; line-height: 1.5; }
             <button id="bitacoraViewList" onclick="setBitacoraViewMode('list')">Lista</button>
           </div>
           <div class="bitacora-header-actions">
-            <button class="trash-link-btn" onclick="openTrashModal()">Papelera</button>
-            <button class="trash-link-btn" onclick="openExportModal()">Exportar</button>
+            <button class="trash-link-btn tip" data-tip="Papelera" onclick="openTrashModal()" aria-label="Papelera"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6h16Z"/><path d="M10 11v6M14 11v6"/></svg></button>
+            <button class="trash-link-btn tip" data-tip="Exportar" onclick="openExportModal()" aria-label="Exportar"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/></svg></button>
           </div>
         </div>
         <div class="view-toggle" id="bitacoraTabs" style="margin-bottom:20px;display:none"></div>
@@ -498,7 +498,7 @@ textarea { resize: vertical; line-height: 1.5; }
               <div class="form-group"><label>Fecha</label><input type="date" id="f_date" required/></div>
               <div class="form-group"><label>Hora entrada</label><input type="time" id="f_entry_time"/></div>
               <div class="form-group"><label>Hora cierre</label><input type="time" id="f_exit_time"/></div>
-              <div class="form-group"><label>Activo</label><input type="text" id="f_asset" value="SPX" required/></div>
+              <div class="form-group"><label>Activo</label><input type="text" id="f_asset" required/></div>
               <div class="form-group"><label>Tipo</label><select id="f_trade_type" style="font-family:'Cocogoose',sans-serif" onchange="toggleOtherField(this,'f_trade_type_other')"><option value="0DTE" id="opt0DTE">0DTE</option><option value="Day Trade">Day Trade</option><option value="Swing">Swing</option><option value="Otro">Otro</option></select><input type="text" id="f_trade_type_other" placeholder="Especifica el tipo..." style="display:none;margin-top:8px"/></div>
               <div class="form-group" id="strategyFieldGroup"><label>Estrategia</label><select id="f_strategy" onchange="toggleOtherField(this,'f_strategy_other'); suggestLegCount(this.value); updateOpenActionVisibility()">
                 <optgroup label="1 pata — Single">
@@ -657,33 +657,12 @@ textarea { resize: vertical; line-height: 1.5; }
 
       <!-- PROTOCOLO DE TRADING -->
       <div class="page" id="page-reglas">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px">
-          <button class="protocolo-tab active" onclick="switchProtocoloTab('reglas')">Reglas</button>
-          <button class="protocolo-tab" onclick="switchProtocoloTab('checklist')">Checklist</button>
-          <button class="protocolo-tab" onclick="switchProtocoloTab('riskmgmt')">Risk Management</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:24px">
+          <div id="protocoloSectionTabs" style="display:flex;gap:10px;flex-wrap:wrap"></div>
+          <button class="btn-secondary" style="padding:8px 14px;font-size:0.65rem" onclick="openAddSectionModal()">+ Sección</button>
         </div>
-
-        <div class="protocolo-panel active" id="protocolo-reglas">
-          <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
-            <button class="btn-primary" onclick="openAddItemModal('rule', null)">+ Agregar regla</button>
-          </div>
-          <div id="disciplineList_rule"></div>
-        </div>
-
-        <div class="protocolo-panel" id="protocolo-checklist">
-          <p style="font-size:0.7rem;color:var(--text3);margin-bottom:16px">Marca cada ítem a medida que lo cumples hoy. Se reinicia automáticamente cada día.</p>
-          <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
-            <button class="btn-primary" onclick="openAddItemModal('checklist', null)">+ Agregar ítem</button>
-          </div>
-          <div id="checklistList"></div>
-        </div>
-
-        <div class="protocolo-panel" id="protocolo-riskmgmt">
-          <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
-            <button class="btn-primary" onclick="openAddItemModal('risk_management', null)">+ Agregar ítem</button>
-          </div>
-          <div id="disciplineList_risk_management"></div>
-        </div>
+        <div id="protocoloSectionHeader" style="margin-bottom:16px"></div>
+        <div id="protocoloItemsContainer"></div>
       </div>
 
       <!-- MOVIMIENTOS -->
@@ -1045,7 +1024,7 @@ textarea { resize: vertical; line-height: 1.5; }
             <div class="form-group"><label>Ajustes próxima semana</label><input type="text" id="w_adjustments"/></div>
           </div>
           <div class="form-group" style="margin-top:14px"><label>Notas de la semana</label><textarea id="w_notes" rows="3"></textarea></div>
-          <div class="form-actions"><button type="button" class="btn-primary" onclick="saveWeeklyReview()">Guardar Revisión</button></div>
+          <div class="form-actions"><button type="button" class="btn-primary" id="weeklySaveBtn" onclick="saveWeeklyReview()">Guardar Revisión</button><span id="weeklyCancelEdit" style="display:none;font-size:0.65rem;color:var(--text3);cursor:pointer;margin-left:12px" onclick="cancelWeeklyEdit()">Cancelar edición</span></div>
         </div>
         <div id="weeklyReviewsList"></div>
       </div>
@@ -1178,19 +1157,62 @@ function closeConfirmModal(confirmed) {
   </div>
 </div>
 
+<!-- MODAL NUEVA SECCIÓN DE PROTOCOLO -->
+<div id="addSectionModal" class="modal-overlay" style="display:none">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title">Nueva sección</div>
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Nombre</label>
+      <input type="text" id="section_name_input" placeholder="ej. Rutina Post-Trade"/>
+    </div>
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Tipo <span class="tip" data-tip="No se puede cambiar después de crearla — si más adelante quieres el otro tipo, crea una sección nueva y copia el contenido.">ⓘ</span></label>
+      <div class="toggle-group">
+        <button type="button" class="toggle-btn active" id="sectionModeTextBtn" onclick="setNewSectionMode('text')">Texto</button>
+        <button type="button" class="toggle-btn" id="sectionModeChecklistBtn" onclick="setNewSectionMode('checklist')">Checklist (con casillas)</button>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:20px">
+      <label>Aplicar a</label>
+      <select id="section_scope">
+        <option value="account">Solo esta cuenta</option>
+        <option value="all">Todas mis cuentas</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn-secondary" onclick="closeAddSectionModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveNewSection()">Crear sección</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL ITEM PROTOCOLO (Reglas / Checklist / Risk Management) -->
 <div id="disciplineItemModal" class="modal-overlay" style="display:none">
-  <div class="modal" style="max-width:480px">
+  <div class="modal" style="max-width:520px">
     <div class="modal-title" id="disciplineModalTitle">Agregar ítem</div>
-    <div class="form-group" style="margin-bottom:14px">
-      <label>Sección (opcional)</label>
-      <select id="di_section_select" onchange="handleSectionSelectChange()"></select>
-      <input type="text" id="di_new_section" placeholder="Nombre de la nueva sección" style="display:none;margin-top:8px"/>
+
+    <div class="form-group" id="diModeGroup" style="margin-bottom:16px">
+      <div class="toggle-group">
+        <button type="button" class="toggle-btn active" id="diModeIndividualBtn" onclick="setDiEntryMode('individual')">Individual</button>
+        <button type="button" class="toggle-btn" id="diModeBulkBtn" onclick="setDiEntryMode('bulk')">Pegar en bloque</button>
+      </div>
     </div>
-    <div class="form-group" style="margin-bottom:14px">
-      <label id="di_text_label">Texto</label>
-      <textarea id="di_text" rows="3" placeholder="Escribe aquí..."></textarea>
+
+    <div id="diIndividualFields">
+      <div class="form-group" style="margin-bottom:14px">
+        <label id="di_text_label">Texto</label>
+        <textarea id="di_text" rows="3" placeholder="Escribe aquí..."></textarea>
+      </div>
     </div>
+
+    <div id="diBulkFields" style="display:none">
+      <div id="diBulkHelp" style="display:none;font-size:0.65rem;color:var(--text3);background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:10px;line-height:1.6">Usa <strong style="color:var(--gold-light)">#</strong> antes de una línea para que sea un título (sin casilla). El resto de las líneas se guardan como ítems del checklist, una por línea.</div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label>Pega tu texto — como lo pegues, así se guarda (una línea = un ítem)</label>
+        <textarea id="di_bulk_text" rows="8" placeholder="Pega aquí tu lista completa..."></textarea>
+      </div>
+    </div>
+
     <div class="form-group" style="margin-bottom:20px">
       <label>Aplicar a</label>
       <select id="di_scope">
@@ -2495,7 +2517,7 @@ async function saveTrade(e) {
   const contracts = isOptionsCat
     ? (g('f_contracts')?parseInt(g('f_contracts')):null)
     : (g('f_qty_other')?parseFloat(g('f_qty_other')):null);
-  const payload = { account_id:currentAccountId, user_id:currentUser.id, status, trade_category:category, trade_date:g('f_date'), entry_time:g('f_entry_time'), exit_time:g('f_exit_time'), asset:g('f_asset')||'SPX', trade_type:tradeType, strategy: isOptionsCat ? strategy : null, direction:direction,
+  const payload = { account_id:currentAccountId, user_id:currentUser.id, status, trade_category:category, trade_date:g('f_date'), entry_time:g('f_entry_time'), exit_time:g('f_exit_time'), asset:g('f_asset'), trade_type:tradeType, strategy: isOptionsCat ? strategy : null, direction:direction,
     market_condition: isOptionsCat ? marketCondition : null,
     gex_context: isOptionsCat ? g('f_gex_context') : null,
     vix_level: isOptionsCat ? g('f_vix_level') : null,
@@ -2544,7 +2566,6 @@ async function saveTrade(e) {
 function resetForm() {
   document.getElementById('tradeForm').reset();
   document.getElementById('f_date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('f_asset').value = 'SPX';
   document.getElementById('f_status').value = 'closed';
   toggleStatusFields();
   setTradeCategory('options');
@@ -2576,15 +2597,70 @@ function resetForm() {
   document.getElementById('rulesBrokenGroup').style.display='none';
 }
 
+let editingWeeklyId = null;
+
 async function saveWeeklyReview() {
   const regimeSelect = document.getElementById('w_regime').value;
   const regimeOther = document.getElementById('w_regime_other')?.value || '';
   const market_regime = (regimeSelect === 'Otro' && regimeOther.trim()) ? regimeOther.trim() : regimeSelect;
   const p = { account_id:currentAccountId, user_id:currentUser.id, week_start:document.getElementById('w_start').value, week_end:document.getElementById('w_end').value, market_regime, rules_compliance:document.getElementById('w_compliance').value, most_repeated_error:document.getElementById('w_error').value, strategy_adjustments:document.getElementById('w_adjustments').value, notes:document.getElementById('w_notes').value };
   if (!p.week_start||!p.week_end) { alert('Selecciona el rango'); return; }
-  await sb.from('weekly_reviews').insert(p); showToast('✦ Revisión guardada');
-  document.getElementById('w_regime_other').value=''; document.getElementById('w_regime_other').style.display='none';
+  if (editingWeeklyId) {
+    await sb.from('weekly_reviews').update(p).eq('id', editingWeeklyId);
+    showToast('✦ Revisión actualizada');
+  } else {
+    await sb.from('weekly_reviews').insert(p);
+    showToast('✦ Revisión guardada');
+  }
+  cancelWeeklyEdit();
   renderWeekly();
+}
+
+function cancelWeeklyEdit() {
+  editingWeeklyId = null;
+  ['w_start','w_end','w_error','w_adjustments','w_notes'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('w_regime').value = '';
+  document.getElementById('w_compliance').value = '';
+  document.getElementById('w_regime_other').value = '';
+  document.getElementById('w_regime_other').style.display = 'none';
+  const btn = document.getElementById('weeklySaveBtn');
+  if (btn) btn.textContent = 'Guardar Revisión';
+  const cancelLink = document.getElementById('weeklyCancelEdit');
+  if (cancelLink) cancelLink.style.display = 'none';
+}
+
+function editWeeklyReview(id, list) {
+  const r = list.find(x => x.id === id);
+  if (!r) return;
+  editingWeeklyId = id;
+  document.getElementById('w_start').value = r.week_start || '';
+  document.getElementById('w_end').value = r.week_end || '';
+  const regimeSelectEl = document.getElementById('w_regime');
+  const knownOptions = Array.from(regimeSelectEl.options).map(o => o.value);
+  if (r.market_regime && !knownOptions.includes(r.market_regime)) {
+    regimeSelectEl.value = 'Otro';
+    document.getElementById('w_regime_other').value = r.market_regime;
+    document.getElementById('w_regime_other').style.display = 'block';
+  } else {
+    regimeSelectEl.value = r.market_regime || '';
+    document.getElementById('w_regime_other').style.display = 'none';
+  }
+  document.getElementById('w_compliance').value = r.rules_compliance || '';
+  document.getElementById('w_error').value = r.most_repeated_error || '';
+  document.getElementById('w_adjustments').value = r.strategy_adjustments || '';
+  document.getElementById('w_notes').value = r.notes || '';
+  document.getElementById('weeklySaveBtn').textContent = 'Actualizar Revisión';
+  const cancelLink = document.getElementById('weeklyCancelEdit');
+  if (cancelLink) cancelLink.style.display = 'inline';
+  document.getElementById('w_start').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function deleteWeeklyReview(id) {
+  showConfirmModal('¿Eliminar esta revisión semanal? No se puede deshacer.', async () => {
+    await sb.from('weekly_reviews').delete().eq('id', id);
+    showToast('✦ Revisión eliminada');
+    renderWeekly();
+  }, 'Eliminar revisión', 'Eliminar');
 }
 
 async function loadMovements() {
@@ -2701,7 +2777,8 @@ async function deleteMovement(id) {
 async function renderWeekly() {
   const {data} = await sb.from('weekly_reviews').select('*').eq('account_id',currentAccountId).order('week_start',{ascending:false});
   const reviews = data||[];
-  document.getElementById('weeklyReviewsList').innerHTML = reviews.map(r=>`<div class="card" style="margin-top:16px"><div class="card-header"><div><div class="card-title">Semana ${r.week_start} → ${r.week_end}</div><div class="card-meta">${r.market_regime||'—'}</div></div><span class="badge badge-gold">${r.rules_compliance||'—'}</span></div>${r.most_repeated_error?`<div class="card-field" style="margin-bottom:8px"><div class="field-label">Error más repetido</div><div class="field-value">${r.most_repeated_error}</div></div>`:''}${r.notes?`<div class="notes-box">${r.notes}</div>`:''}</div>`).join('');
+  window._weeklyReviewsCache = reviews;
+  document.getElementById('weeklyReviewsList').innerHTML = reviews.map(r=>`<div class="card" style="margin-top:16px"><div class="card-header"><div><div class="card-title">Semana ${r.week_start} → ${r.week_end}</div><div class="card-meta">${r.market_regime||'—'}</div></div><span class="badge badge-gold">${r.rules_compliance||'—'}</span></div>${r.most_repeated_error?`<div class="card-field" style="margin-bottom:8px"><div class="field-label">Error más repetido</div><div class="field-value">${r.most_repeated_error}</div></div>`:''}${r.notes?`<div class="notes-box">${r.notes}</div>`:''}<div style="display:flex;gap:8px;margin-top:10px"><button class="btn-secondary" style="padding:6px 12px;font-size:0.62rem" onclick="editWeeklyReview('${r.id}', window._weeklyReviewsCache)">Editar</button><button class="btn-danger" onclick="deleteWeeklyReview('${r.id}')">✕</button></div></div>`).join('');
 }
 
 // ===== PROTOCOLO DE TRADING =====
@@ -3170,11 +3247,27 @@ async function confirmImport() {
   renderBitacora();
 }
 
-function switchProtocoloTab(tab) {
-  document.querySelectorAll('.protocolo-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.protocolo-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('protocolo-' + tab).classList.add('active');
-  event.target.classList.add('active');
+// ===== PROTOCOLO — secciones configurables =====
+let protocolSections = [];
+let activeProtocolSectionId = null;
+
+async function loadProtocolSections() {
+  if (!currentUser) { protocolSections = []; return; }
+  const { data } = await sb.from('protocol_sections').select('*')
+    .or(`account_id.eq.${currentAccountId},account_id.is.null`)
+    .order('sort_order', { ascending: true });
+  protocolSections = data || [];
+
+  if (protocolSections.length === 0) {
+    // Primera vez que esta cuenta abre Protocolo — se crean las 3 secciones por defecto.
+    const defaults = [
+      { user_id: currentUser.id, account_id: null, name: 'Reglas', mode: 'text', sort_order: 0 },
+      { user_id: currentUser.id, account_id: null, name: 'Checklist', mode: 'checklist', sort_order: 1 },
+      { user_id: currentUser.id, account_id: null, name: 'Risk Management', mode: 'text', sort_order: 2 },
+    ];
+    const { data: inserted } = await sb.from('protocol_sections').insert(defaults).select();
+    protocolSections = inserted || [];
+  }
 }
 
 async function loadDisciplineItems() {
@@ -3203,110 +3296,197 @@ async function loadChecklistCompletionsToday() {
 }
 
 async function renderProtocolo() {
+  await loadProtocolSections();
   await Promise.all([loadDisciplineItems(), loadChecklistItems(), loadChecklistCompletionsToday()]);
-  renderDisciplineTab('rule');
-  renderDisciplineTab('risk_management');
-  renderChecklistTab();
+  if (!activeProtocolSectionId || !protocolSections.find(s => s.id === activeProtocolSectionId)) {
+    activeProtocolSectionId = protocolSections.length ? protocolSections[0].id : null;
+  }
+  renderProtocoloTabs();
+  renderProtocoloSectionContent();
+}
+
+function renderProtocoloTabs() {
+  const el = document.getElementById('protocoloSectionTabs');
+  el.innerHTML = protocolSections.map(s =>
+    `<button class="protocolo-tab ${s.id === activeProtocolSectionId ? 'active' : ''}" onclick="switchProtocoloSection('${s.id}')">${s.mode === 'checklist' ? '☑ ' : ''}${s.name}</button>`
+  ).join('');
+}
+
+function switchProtocoloSection(id) {
+  activeProtocolSectionId = id;
+  renderProtocoloTabs();
+  renderProtocoloSectionContent();
 }
 
 function scopeLabel(item) { return item.account_id ? 'Solo esta cuenta' : 'Todas mis cuentas'; }
 
-function groupBySection(items) {
-  const groups = {};
-  items.forEach(it => { const k = it.section_name || '__none__'; (groups[k] = groups[k] || []).push(it); });
-  return groups;
-}
+function renderProtocoloSectionContent() {
+  const headerEl = document.getElementById('protocoloSectionHeader');
+  const listEl = document.getElementById('protocoloItemsContainer');
+  const section = protocolSections.find(s => s.id === activeProtocolSectionId);
+  if (!section) {
+    headerEl.innerHTML = '';
+    listEl.innerHTML = `<div class="empty-state"><div class="empty-title">Aún no tienes secciones</div><div class="empty-sub">Crea la primera con "+ Sección" arriba</div></div>`;
+    return;
+  }
 
-function renderDisciplineTab(type) {
-  const container = document.getElementById('disciplineList_' + type);
-  if (!container) return;
-  const items = disciplineItems.filter(i => i.item_type === type);
+  const idx = protocolSections.findIndex(s => s.id === section.id);
+  headerEl.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:0.9rem;color:var(--gold-light);font-weight:600">${section.name}</span>
+        <span onclick="${idx > 0 ? `moveSectionUp('${section.id}')` : ''}" style="cursor:${idx > 0 ? 'pointer' : 'default'};opacity:${idx > 0 ? 1 : 0.25};font-size:0.7rem" title="Mover sección arriba">▲</span>
+        <span onclick="${idx < protocolSections.length - 1 ? `moveSectionDown('${section.id}')` : ''}" style="cursor:${idx < protocolSections.length - 1 ? 'pointer' : 'default'};opacity:${idx < protocolSections.length - 1 ? 1 : 0.25};font-size:0.7rem" title="Mover sección abajo">▼</span>
+        <button class="btn-danger" style="margin-left:8px" onclick="deleteProtocolSection('${section.id}')" title="Eliminar sección">✕</button>
+      </div>
+      <button class="btn-primary" onclick="openAddItemModal(null)">+ Agregar</button>
+    </div>
+    ${section.mode === 'checklist' ? '<p style="font-size:0.68rem;color:var(--text3);margin-top:8px">Marca cada ítem a medida que lo cumples hoy. Se reinicia automáticamente cada día.</p>' : ''}
+  `;
+
+  const items = (section.mode === 'checklist' ? checklistItems : disciplineItems).filter(i => i.section_id === section.id);
   if (!items.length) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-title">Aún no tienes ${type==='rule'?'reglas':'ítems de risk management'}</div><div class="empty-sub">Agrega el primero con el botón de arriba — tú decides cómo organizarlas</div></div>`;
+    listEl.innerHTML = `<div class="empty-state"><div class="empty-title">Aún no tienes nada aquí</div><div class="empty-sub">Agrega el primero con el botón de arriba</div></div>`;
     return;
   }
-  const groups = groupBySection(items);
-  let html = '';
-  Object.entries(groups).forEach(([section, list]) => {
-    html += `<div class="discipline-section">`;
-    if (section !== '__none__') html += `<div class="discipline-section-title">${section}</div>`;
-    list.forEach(it => {
-      html += `<div class="discipline-item">
-        <div class="discipline-item-text">${it.item_text}<div class="discipline-item-scope">${scopeLabel(it)}</div></div>
-        <div class="discipline-item-actions">
-          <button class="btn-secondary" style="padding:6px 10px;font-size:0.62rem" onclick="editDisciplineItem('${it.id}','${type}')">Editar</button>
-          <button class="btn-danger" onclick="deleteDisciplineItem('${it.id}','${type}')">✕</button>
-        </div>
-      </div>`;
-    });
-    html += `</div>`;
-  });
-  container.innerHTML = html;
-}
 
-function renderChecklistTab() {
-  const container = document.getElementById('checklistList');
-  if (!container) return;
-  if (!checklistItems.length) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-title">Aún no tienes ítems en tu checklist</div><div class="empty-sub">Agrega el primero con el botón de arriba</div></div>`;
-    return;
-  }
-  const groups = groupBySection(checklistItems);
   let html = '';
-  Object.entries(groups).forEach(([section, list]) => {
-    html += `<div class="discipline-section">`;
-    if (section !== '__none__') html += `<div class="discipline-section-title">${section}</div>`;
-    list.forEach(it => {
+  items.forEach((it, i) => {
+    const arrows = `
+      <span onclick="${i > 0 ? `moveItemUpDown('${it.id}','${section.mode}',${i},-1)` : ''}" style="cursor:${i > 0 ? 'pointer' : 'default'};opacity:${i > 0 ? 1 : 0.25};font-size:0.6rem" title="Subir">▲</span>
+      <span onclick="${i < items.length - 1 ? `moveItemUpDown('${it.id}','${section.mode}',${i},1)` : ''}" style="cursor:${i < items.length - 1 ? 'pointer' : 'default'};opacity:${i < items.length - 1 ? 1 : 0.25};font-size:0.6rem" title="Bajar">▼</span>
+    `;
+    if (it.is_header) {
+      html += `<div class="discipline-section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>${it.item_text}</span>
+        <span style="display:flex;gap:6px;align-items:center">${arrows}<button class="btn-danger" onclick="deleteDisciplineItem('${it.id}','${section.mode}')">✕</button></span>
+      </div>`;
+      return;
+    }
+    if (section.mode === 'checklist') {
       const checked = !!checklistCompletionsToday[it.id];
       html += `<div class="checklist-item">
-        <div class="checklist-checkbox ${checked?'checked':''}" onclick="toggleChecklistItem('${it.id}', ${!checked})"></div>
-        <div class="checklist-item-text ${checked?'done':''}">${it.item_text}<div class="discipline-item-scope">${scopeLabel(it)}</div></div>
-        <div class="discipline-item-actions">
+        <div class="checklist-checkbox ${checked ? 'checked' : ''}" onclick="toggleChecklistItem('${it.id}', ${!checked})"></div>
+        <div class="checklist-item-text ${checked ? 'done' : ''}">${it.item_text}<div class="discipline-item-scope">${scopeLabel(it)}</div></div>
+        <div class="discipline-item-actions">${arrows}
           <button class="btn-secondary" style="padding:6px 10px;font-size:0.62rem" onclick="editDisciplineItem('${it.id}','checklist')">Editar</button>
           <button class="btn-danger" onclick="deleteDisciplineItem('${it.id}','checklist')">✕</button>
         </div>
       </div>`;
-    });
-    html += `</div>`;
+    } else {
+      html += `<div class="discipline-item">
+        <div class="discipline-item-text">${it.item_text}<div class="discipline-item-scope">${scopeLabel(it)}</div></div>
+        <div class="discipline-item-actions">${arrows}
+          <button class="btn-secondary" style="padding:6px 10px;font-size:0.62rem" onclick="editDisciplineItem('${it.id}','text')">Editar</button>
+          <button class="btn-danger" onclick="deleteDisciplineItem('${it.id}','text')">✕</button>
+        </div>
+      </div>`;
+    }
   });
-  container.innerHTML = html;
+  listEl.innerHTML = html;
+}
+
+async function moveItemUpDown(id, mode, idx, dir) {
+  const table = mode === 'checklist' ? 'checklist_items' : 'discipline_items';
+  const list = (mode === 'checklist' ? checklistItems : disciplineItems).filter(i => i.section_id === activeProtocolSectionId);
+  const other = list[idx + dir];
+  const current = list[idx];
+  if (!other || !current) return;
+  const a = current.sort_order, b = other.sort_order;
+  await Promise.all([
+    sb.from(table).update({ sort_order: b }).eq('id', current.id),
+    sb.from(table).update({ sort_order: a }).eq('id', other.id),
+  ]);
+  await renderProtocolo();
+}
+
+async function moveSectionUp(id) { await moveSectionUpDown(id, -1); }
+async function moveSectionDown(id) { await moveSectionUpDown(id, 1); }
+
+async function moveSectionUpDown(id, dir) {
+  const idx = protocolSections.findIndex(s => s.id === id);
+  const other = protocolSections[idx + dir];
+  const current = protocolSections[idx];
+  if (!other || !current) return;
+  const a = current.sort_order, b = other.sort_order;
+  await Promise.all([
+    sb.from('protocol_sections').update({ sort_order: b }).eq('id', current.id),
+    sb.from('protocol_sections').update({ sort_order: a }).eq('id', other.id),
+  ]);
+  await renderProtocolo();
+}
+
+function openAddSectionModal() {
+  document.getElementById('section_name_input').value = '';
+  document.getElementById('section_scope').value = 'account';
+  setNewSectionMode('text');
+  document.getElementById('addSectionModal').style.display = 'flex';
+}
+function closeAddSectionModal() { document.getElementById('addSectionModal').style.display = 'none'; }
+
+let newSectionMode = 'text';
+function setNewSectionMode(mode) {
+  newSectionMode = mode;
+  document.getElementById('sectionModeTextBtn').classList.toggle('active', mode === 'text');
+  document.getElementById('sectionModeChecklistBtn').classList.toggle('active', mode === 'checklist');
+}
+
+async function saveNewSection() {
+  const name = document.getElementById('section_name_input').value.trim();
+  if (!name) { alert('Ponle un nombre a la sección'); return; }
+  const scope = document.getElementById('section_scope').value;
+  const accountIdVal = scope === 'all' ? null : currentAccountId;
+  const maxOrder = protocolSections.length ? Math.max(...protocolSections.map(s => s.sort_order)) : -1;
+  await sb.from('protocol_sections').insert({
+    user_id: currentUser.id, account_id: accountIdVal, name, mode: newSectionMode, sort_order: maxOrder + 1
+  });
+  showToast('✦ Sección creada');
+  closeAddSectionModal();
+  await renderProtocolo();
+}
+
+async function deleteProtocolSection(id) {
+  const section = protocolSections.find(s => s.id === id);
+  if (!section) return;
+  const items = (section.mode === 'checklist' ? checklistItems : disciplineItems).filter(i => i.section_id === id);
+  const warning = items.length
+    ? `Esta sección tiene ${items.length} ítem(s) — se eliminarán todos junto con la sección. No se puede deshacer.`
+    : 'Esta acción no se puede deshacer.';
+  showConfirmModal(warning, async () => {
+    await sb.from('protocol_sections').delete().eq('id', id);
+    activeProtocolSectionId = null;
+    showToast('✦ Sección eliminada');
+    await renderProtocolo();
+  }, '¿Eliminar esta sección?', 'Eliminar');
 }
 
 async function toggleChecklistItem(itemId, newChecked) {
   const today = new Date().toISOString().split('T')[0];
   checklistCompletionsToday[itemId] = newChecked;
-  renderChecklistTab();
+  renderProtocoloSectionContent();
   await sb.from('checklist_completions').upsert({
     checklist_item_id: itemId, account_id: currentAccountId, user_id: currentUser.id,
     completion_date: today, is_checked: newChecked
   }, { onConflict: 'checklist_item_id,account_id,completion_date' });
 }
 
-function getSectionsForType(type) {
-  const source = type === 'checklist' ? checklistItems : disciplineItems.filter(i => i.item_type === type);
-  return [...new Set(source.map(i => i.section_name).filter(Boolean))];
-}
-
-function openAddItemModal(type, editId) {
-  diModalType = type;
+function openAddItemModal(editId) {
   diModalEditId = editId || null;
-  const sections = getSectionsForType(type);
-  const sel = document.getElementById('di_section_select');
-  sel.innerHTML = '<option value="">Sin sección</option>' +
-    sections.map(s => `<option value="${s}">${s}</option>`).join('') +
-    '<option value="__new__">+ Nueva sección...</option>';
-  document.getElementById('di_new_section').style.display = 'none';
-  document.getElementById('di_new_section').value = '';
+  const section = protocolSections.find(s => s.id === activeProtocolSectionId);
+  if (!section) return;
+  setDiEntryMode('individual');
+  document.getElementById('diModeGroup').style.display = editId ? 'none' : 'flex';
   document.getElementById('di_text').value = '';
+  document.getElementById('di_bulk_text').value = '';
   document.getElementById('di_scope').value = 'account';
-  document.getElementById('di_text_label').textContent = type === 'checklist' ? 'Ítem del checklist' : type === 'risk_management' ? 'Ítem de Risk Management' : 'Regla';
-  document.getElementById('disciplineModalTitle').textContent = editId ? 'Editar ítem' : 'Agregar ítem';
+  document.getElementById('di_text_label').textContent = section.mode === 'checklist' ? 'Ítem del checklist' : 'Regla / ítem';
+  document.getElementById('diBulkHelp').style.display = section.mode === 'checklist' ? 'block' : 'none';
+  document.getElementById('disciplineModalTitle').textContent = editId ? 'Editar ítem' : ('Agregar a "' + section.name + '"');
 
   if (editId) {
-    const source = type === 'checklist' ? checklistItems : disciplineItems;
+    const source = section.mode === 'checklist' ? checklistItems : disciplineItems;
     const item = source.find(i => i.id === editId);
     if (item) {
-      sel.value = item.section_name || '';
       document.getElementById('di_text').value = item.item_text;
       document.getElementById('di_scope').value = item.account_id ? 'account' : 'all';
     }
@@ -3314,46 +3494,62 @@ function openAddItemModal(type, editId) {
   document.getElementById('disciplineItemModal').style.display = 'flex';
 }
 
-function editDisciplineItem(id, type) { openAddItemModal(type, id); }
+function editDisciplineItem(id, mode) { openAddItemModal(id); }
 
-function handleSectionSelectChange() {
-  const val = document.getElementById('di_section_select').value;
-  document.getElementById('di_new_section').style.display = val === '__new__' ? 'block' : 'none';
+let diEntryMode = 'individual';
+function setDiEntryMode(mode) {
+  diEntryMode = mode;
+  document.getElementById('diModeIndividualBtn').classList.toggle('active', mode === 'individual');
+  document.getElementById('diModeBulkBtn').classList.toggle('active', mode === 'bulk');
+  document.getElementById('diIndividualFields').style.display = mode === 'individual' ? 'block' : 'none';
+  document.getElementById('diBulkFields').style.display = mode === 'bulk' ? 'block' : 'none';
 }
 
 function closeDisciplineModal() { document.getElementById('disciplineItemModal').style.display = 'none'; }
 
 async function saveDisciplineItem() {
-  const text = document.getElementById('di_text').value.trim();
-  if (!text) { alert('Escribe el texto del ítem'); return; }
-  let sectionVal = document.getElementById('di_section_select').value;
-  if (sectionVal === '__new__') sectionVal = document.getElementById('di_new_section').value.trim();
+  const section = protocolSections.find(s => s.id === activeProtocolSectionId);
+  if (!section) return;
+  const table = section.mode === 'checklist' ? 'checklist_items' : 'discipline_items';
   const scope = document.getElementById('di_scope').value;
   const accountIdVal = scope === 'all' ? null : currentAccountId;
-
-  const table = diModalType === 'checklist' ? 'checklist_items' : 'discipline_items';
-  const payload = { user_id: currentUser.id, account_id: accountIdVal, section_name: sectionVal || null, item_text: text };
-  if (diModalType !== 'checklist') payload.item_type = diModalType;
+  const existingCount = (section.mode === 'checklist' ? checklistItems : disciplineItems).filter(i => i.section_id === section.id).length;
 
   if (diModalEditId) {
-    await sb.from(table).update(payload).eq('id', diModalEditId);
+    const text = document.getElementById('di_text').value.trim();
+    if (!text) { alert('Escribe el texto del ítem'); return; }
+    await sb.from(table).update({ item_text: text, account_id: accountIdVal }).eq('id', diModalEditId);
     showToast('✦ Actualizado');
-  } else {
-    await sb.from(table).insert(payload);
+  } else if (diEntryMode === 'individual') {
+    const text = document.getElementById('di_text').value.trim();
+    if (!text) { alert('Escribe el texto del ítem'); return; }
+    await sb.from(table).insert({ user_id: currentUser.id, account_id: accountIdVal, section_id: section.id, item_text: text, sort_order: existingCount });
     showToast('✦ Agregado');
+  } else {
+    const raw = document.getElementById('di_bulk_text').value;
+    const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length);
+    if (!lines.length) { alert('Pega al menos una línea de texto'); return; }
+    const rows = lines.map((line, i) => {
+      const isHeader = section.mode === 'checklist' && line.startsWith('#');
+      const text = isHeader ? line.replace(/^#+\s*/, '') : line;
+      return { user_id: currentUser.id, account_id: accountIdVal, section_id: section.id, item_text: text, is_header: isHeader, sort_order: existingCount + i };
+    });
+    await sb.from(table).insert(rows);
+    showToast(`✦ ${rows.length} ítems agregados`);
   }
   closeDisciplineModal();
   await renderProtocolo();
 }
 
-async function deleteDisciplineItem(id, type) {
+async function deleteDisciplineItem(id, mode) {
   showConfirmModal('Esta acción no se puede deshacer.', async () => {
-    const table = type === 'checklist' ? 'checklist_items' : 'discipline_items';
+    const table = mode === 'checklist' ? 'checklist_items' : 'discipline_items';
     await sb.from(table).delete().eq('id', id);
     showToast('✦ Eliminado');
     await renderProtocolo();
   }, '¿Eliminar este ítem?');
 }
+
 
 
 function calcPremiumTotal() {
