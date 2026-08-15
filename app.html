@@ -1230,7 +1230,6 @@ function closeConfirmModal(confirmed) {
     </div>
 
     <div id="diBulkFields" style="display:none">
-      <div id="diBulkHelp" style="display:none;font-size:0.65rem;color:var(--text3);background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:10px;line-height:1.6">Usa <strong style="color:var(--gold-light)">#</strong> antes de una línea para crear una sección nueva con ese nombre — todo lo que pegues debajo cae ahí, hasta el siguiente #. Si no usas #, todo se guarda en la sección que elegiste arriba (o suelto, si no elegiste ninguna).</div>
       <div class="form-group" style="margin-bottom:14px">
         <label>Pega tu texto — como lo pegues, así se guarda (una línea = un ítem)</label>
         <textarea id="di_bulk_text" rows="8" placeholder="Pega aquí tu lista completa..."></textarea>
@@ -3581,7 +3580,6 @@ function openAddItemModal(editId) {
   document.getElementById('di_bulk_text').value = '';
   document.getElementById('di_scope').value = 'account';
   document.getElementById('di_text_label').textContent = page.mode === 'checklist' ? 'Ítem del checklist' : 'Regla / ítem';
-  document.getElementById('diBulkHelp').style.display = page.mode === 'checklist' ? 'block' : 'none';
   document.getElementById('disciplineModalTitle').textContent = editId ? 'Editar ítem' : ('Agregar a "' + page.name + '"');
 
   const subs = protocolSubsections.filter(s => s.page_id === page.id);
@@ -3624,67 +3622,39 @@ async function saveDisciplineItem() {
   if (diModalEditId) {
     const text = document.getElementById('di_text').value.trim();
     if (!text) { alert('Escribe el texto del ítem'); return; }
-    await sb.from(table).update({ item_text: text, account_id: accountIdVal, subsection_id: selectedSubId }).eq('id', diModalEditId);
+    const { error } = await sb.from(table).update({ item_text: text, account_id: accountIdVal, subsection_id: selectedSubId }).eq('id', diModalEditId);
+    if (error) { alert('No se pudo actualizar: ' + error.message); return; }
     showToast('✦ Actualizado');
     closeDisciplineModal();
     await renderProtocolo();
     return;
   }
 
+  const source = page.mode === 'checklist' ? checklistItems : disciplineItems;
+
   if (diEntryMode === 'individual') {
     const text = document.getElementById('di_text').value.trim();
     if (!text) { alert('Escribe el texto del ítem'); return; }
-    const source = page.mode === 'checklist' ? checklistItems : disciplineItems;
     const count = source.filter(i => i.page_id === page.id && i.subsection_id == selectedSubId).length;
-    await sb.from(table).insert({ user_id: currentUser.id, account_id: accountIdVal, page_id: page.id, subsection_id: selectedSubId, item_text: text, sort_order: count });
+    const { error } = await sb.from(table).insert({ user_id: currentUser.id, account_id: accountIdVal, page_id: page.id, subsection_id: selectedSubId, item_text: text, sort_order: count });
+    if (error) { alert('No se pudo guardar: ' + error.message); return; }
     showToast('✦ Agregado');
     closeDisciplineModal();
     await renderProtocolo();
     return;
   }
 
-  // Pegar en bloque
+  // Pegar en bloque — todo cae bajo la sección elegida arriba (o suelto si no elegiste ninguna),
+  // tal como lo pegaste, sin interpretar símbolos. Si quieres varias secciones, créalas primero
+  // con "+ Sección" y pega cada bloque por separado.
   const raw = document.getElementById('di_bulk_text').value;
   const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length);
   if (!lines.length) { alert('Pega al menos una línea de texto'); return; }
-  const rows = [];
+  const count = source.filter(i => i.page_id === page.id && i.subsection_id == selectedSubId).length;
+  const rows = lines.map((line, i) => ({ user_id: currentUser.id, account_id: accountIdVal, page_id: page.id, subsection_id: selectedSubId, item_text: line, sort_order: count + i }));
 
-  if (page.mode === 'checklist') {
-    // # crea/reutiliza secciones reales sobre la marcha — solo en páginas de checklist.
-    let currentSubId = selectedSubId;
-    const subsByName = {};
-    protocolSubsections.filter(s => s.page_id === page.id).forEach(s => { subsByName[s.name.toLowerCase()] = s.id; });
-    const orderCounters = {};
-    const seedCount = subId => checklistItems.filter(i => i.page_id === page.id && i.subsection_id == subId).length;
-
-    for (const line of lines) {
-      if (line.startsWith('#')) {
-        const name = line.replace(/^#+\s*/, '').trim();
-        if (!name) continue;
-        const key = name.toLowerCase();
-        if (!subsByName[key]) {
-          const maxOrder = protocolSubsections.filter(s => s.page_id === page.id).reduce((m, s) => Math.max(m, s.sort_order), -1);
-          const { data: inserted } = await sb.from('protocol_subsections').insert({
-            page_id: page.id, user_id: currentUser.id, account_id: accountIdVal, name, sort_order: maxOrder + 1
-          }).select().single();
-          if (inserted) { subsByName[key] = inserted.id; protocolSubsections.push(inserted); }
-        }
-        currentSubId = subsByName[key];
-        continue;
-      }
-      if (orderCounters[currentSubId] === undefined) orderCounters[currentSubId] = seedCount(currentSubId);
-      rows.push({ user_id: currentUser.id, account_id: accountIdVal, page_id: page.id, subsection_id: currentSubId, item_text: line, sort_order: orderCounters[currentSubId] });
-      orderCounters[currentSubId]++;
-    }
-  } else {
-    // Páginas de texto: se guarda tal cual, sin interpretar #, todo bajo la sección elegida (o suelto).
-    const count = disciplineItems.filter(i => i.page_id === page.id && i.subsection_id == selectedSubId).length;
-    lines.forEach((line, i) => {
-      rows.push({ user_id: currentUser.id, account_id: accountIdVal, page_id: page.id, subsection_id: selectedSubId, item_text: line, sort_order: count + i });
-    });
-  }
-
-  if (rows.length) await sb.from(table).insert(rows);
+  const { error } = await sb.from(table).insert(rows);
+  if (error) { alert('No se pudo guardar: ' + error.message); return; }
   showToast(`✦ ${rows.length} ítems agregados`);
   closeDisciplineModal();
   await renderProtocolo();
