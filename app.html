@@ -3282,17 +3282,16 @@ async function loadProtocolSections() {
     .order('sort_order', { ascending: true });
   protocolSections = data || [];
 
-  const defaultNames = ['Reglas', 'Checklist', 'Risk Management'];
-  const missing = defaultNames.filter(name => !protocolSections.find(s => s.name === name));
-  if (missing.length) {
-    const maxOrder = protocolSections.length ? Math.max(...protocolSections.map(s => s.sort_order)) : -1;
-    const toInsert = missing.map((name, i) => ({
-      user_id: currentUser.id, account_id: null,
-      name, mode: name === 'Checklist' ? 'checklist' : 'text',
-      sort_order: maxOrder + 1 + i,
-    }));
-    const { data: inserted } = await sb.from('protocol_sections').insert(toInsert).select();
-    protocolSections = [...protocolSections, ...(inserted || [])].sort((a, b) => a.sort_order - b.sort_order);
+  // Solo se crean las 3 páginas por defecto la primera vez que esta cuenta no tiene NINGUNA
+  // página — así, si alguien borra una a propósito, se queda borrada y no vuelve a aparecer sola.
+  if (protocolSections.length === 0) {
+    const defaults = [
+      { user_id: currentUser.id, account_id: null, name: 'Reglas', mode: 'text', sort_order: 0 },
+      { user_id: currentUser.id, account_id: null, name: 'Checklist', mode: 'checklist', sort_order: 1 },
+      { user_id: currentUser.id, account_id: null, name: 'Risk Management', mode: 'text', sort_order: 2 },
+    ];
+    const { data: inserted } = await sb.from('protocol_sections').insert(defaults).select();
+    protocolSections = inserted || [];
   }
 }
 
