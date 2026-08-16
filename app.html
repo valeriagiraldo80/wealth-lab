@@ -979,12 +979,10 @@ textarea { resize: vertical; line-height: 1.5; }
 
         <div class="calfin-panel active" id="calfin-calendario">
           <div class="form-section">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px">
-              <div class="form-section-title" style="margin-bottom:0">Calendario Financiero</div>
-              <div style="display:flex;gap:8px;flex-shrink:0">
-                <span class="item-icon-btn" style="font-size:1rem;border:1px solid var(--border);border-radius:6px;padding:5px 10px" onclick="openAddCalEventModal()" title="Agregar fecha">+</span>
-                <span class="item-icon-btn" style="font-size:0.85rem;border:1px solid var(--border);border-radius:6px;padding:5px 10px" onclick="toggleCalSearch()" title="Buscar">🔍</span>
-              </div>
+            <div class="form-section-title">Calendario Financiero</div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin:-8px 0 12px">
+              <span class="item-icon-btn" style="font-size:1rem;border:1px solid var(--border);border-radius:6px;padding:5px 10px" onclick="openAddCalEventModal()" title="Agregar fecha">+</span>
+              <span class="item-icon-btn" style="font-size:0.85rem;border:1px solid var(--border);border-radius:6px;padding:5px 10px" onclick="toggleCalSearch()" title="Buscar">🔍</span>
             </div>
             <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Los eventos macroeconómicos y vencimientos que mueven al SPX — Fed, inflación, empleo, vencimientos de opciones — con su nivel de impacto, hora de publicación, y el resultado real una vez se conoce.</p>
 
@@ -4037,6 +4035,7 @@ async function initEstudios() {
 
 function initCalfin() {
   renderEstacionalidad();
+  calWeekOffset = 0;
   loadCalEvents();
   const today = new Date().toISOString().split('T')[0];
   if (document.getElementById('cal_date')) document.getElementById('cal_date').value = today;
@@ -5620,12 +5619,32 @@ function calcLuna() {
 
 let calImpactFilter = 'todas';
 
+let calWeekOffset = 0;
+
 async function loadCalEvents() {
   const now = new Date();
-  const past = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-  const fromDate = past.toISOString().split('T')[0];
-  const { data } = await sb.from('calendar_events').select('*').gte('event_date', fromDate).order('event_date');
+  const past = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+  const future = new Date(now.getTime() + 200 * 24 * 60 * 60 * 1000);
+  const { data } = await sb.from('calendar_events').select('*')
+    .gte('event_date', past.toISOString().split('T')[0])
+    .lte('event_date', future.toISOString().split('T')[0])
+    .order('event_date');
   calEvents = data || [];
+  renderCalEvents();
+}
+
+function getCalWeekRange(offset) {
+  const now = new Date();
+  const day = now.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday + offset * 7);
+  const friday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 4);
+  const fmt = d => d.toISOString().split('T')[0];
+  return { start: fmt(monday), end: fmt(friday), monday, friday };
+}
+
+function changeCalWeek(delta) {
+  calWeekOffset += delta;
   renderCalEvents();
 }
 
@@ -5684,18 +5703,15 @@ function renderCalEvents() {
   if (!el) return;
 
   const today = new Date().toISOString().split('T')[0];
+  const week = getCalWeekRange(calWeekOffset);
 
   const searchEl = document.getElementById('cal_search');
   const searchTerm = searchEl ? searchEl.value.trim().toLowerCase() : '';
 
-  let filtered = calImpactFilter === 'todas' ? calEvents : calEvents.filter(e => (e.impact || 'media') === calImpactFilter);
+  let filtered = calEvents.filter(e => e.event_date >= week.start && e.event_date <= week.end);
+  filtered = calImpactFilter === 'todas' ? filtered : filtered.filter(e => (e.impact || 'media') === calImpactFilter);
   if (searchTerm) {
     filtered = filtered.filter(e => (e.event_type || '').toLowerCase().includes(searchTerm) || (e.description || '').toLowerCase().includes(searchTerm));
-  }
-
-  if (!filtered.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">No hay fechas próximas con este filtro</div></div>';
-    return;
   }
 
   const impactMeta = {
@@ -5706,38 +5722,51 @@ function renderCalEvents() {
   const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
-  let html = '';
-  let lastDate = null;
+  const weekLabel = `Semana del ${week.monday.getDate()} ${monthNames[week.monday.getMonth()]} al ${week.friday.getDate()} ${monthNames[week.friday.getMonth()]}`;
 
-  filtered.forEach(e => {
-    if (e.event_date !== lastDate) {
-      const d = new Date(e.event_date + 'T12:00:00');
-      const label = `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]}`;
-      html += `<div style="font-size:0.65rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin:${lastDate ? '20px' : '0'} 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)">${label}${e.event_date === today ? ' — HOY' : ''}</div>`;
-      lastDate = e.event_date;
-    }
+  let html = `<div style="text-align:center;font-size:0.68rem;color:var(--text3);margin-bottom:16px">${weekLabel}${calWeekOffset === 0 ? ' · esta semana' : ''}</div>`;
 
-    const meta = impactMeta[e.impact || 'media'];
-    const isMine = e.user_id && currentUser && e.user_id === currentUser.id;
-    const isOwnDeletable = isMine || isAdminUser;
+  if (!filtered.length) {
+    html += '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">No hay fechas esta semana con este filtro</div></div>';
+  } else {
+    let lastDate = null;
+    filtered.forEach(e => {
+      if (e.event_date !== lastDate) {
+        const d = new Date(e.event_date + 'T12:00:00');
+        const label = `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]}`;
+        html += `<div style="font-size:0.65rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin:${lastDate ? '20px' : '0'} 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)">${label}${e.event_date === today ? ' — HOY' : ''}</div>`;
+        lastDate = e.event_date;
+      }
 
-    html += `
-    <div class="cal-event" style="border-left:3px solid ${meta.color}">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
-        <span class="badge" style="background:${meta.bg};color:${meta.color};border:1px solid ${meta.color}">${e.event_type}</span>
-        ${e.release_time ? `<span style="font-size:0.6rem;color:var(--text3)">🕐 ${e.release_time}</span>` : ''}
-      </div>
-      ${isMine ? '<span class="badge" style="background:var(--bg3);color:var(--text3);border:1px solid var(--border);margin-top:6px;display:inline-block">👤 Solo tú la ves</span>' : ''}
-      <div class="cal-event-desc">${e.description || ''}</div>
-      ${(e.actual_value || e.previous_value) ? `<div style="display:flex;gap:16px;margin-top:8px;font-size:0.66rem">
-        ${e.actual_value ? `<span><span style="color:var(--text3)">Actual: </span><span style="color:var(--gold-light);font-weight:600;font-family:'Cocogoose',sans-serif">${e.actual_value}</span></span>` : ''}
-        ${e.previous_value ? `<span><span style="color:var(--text3)">Anterior: </span><span style="color:var(--text2);font-family:'Cocogoose',sans-serif">${e.previous_value}</span></span>` : ''}
-      </div>` : ''}
-      ${e.info_text ? `<span class="item-icon-btn" style="font-size:0.9rem" onclick="toggleCalInfo('${e.id}')" title="¿Cómo afecta esto al mercado?">ⓘ</span>` : ''}
-      ${isOwnDeletable ? `<button class="btn-danger" onclick="deleteCalEvent('${e.id}')">✕</button>` : ''}
-      ${e.info_text ? `<div id="calinfo_${e.id}" style="display:none;font-size:0.68rem;color:var(--text2);background:var(--bg3);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.6">${e.info_text}</div>` : ''}
-    </div>`;
-  });
+      const meta = impactMeta[e.impact || 'media'];
+      const isMine = e.user_id && currentUser && e.user_id === currentUser.id;
+      const isOwnDeletable = isMine || isAdminUser;
+      const hasData = e.actual_value || e.previous_value;
+
+      html += `
+      <div class="cal-event" style="border-left:3px solid ${meta.color}">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+          <span class="badge" style="background:${meta.bg};color:${meta.color};border:1px solid ${meta.color}">${e.event_type}</span>
+          ${e.release_time ? `<span style="font-size:0.6rem;color:var(--text3)">🕐 ${e.release_time}</span>` : ''}
+        </div>
+        ${isMine ? '<span class="badge" style="background:var(--bg3);color:var(--text3);border:1px solid var(--border);margin-top:6px;display:inline-block">👤 Solo tú la ves</span>' : ''}
+        <div class="cal-event-desc">${e.description || ''}</div>
+        ${hasData ? `<div style="display:flex;gap:16px;margin-top:8px;font-size:0.66rem">
+          <span><span style="color:var(--text3)">Actual: </span><span style="color:${e.actual_value ? 'var(--gold-light)' : 'var(--text3)'};font-weight:600;font-family:'Cocogoose',sans-serif">${e.actual_value || '--'}</span></span>
+          ${e.previous_value ? `<span><span style="color:var(--text3)">Anterior: </span><span style="color:var(--text2);font-family:'Cocogoose',sans-serif">${e.previous_value}</span></span>` : ''}
+        </div>` : ''}
+        ${e.info_text ? `<span class="item-icon-btn" style="font-size:0.9rem" onclick="toggleCalInfo('${e.id}')" title="¿Cómo afecta esto al mercado?">ⓘ</span>` : ''}
+        ${isOwnDeletable ? `<button class="btn-danger" onclick="deleteCalEvent('${e.id}')">✕</button>` : ''}
+        ${e.info_text ? `<div id="calinfo_${e.id}" style="display:none;font-size:0.68rem;color:var(--text2);background:var(--bg3);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.6">${e.info_text}</div>` : ''}
+      </div>`;
+    });
+  }
+
+  html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:16px;border-top:1px solid var(--border)">
+    <button class="btn-secondary" onclick="changeCalWeek(-1)">‹ Semana anterior</button>
+    ${calWeekOffset !== 0 ? `<span style="font-size:0.62rem;color:var(--text3);cursor:pointer;text-decoration:underline" onclick="calWeekOffset=0;renderCalEvents()">Volver a esta semana</span>` : '<span></span>'}
+    <button class="btn-secondary" onclick="changeCalWeek(1)">Semana siguiente ›</button>
+  </div>`;
 
   el.innerHTML = html;
   wrapNumbersJosefin(el);
