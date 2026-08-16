@@ -1001,6 +1001,12 @@ textarea { resize: vertical; line-height: 1.5; }
             <div class="form-actions" style="justify-content:flex-start;margin-top:0;margin-bottom:20px">
               <button class="btn-primary" onclick="saveCalEvent()">+ Agregar Fecha</button>
             </div>
+            <div class="toggle-group" id="calImpactGroup" style="margin-bottom:16px">
+              <button type="button" class="toggle-btn active" onclick="setCalImpactFilter(this,'todas')">Todas</button>
+              <button type="button" class="toggle-btn" onclick="setCalImpactFilter(this,'alta')">🔴 Alto impacto</button>
+              <button type="button" class="toggle-btn" onclick="setCalImpactFilter(this,'media')">🟡 Impacto medio</button>
+              <button type="button" class="toggle-btn" onclick="setCalImpactFilter(this,'baja')">⚪ Bajo impacto</button>
+            </div>
             <div id="calendario_result"></div>
           </div>
         </div>
@@ -5591,8 +5597,11 @@ function calcLuna() {
   wrapNumbersJosefin(el);
 }
 
+let calImpactFilter = 'todas';
+
 async function loadCalEvents() {
-  const { data } = await sb.from('calendar_events').select('*').order('event_date');
+  const today = new Date().toISOString().split('T')[0];
+  const { data } = await sb.from('calendar_events').select('*').gte('event_date', today).order('event_date');
   calEvents = data || [];
   renderCalEvents();
 }
@@ -5602,7 +5611,7 @@ async function saveCalEvent() {
   const type = document.getElementById('cal_type').value;
   const desc = document.getElementById('cal_desc').value;
   if (!date) { alert('Selecciona una fecha'); return; }
-  await sb.from('calendar_events').insert({ event_date: date, event_type: type, description: desc, created_by: currentUser.id });
+  await sb.from('calendar_events').insert({ event_date: date, event_type: type, description: desc, created_by: currentUser.id, impact: 'media' });
   showToast('✦ Fecha agregada');
   document.getElementById('cal_desc').value = '';
   loadCalEvents();
@@ -5613,30 +5622,49 @@ async function deleteCalEvent(id) {
   loadCalEvents();
 }
 
+function setCalImpactFilter(btn, level) {
+  calImpactFilter = level;
+  document.querySelectorAll('#calImpactGroup .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCalEvents();
+}
+
+function toggleCalInfo(id) {
+  const el = document.getElementById('calinfo_' + id);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
 function renderCalEvents() {
   const el = document.getElementById('calendario_result');
   if (!el) return;
 
   const today = new Date().toISOString().split('T')[0];
 
-  if (!calEvents.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">No hay fechas registradas</div></div>';
+  const filtered = calImpactFilter === 'todas' ? calEvents : calEvents.filter(e => (e.impact || 'media') === calImpactFilter);
+
+  if (!filtered.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-title">No hay fechas próximas con este filtro</div></div>';
     return;
   }
 
-  const typeColors = {
-    'OPEX': 'badge-gold', 'Triple Witching': 'badge-red', 'Fed / FOMC': 'badge-blue',
-    'NFP': 'badge-blue', 'CPI': 'badge-blue', 'Equinoccio': 'badge-green', 'Solsticio': 'badge-green',
-    'Rueda de 24': 'badge-warning', 'Otro': 'badge-gray'
+  const impactMeta = {
+    alta: { color: 'var(--danger)', bg: 'rgba(248,113,113,0.08)', label: 'Alto impacto' },
+    media: { color: 'var(--gold-light)', bg: 'rgba(170,146,82,0.08)', label: 'Impacto medio' },
+    baja: { color: 'var(--text3)', bg: 'var(--bg3)', label: 'Bajo impacto' },
   };
 
-  const html = calEvents.map(e => `
-    <div class="cal-event" style="${e.event_date === today ? 'border-color:var(--gold)' : ''}">
+  const html = filtered.map(e => {
+    const meta = impactMeta[e.impact || 'media'];
+    return `
+    <div class="cal-event" style="border-left:3px solid ${meta.color};${e.event_date === today ? 'border-color:var(--gold)' : ''}">
       <div class="cal-event-date">${e.event_date} ${e.event_date === today ? '← HOY' : ''}</div>
-      <span class="badge ${typeColors[e.event_type] || 'badge-gray'}">${e.event_type}</span>
+      <span class="badge" style="background:${meta.bg};color:${meta.color};border:1px solid ${meta.color}">${e.event_type}</span>
       <div class="cal-event-desc">${e.description || ''}</div>
-      <button class="btn-danger" onclick="deleteCalEvent('${e.id}')">✕</button>
-    </div>`).join('');
+      ${e.info_text ? `<span class="item-icon-btn" style="font-size:0.9rem" onclick="toggleCalInfo('${e.id}')" title="¿Cómo afecta esto al mercado?">ⓘ</span>` : ''}
+      ${!e.is_auto ? `<button class="btn-danger" onclick="deleteCalEvent('${e.id}')">✕</button>` : ''}
+      ${e.info_text ? `<div id="calinfo_${e.id}" style="display:none;font-size:0.68rem;color:var(--text2);background:var(--bg3);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.6">${e.info_text}</div>` : ''}
+    </div>`;
+  }).join('');
 
   el.innerHTML = html;
 }
