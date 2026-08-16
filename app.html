@@ -1313,6 +1313,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let accounts = [], currentAccountId = null, trades = [], selectedScore = null, selectedErrors = [], selectedQuality = null, pnlChartInstance = null, editingAccountId = null, editingTradeId = null;
 let selectedGreeks = [], selectedConfluence = null;
 let currentUser = null;
+let isAdminUser = false;
 
 async function requireAuth() {
   const { data: { session } } = await sb.auth.getSession();
@@ -1321,6 +1322,8 @@ async function requireAuth() {
     return null;
   }
   currentUser = session.user;
+  const { data: profile } = await sb.from('profiles').select('is_admin').eq('id', currentUser.id).maybeSingle();
+  isAdminUser = !!(profile && profile.is_admin);
   return session.user;
 }
 
@@ -5632,8 +5635,9 @@ async function saveCalEvent() {
   const type = document.getElementById('cal_type').value;
   const desc = document.getElementById('cal_desc').value;
   if (!date) { alert('Selecciona una fecha'); return; }
-  await sb.from('calendar_events').insert({ event_date: date, event_type: type, description: desc, created_by: currentUser.id, impact: 'media' });
-  showToast('✦ Fecha agregada');
+  const { error } = await sb.from('calendar_events').insert({ event_date: date, event_type: type, description: desc, created_by: currentUser.id, user_id: currentUser.id, impact: 'media' });
+  if (error) { alert('No se pudo guardar: ' + error.message); return; }
+  showToast('✦ Fecha agregada — solo tú la ves');
   closeAddCalEventModal();
   loadCalEvents();
 }
@@ -5682,13 +5686,16 @@ function renderCalEvents() {
 
   const html = filtered.map(e => {
     const meta = impactMeta[e.impact || 'media'];
+    const isMine = e.user_id && currentUser && e.user_id === currentUser.id;
+    const isOwnDeletable = isMine || isAdminUser;
     return `
     <div class="cal-event" style="border-left:3px solid ${meta.color};${e.event_date === today ? 'border-color:var(--gold)' : ''}">
       <div class="cal-event-date">${e.event_date} ${e.event_date === today ? '← HOY' : ''}</div>
       <span class="badge" style="background:${meta.bg};color:${meta.color};border:1px solid ${meta.color}">${e.event_type}</span>
+      ${isMine ? '<span class="badge" style="background:var(--bg3);color:var(--text3);border:1px solid var(--border);margin-left:6px">👤 Solo tú la ves</span>' : ''}
       <div class="cal-event-desc">${e.description || ''}</div>
       ${e.info_text ? `<span class="item-icon-btn" style="font-size:0.9rem" onclick="toggleCalInfo('${e.id}')" title="¿Cómo afecta esto al mercado?">ⓘ</span>` : ''}
-      ${!e.is_auto ? `<button class="btn-danger" onclick="deleteCalEvent('${e.id}')">✕</button>` : ''}
+      ${isOwnDeletable ? `<button class="btn-danger" onclick="deleteCalEvent('${e.id}')">✕</button>` : ''}
       ${e.info_text ? `<div id="calinfo_${e.id}" style="display:none;font-size:0.68rem;color:var(--text2);background:var(--bg3);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.6">${e.info_text}</div>` : ''}
     </div>`;
   }).join('');
