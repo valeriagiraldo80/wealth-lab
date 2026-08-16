@@ -979,12 +979,17 @@ textarea { resize: vertical; line-height: 1.5; }
 
         <div class="calfin-panel active" id="calfin-calendario">
           <div class="form-section">
-            <div class="form-section-title">Calendario Financiero</div>
-            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Fechas que mueven el mercado — Fed, inflación, empleo, vencimientos — en un solo lugar, sin tener que buscarlas en otro sitio.</p>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px">
+              <div class="form-section-title" style="margin-bottom:0">Calendario Financiero</div>
+              <div style="display:flex;gap:8px;flex-shrink:0">
+                <span class="item-icon-btn" style="font-size:1rem;border:1px solid var(--border);border-radius:6px;padding:5px 10px" onclick="openAddCalEventModal()" title="Agregar fecha">+</span>
+                <span class="item-icon-btn" style="font-size:0.85rem;border:1px solid var(--border);border-radius:6px;padding:5px 10px" onclick="toggleCalSearch()" title="Buscar">🔍</span>
+              </div>
+            </div>
+            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Los eventos macroeconómicos y vencimientos que mueven al SPX — Fed, inflación, empleo, vencimientos de opciones — con su nivel de impacto, hora de publicación, y el resultado real una vez se conoce.</p>
 
-            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
-              <input type="text" id="cal_search" placeholder="🔍 Buscar (ej. CPI, FOMC...)" oninput="renderCalEvents()" style="flex:1;min-width:180px;padding:8px 12px;font-size:0.72rem"/>
-              <button class="btn-secondary" style="padding:8px 14px;font-size:0.65rem;white-space:nowrap" onclick="openAddCalEventModal()">+ Agregar fecha</button>
+            <div id="calSearchWrap" style="display:none;margin-bottom:14px">
+              <input type="text" id="cal_search" placeholder="Buscar (ej. CPI, FOMC...)" oninput="renderCalEvents()" style="width:100%;padding:8px 12px;font-size:0.72rem"/>
             </div>
 
             <div class="toggle-group" id="calImpactGroup" style="margin-bottom:16px">
@@ -5616,8 +5621,10 @@ function calcLuna() {
 let calImpactFilter = 'todas';
 
 async function loadCalEvents() {
-  const today = new Date().toISOString().split('T')[0];
-  const { data } = await sb.from('calendar_events').select('*').gte('event_date', today).order('event_date');
+  const now = new Date();
+  const past = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const fromDate = past.toISOString().split('T')[0];
+  const { data } = await sb.from('calendar_events').select('*').gte('event_date', fromDate).order('event_date');
   calEvents = data || [];
   renderCalEvents();
 }
@@ -5652,6 +5659,19 @@ function setCalImpactFilter(btn, level) {
   document.querySelectorAll('#calImpactGroup .toggle-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderCalEvents();
+}
+
+function toggleCalSearch() {
+  const wrap = document.getElementById('calSearchWrap');
+  const input = document.getElementById('cal_search');
+  const opening = wrap.style.display === 'none';
+  wrap.style.display = opening ? 'block' : 'none';
+  if (opening) {
+    input.focus();
+  } else {
+    input.value = '';
+    renderCalEvents();
+  }
 }
 
 function toggleCalInfo(id) {
