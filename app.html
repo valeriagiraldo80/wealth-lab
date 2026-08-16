@@ -980,13 +980,13 @@ textarea { resize: vertical; line-height: 1.5; }
         <div class="calfin-panel active" id="calfin-calendario">
           <div class="form-section">
             <div style="position:relative">
-              <div class="form-section-title" style="margin-bottom:4px">Calendario Financiero</div>
+              <div class="form-section-title" style="margin-bottom:4px;width:calc(100% - 95px)">Calendario Financiero</div>
               <div style="position:absolute;top:-2px;right:0;display:flex;gap:8px">
                 <span class="item-icon-btn" style="font-size:1rem;border:1px solid var(--border);border-radius:6px;padding:5px 10px" onclick="openAddCalEventModal()" title="Agregar fecha">+</span>
                 <span class="item-icon-btn" style="font-size:0.85rem;border:1px solid var(--border);border-radius:6px;padding:5px 10px" onclick="toggleCalSearch()" title="Buscar">🔍</span>
               </div>
             </div>
-            <p style="font-size:0.72rem;color:var(--text2);margin:0 0 16px;line-height:1.6;max-width:420px">Los eventos macroeconómicos y vencimientos que mueven al SPX — con su impacto, hora de publicación, y resultado real.</p>
+            <p style="font-size:0.72rem;color:var(--text2);margin:0 0 16px;line-height:1.6;max-width:420px">Los eventos macroeconómicos y vencimientos que mueven al SPX<br>— con su impacto, hora de publicación, y resultado real.</p>
 
             <div id="calSearchWrap" style="display:none;margin-bottom:14px">
               <input type="text" id="cal_search" placeholder="Buscar (ej. CPI, FOMC...)" oninput="renderCalEvents()" style="width:100%;padding:8px 12px;font-size:0.72rem"/>
