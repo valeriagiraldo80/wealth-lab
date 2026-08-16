@@ -5683,24 +5683,44 @@ function renderCalEvents() {
     media: { color: 'var(--gold-light)', bg: 'rgba(170,146,82,0.08)', label: 'Impacto medio' },
     baja: { color: 'var(--text3)', bg: 'var(--bg3)', label: 'Bajo impacto' },
   };
+  const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
-  const html = filtered.map(e => {
+  let html = '';
+  let lastDate = null;
+
+  filtered.forEach(e => {
+    if (e.event_date !== lastDate) {
+      const d = new Date(e.event_date + 'T12:00:00');
+      const label = `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]}`;
+      html += `<div style="font-size:0.65rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin:${lastDate ? '20px' : '0'} 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)">${label}${e.event_date === today ? ' — HOY' : ''}</div>`;
+      lastDate = e.event_date;
+    }
+
     const meta = impactMeta[e.impact || 'media'];
     const isMine = e.user_id && currentUser && e.user_id === currentUser.id;
     const isOwnDeletable = isMine || isAdminUser;
-    return `
-    <div class="cal-event" style="border-left:3px solid ${meta.color};${e.event_date === today ? 'border-color:var(--gold)' : ''}">
-      <div class="cal-event-date">${e.event_date} ${e.event_date === today ? '← HOY' : ''}</div>
-      <span class="badge" style="background:${meta.bg};color:${meta.color};border:1px solid ${meta.color}">${e.event_type}</span>
-      ${isMine ? '<span class="badge" style="background:var(--bg3);color:var(--text3);border:1px solid var(--border);margin-left:6px">👤 Solo tú la ves</span>' : ''}
+
+    html += `
+    <div class="cal-event" style="border-left:3px solid ${meta.color}">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+        <span class="badge" style="background:${meta.bg};color:${meta.color};border:1px solid ${meta.color}">${e.event_type}</span>
+        ${e.release_time ? `<span style="font-size:0.6rem;color:var(--text3)">🕐 ${e.release_time}</span>` : ''}
+      </div>
+      ${isMine ? '<span class="badge" style="background:var(--bg3);color:var(--text3);border:1px solid var(--border);margin-top:6px;display:inline-block">👤 Solo tú la ves</span>' : ''}
       <div class="cal-event-desc">${e.description || ''}</div>
+      ${(e.actual_value || e.previous_value) ? `<div style="display:flex;gap:16px;margin-top:8px;font-size:0.66rem">
+        ${e.actual_value ? `<span><span style="color:var(--text3)">Actual: </span><span style="color:var(--gold-light);font-weight:600;font-family:'Cocogoose',sans-serif">${e.actual_value}</span></span>` : ''}
+        ${e.previous_value ? `<span><span style="color:var(--text3)">Anterior: </span><span style="color:var(--text2);font-family:'Cocogoose',sans-serif">${e.previous_value}</span></span>` : ''}
+      </div>` : ''}
       ${e.info_text ? `<span class="item-icon-btn" style="font-size:0.9rem" onclick="toggleCalInfo('${e.id}')" title="¿Cómo afecta esto al mercado?">ⓘ</span>` : ''}
       ${isOwnDeletable ? `<button class="btn-danger" onclick="deleteCalEvent('${e.id}')">✕</button>` : ''}
       ${e.info_text ? `<div id="calinfo_${e.id}" style="display:none;font-size:0.68rem;color:var(--text2);background:var(--bg3);border-radius:8px;padding:10px 12px;margin-top:8px;line-height:1.6">${e.info_text}</div>` : ''}
     </div>`;
-  }).join('');
+  });
 
   el.innerHTML = html;
+  wrapNumbersJosefin(el);
 }
 
 // 9. ESTACIONALIDAD
