@@ -5726,9 +5726,9 @@ function renderCalEvents() {
 
   const weekLabel = `Semana del ${week.monday.getDate()} ${monthNames[week.monday.getMonth()]} al ${week.friday.getDate()} ${monthNames[week.friday.getMonth()]}`;
 
-  let html = `<div style="text-align:center;font-size:0.68rem;color:var(--text3);margin-bottom:6px">${weekLabel}${calWeekOffset === 0 ? ' · esta semana' : ''}</div>
-  <div style="display:flex;justify-content:center;gap:24px;margin-bottom:16px">
+  let html = `<div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-bottom:16px">
     <span class="item-icon-btn" style="font-size:0.9rem" onclick="changeCalWeek(-1)" title="Semana anterior">‹</span>
+    <span style="font-size:0.68rem;color:var(--text3)">${weekLabel}${calWeekOffset === 0 ? ' · esta semana' : ''}</span>
     <span class="item-icon-btn" style="font-size:0.9rem" onclick="changeCalWeek(1)" title="Semana siguiente">›</span>
   </div>`;
 
