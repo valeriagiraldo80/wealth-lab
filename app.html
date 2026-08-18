@@ -5743,6 +5743,7 @@ async function renderAstrologiaFinanciera() {
   } else {
     html += `<div style="margin-bottom:20px">
       <div style="font-size:0.62rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">✦ Señales principales — planetas lentos, ángulo duro</div>
+      <p style="font-size:0.6rem;color:var(--text3);margin-bottom:8px;line-height:1.5">Estas son las que de verdad vale la pena vigilar — planetas lentos en tensión es lo que históricamente se asocia con giros de tendencia reales, no ruido.</p>
       ${principales.length ? principales.map(a => renderAspectCard(a, { compact: false, alwaysExplain: true, withWindow: true })).join('') : '<p style="font-size:0.65rem;color:var(--text3)">Ninguna activa ahora mismo — es lo normal, estas son raras a propósito.</p>'}
     </div>`;
 
@@ -5753,7 +5754,7 @@ async function renderAstrologiaFinanciera() {
           <span id="astroContextoBox-icon" style="font-size:0.7rem;color:var(--gold-light)">▾</span>
         </div>
         <div id="astroContextoBox" style="display:none;margin-top:8px">
-          <p style="font-size:0.6rem;color:var(--text3);margin-bottom:8px;line-height:1.5">Toca cualquiera para ver su explicación.</p>
+          <p style="font-size:0.6rem;color:var(--text3);margin-bottom:8px;line-height:1.5">Los mismos planetas lentos, pero en ángulos que fluyen fácil entre sí — no suelen marcar un giro, más bien acompañan una tendencia que ya está en marcha. Toca cualquiera para ver su explicación.</p>
           ${contexto.map(a => renderAspectCard(a, { compact: true, collapsibleExplain: true, withWindow: true })).join('')}
         </div>
       </div>`;
@@ -5807,7 +5808,7 @@ async function renderAstrologiaFinanciera() {
       <span id="astroRetroBox-icon" style="font-size:0.7rem;color:var(--gold-light)">▾</span>
     </div>
     <div id="astroRetroBox" style="display:none;margin-top:8px">
-      ${activeRetro.length ? activeRetro.map(p => {
+      ${activeRetro.length ? `<p style="font-size:0.6rem;color:var(--text3);margin-bottom:8px;line-height:1.5">Toca cualquiera para ver su explicación.</p>` + activeRetro.map(p => {
         const win = findRetrogradeWindow(p.key, now, 300);
         const fmt = d => d.toISOString().split('T')[0];
         const id = 'retroCard' + (retroCardId++);
