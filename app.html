@@ -5580,6 +5580,28 @@ function polarPoint(cx, cy, angleDeg, radius) {
   return { x: cx + radius * Math.cos(rad), y: cy - radius * Math.sin(rad) };
 }
 
+// Busca desde cuándo y hasta cuándo un aspecto entre dos planetas se mantiene dentro del orbe —
+// para saber la ventana completa, no solo que "está activo ahora".
+function findAspectWindow(keyA, keyB, aspectDeg, tolerance, refDate, maxDays) {
+  function orbAt(date) {
+    const diff = angleDiff(eclipticLongitude(keyA, date), eclipticLongitude(keyB, date));
+    return Math.abs(diff - aspectDeg);
+  }
+  let start = refDate, startHitCap = true;
+  for (let i = 1; i <= maxDays; i++) {
+    const d = new Date(refDate.getTime() - i * 86400000);
+    if (orbAt(d) > tolerance) { start = new Date(refDate.getTime() - (i - 1) * 86400000); startHitCap = false; break; }
+    start = d;
+  }
+  let end = refDate, endHitCap = true;
+  for (let i = 1; i <= maxDays; i++) {
+    const d = new Date(refDate.getTime() + i * 86400000);
+    if (orbAt(d) > tolerance) { end = new Date(refDate.getTime() + (i - 1) * 86400000); endHitCap = false; break; }
+    end = d;
+  }
+  return { start, end, startHitCap, endHitCap };
+}
+
 async function renderAstrologiaFinanciera() {
   const el = document.getElementById('astro_result');
   if (!el) return;
@@ -5678,11 +5700,23 @@ async function renderAstrologiaFinanciera() {
     else menores.push(asp);
   });
 
-  function renderAspectCard(asp, compact) {
+  let aspectCardId = 0;
+  function renderAspectCard(asp, opts) {
+    opts = opts || {};
     const meta = ASPECT_GROUP_META[asp.aspect.group];
-    return `<div style="background:${meta.bg};border:1px solid ${meta.border};border-radius:8px;padding:${compact ? '8px 12px' : '10px 14px'};margin-bottom:8px">
-      <div style="font-size:${compact ? '0.64rem' : '0.68rem'};font-weight:600;color:${meta.color}">${asp.a.symbol} ${asp.a.name} — ${asp.aspect.name} — ${asp.b.symbol} ${asp.b.name}</div>
-      ${!compact ? `<div style="font-size:0.62rem;color:var(--text2);margin-top:4px;line-height:1.5">${ASPECT_INFO[asp.aspect.name]}</div>` : ''}
+    const id = 'aspCard' + (aspectCardId++);
+    let windowLine = '';
+    if (opts.withWindow) {
+      const win = findAspectWindow(asp.a.key, asp.b.key, asp.aspect.deg, ASPECT_TOLERANCE, now, 500);
+      const fmt = d => d.toISOString().split('T')[0];
+      windowLine = `<div style="font-size:0.6rem;color:var(--text3);margin-top:4px">Activo ${win.startHitCap ? 'desde antes del' : 'desde el'} ${fmt(win.start)} ${win.endHitCap ? '— sigue activo más allá del' : 'hasta el'} ${fmt(win.end)}</div>`;
+    }
+    const clickable = opts.collapsibleExplain;
+    return `<div style="background:${meta.bg};border:1px solid ${meta.border};border-radius:8px;padding:${opts.compact ? '8px 12px' : '10px 14px'};margin-bottom:8px;${clickable ? 'cursor:pointer' : ''}" ${clickable ? `onclick="toggleLunaAcc('${id}')"` : ''}>
+      <div style="font-size:${opts.compact ? '0.64rem' : '0.68rem'};font-weight:600;color:${meta.color}">${asp.a.symbol} ${asp.a.name} — ${asp.aspect.name} — ${asp.b.symbol} ${asp.b.name}</div>
+      ${windowLine}
+      ${opts.alwaysExplain ? `<div style="font-size:0.62rem;color:var(--text2);margin-top:4px;line-height:1.5">${ASPECT_INFO[asp.aspect.name]}</div>` : ''}
+      ${clickable ? `<div id="${id}" style="display:none;font-size:0.6rem;color:var(--text2);margin-top:6px;line-height:1.5">${ASPECT_INFO[asp.aspect.name]}</div>` : ''}
     </div>`;
   }
 
@@ -5691,13 +5725,19 @@ async function renderAstrologiaFinanciera() {
   } else {
     html += `<div style="margin-bottom:20px">
       <div style="font-size:0.62rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">✦ Señales principales — planetas lentos, ángulo duro</div>
-      ${principales.length ? principales.map(a => renderAspectCard(a, false)).join('') : '<p style="font-size:0.65rem;color:var(--text3)">Ninguna activa ahora mismo — es lo normal, estas son raras a propósito.</p>'}
+      ${principales.length ? principales.map(a => renderAspectCard(a, { compact: false, alwaysExplain: true, withWindow: true })).join('') : '<p style="font-size:0.65rem;color:var(--text3)">Ninguna activa ahora mismo — es lo normal, estas son raras a propósito.</p>'}
     </div>`;
 
     if (contexto.length) {
       html += `<div style="margin-bottom:20px">
-        <div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Contexto de fondo — planetas lentos, ángulo suave</div>
-        ${contexto.map(a => renderAspectCard(a, true)).join('')}
+        <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleLunaAcc('astroContextoBox')">
+          <span style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em">Contexto de fondo (${contexto.length}) — planetas lentos, ángulo suave</span>
+          <span id="astroContextoBox-icon" style="font-size:0.7rem;color:var(--text3)">▾</span>
+        </div>
+        <div id="astroContextoBox" style="display:none;margin-top:8px">
+          <p style="font-size:0.6rem;color:var(--text3);margin-bottom:8px;line-height:1.5">Toca cualquiera para ver su explicación.</p>
+          ${contexto.map(a => renderAspectCard(a, { compact: true, collapsibleExplain: true, withWindow: true })).join('')}
+        </div>
       </div>`;
     }
 
@@ -5708,8 +5748,8 @@ async function renderAstrologiaFinanciera() {
           <span id="astroMenoresBox-icon" style="font-size:0.7rem;color:var(--text3)">▾</span>
         </div>
         <div id="astroMenoresBox" style="display:none;margin-top:8px">
-          <p style="font-size:0.6rem;color:var(--text3);margin-bottom:8px;line-height:1.5">No crean la tendencia por sí solos — pueden ser el día exacto en que una señal de arriba finalmente se nota en el precio.</p>
-          ${menores.map(a => renderAspectCard(a, true)).join('')}
+          <p style="font-size:0.6rem;color:var(--text3);margin-bottom:8px;line-height:1.5">No crean la tendencia por sí solos — pueden ser el día exacto en que una señal de arriba finalmente se nota en el precio. Toca cualquiera para ver su explicación.</p>
+          ${menores.map(a => renderAspectCard(a, { compact: true, collapsibleExplain: true })).join('')}
         </div>
       </div>`;
     }
@@ -5719,18 +5759,37 @@ async function renderAstrologiaFinanciera() {
   const signChanges = PLANETS.map(p => ({ p, change: findUpcomingSignChange(p.key, now, 90) })).filter(x => x.change);
   signChanges.sort((x, y) => x.change.date - y.change.date);
   html += `<div style="margin-bottom:20px">
-    <div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Cambios de signo próximos (90 días)</div>
-    ${signChanges.length ? signChanges.map(x => `<div style="display:flex;justify-content:space-between;background:var(--bg3);border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:0.65rem">
-      <span>${x.p.symbol} ${x.p.name} entra a ${x.change.sign.symbol} ${x.change.sign.name}</span>
-      <span style="color:var(--gold-light);font-family:'Cocogoose',sans-serif">${x.change.date.toISOString().split('T')[0]}</span>
-    </div>`).join('') : '<p style="font-size:0.65rem;color:var(--text3)">Nada en los próximos 90 días.</p>'}
+    <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleLunaAcc('astroSignosBox')">
+      <span style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em">Cambios de signo próximos (90 días)</span>
+      <span id="astroSignosBox-icon" style="font-size:0.7rem;color:var(--text3)">▾</span>
+    </div>
+    <div id="astroSignosBox" style="display:none;margin-top:8px">
+      ${signChanges.length ? signChanges.map(x => {
+        const outer = isOuter(x.p.key);
+        const explain = outer
+          ? 'Los planetas lentos casi no cambian de signo — cuando lo hacen, marca un cambio de "era" que puede durar años. Vale la pena anotarlo.'
+          : 'Los planetas rápidos cambian de signo seguido — es un cambio de tono menor, no tan significativo como un aspecto entre planetas lentos.';
+        return `<div style="background:var(--bg3);border-radius:8px;padding:8px 12px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;font-size:0.65rem">
+            <span>${x.p.symbol} ${x.p.name} entra a ${x.change.sign.symbol} ${x.change.sign.name}</span>
+            <span style="color:var(--gold-light);font-family:'Cocogoose',sans-serif">${x.change.date.toISOString().split('T')[0]}</span>
+          </div>
+          <div style="font-size:0.6rem;color:var(--text3);margin-top:4px;line-height:1.5">${explain}</div>
+        </div>`;
+      }).join('') : '<p style="font-size:0.65rem;color:var(--text3)">Nada en los próximos 90 días.</p>'}
+    </div>
   </div>`;
 
   // Retrogradaciones activas
   const activeRetro = positions.filter(p => p.retro);
   html += `<div>
-    <div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Retrogradaciones activas</div>
-    ${activeRetro.length ? activeRetro.map(p => `<div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:0.65rem;color:var(--danger)">${p.symbol} ${p.name} está retrógrado — momento tradicional de "revisar, no avanzar".</div>`).join('') : '<p style="font-size:0.65rem;color:var(--text3)">Ningún planeta retrógrado ahora mismo.</p>'}
+    <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleLunaAcc('astroRetroBox')">
+      <span style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em">Retrogradaciones activas</span>
+      <span id="astroRetroBox-icon" style="font-size:0.7rem;color:var(--text3)">▾</span>
+    </div>
+    <div id="astroRetroBox" style="display:none;margin-top:8px">
+      ${activeRetro.length ? activeRetro.map(p => `<div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:0.65rem;color:var(--danger)">${p.symbol} ${p.name} está retrógrado — momento tradicional de "revisar, no avanzar".</div>`).join('') : '<p style="font-size:0.65rem;color:var(--text3)">Ningún planeta retrógrado ahora mismo.</p>'}
+    </div>
   </div>`;
 
   el.innerHTML = html;
