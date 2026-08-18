@@ -5517,21 +5517,21 @@ function toggleLunaAcc(id) {
 
 // ===== ASTROLOGÍA FINANCIERA =====
 const PLANETS = [
-  { key: 'Sun', name: 'Sol', symbol: '☉' },
-  { key: 'Mercury', name: 'Mercurio', symbol: '☿' },
-  { key: 'Venus', name: 'Venus', symbol: '♀' },
-  { key: 'Mars', name: 'Marte', symbol: '♂' },
-  { key: 'Jupiter', name: 'Júpiter', symbol: '♃' },
-  { key: 'Saturn', name: 'Saturno', symbol: '♄' },
-  { key: 'Uranus', name: 'Urano', symbol: '♅' },
-  { key: 'Neptune', name: 'Neptuno', symbol: '♆' },
-  { key: 'Pluto', name: 'Plutón', symbol: '♇' },
+  { key: 'Sun', name: 'Sol', symbol: '☉\uFE0E' },
+  { key: 'Mercury', name: 'Mercurio', symbol: '☿\uFE0E' },
+  { key: 'Venus', name: 'Venus', symbol: '♀\uFE0E' },
+  { key: 'Mars', name: 'Marte', symbol: '♂\uFE0E' },
+  { key: 'Jupiter', name: 'Júpiter', symbol: '♃\uFE0E' },
+  { key: 'Saturn', name: 'Saturno', symbol: '♄\uFE0E' },
+  { key: 'Uranus', name: 'Urano', symbol: '♅\uFE0E' },
+  { key: 'Neptune', name: 'Neptuno', symbol: '♆\uFE0E' },
+  { key: 'Pluto', name: 'Plutón', symbol: '♇\uFE0E' },
 ];
 const ZODIAC_SIGNS = [
-  { name: 'Aries', symbol: '♈' }, { name: 'Tauro', symbol: '♉' }, { name: 'Géminis', symbol: '♊' },
-  { name: 'Cáncer', symbol: '♋' }, { name: 'Leo', symbol: '♌' }, { name: 'Virgo', symbol: '♍' },
-  { name: 'Libra', symbol: '♎' }, { name: 'Escorpio', symbol: '♏' }, { name: 'Sagitario', symbol: '♐' },
-  { name: 'Capricornio', symbol: '♑' }, { name: 'Acuario', symbol: '♒' }, { name: 'Piscis', symbol: '♓' },
+  { name: 'Aries', symbol: '♈\uFE0E' }, { name: 'Tauro', symbol: '♉\uFE0E' }, { name: 'Géminis', symbol: '♊\uFE0E' },
+  { name: 'Cáncer', symbol: '♋\uFE0E' }, { name: 'Leo', symbol: '♌\uFE0E' }, { name: 'Virgo', symbol: '♍\uFE0E' },
+  { name: 'Libra', symbol: '♎\uFE0E' }, { name: 'Escorpio', symbol: '♏\uFE0E' }, { name: 'Sagitario', symbol: '♐\uFE0E' },
+  { name: 'Capricornio', symbol: '♑\uFE0E' }, { name: 'Acuario', symbol: '♒\uFE0E' }, { name: 'Piscis', symbol: '♓\uFE0E' },
 ];
 const ASPECT_INFO = {
   'Conjunción': 'Dos planetas en el mismo punto — sus energías se combinan en una sola. Puede ser un momento de arranque o de máxima intensidad, según qué planetas sean.',
@@ -5664,20 +5664,55 @@ async function renderAstrologiaFinanciera() {
     </div>`;
   }
 
-  // Lista de aspectos activos
-  if (aspects.length) {
-    html += `<div style="margin-bottom:20px">
-      <div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Aspectos activos ahora</div>
-      ${aspects.map(asp => {
-        const meta = ASPECT_GROUP_META[asp.aspect.group];
-        return `<div style="background:${meta.bg};border:1px solid ${meta.border};border-radius:8px;padding:10px 14px;margin-bottom:8px">
-          <div style="font-size:0.68rem;font-weight:600;color:${meta.color}">${asp.a.symbol} ${asp.a.name} — ${asp.aspect.name} — ${asp.b.symbol} ${asp.b.name}</div>
-          <div style="font-size:0.62rem;color:var(--text2);margin-top:4px;line-height:1.5">${ASPECT_INFO[asp.aspect.name]}</div>
-        </div>`;
-      }).join('')}
+  // Lista de aspectos, organizada en 3 niveles según cómo lo estudian los astrólogos financieros
+  // reales (Merriman, Bradley): entre más lento el planeta y más "duro" el ángulo, más pesa.
+  const OUTER_PLANETS = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+  const HARD_ASPECTS = ['Conjunción', 'Cuadratura', 'Oposición'];
+  const isOuter = k => OUTER_PLANETS.includes(k);
+
+  const principales = [], contexto = [], menores = [];
+  aspects.forEach(asp => {
+    const bothOuter = isOuter(asp.a.key) && isOuter(asp.b.key);
+    if (bothOuter && HARD_ASPECTS.includes(asp.aspect.name)) principales.push(asp);
+    else if (bothOuter) contexto.push(asp);
+    else menores.push(asp);
+  });
+
+  function renderAspectCard(asp, compact) {
+    const meta = ASPECT_GROUP_META[asp.aspect.group];
+    return `<div style="background:${meta.bg};border:1px solid ${meta.border};border-radius:8px;padding:${compact ? '8px 12px' : '10px 14px'};margin-bottom:8px">
+      <div style="font-size:${compact ? '0.64rem' : '0.68rem'};font-weight:600;color:${meta.color}">${asp.a.symbol} ${asp.a.name} — ${asp.aspect.name} — ${asp.b.symbol} ${asp.b.name}</div>
+      ${!compact ? `<div style="font-size:0.62rem;color:var(--text2);margin-top:4px;line-height:1.5">${ASPECT_INFO[asp.aspect.name]}</div>` : ''}
     </div>`;
-  } else {
+  }
+
+  if (!aspects.length) {
     html += `<p style="font-size:0.68rem;color:var(--text3);margin-bottom:20px">Ningún planeta está en aspecto exacto ahora mismo.</p>`;
+  } else {
+    html += `<div style="margin-bottom:20px">
+      <div style="font-size:0.62rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">✦ Señales principales — planetas lentos, ángulo duro</div>
+      ${principales.length ? principales.map(a => renderAspectCard(a, false)).join('') : '<p style="font-size:0.65rem;color:var(--text3)">Ninguna activa ahora mismo — es lo normal, estas son raras a propósito.</p>'}
+    </div>`;
+
+    if (contexto.length) {
+      html += `<div style="margin-bottom:20px">
+        <div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Contexto de fondo — planetas lentos, ángulo suave</div>
+        ${contexto.map(a => renderAspectCard(a, true)).join('')}
+      </div>`;
+    }
+
+    if (menores.length) {
+      html += `<div style="margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleLunaAcc('astroMenoresBox')">
+          <span style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em">Disparadores menores (${menores.length}) — planetas rápidos</span>
+          <span id="astroMenoresBox-icon" style="font-size:0.7rem;color:var(--text3)">▾</span>
+        </div>
+        <div id="astroMenoresBox" style="display:none;margin-top:8px">
+          <p style="font-size:0.6rem;color:var(--text3);margin-bottom:8px;line-height:1.5">No crean la tendencia por sí solos — pueden ser el día exacto en que una señal de arriba finalmente se nota en el precio.</p>
+          ${menores.map(a => renderAspectCard(a, true)).join('')}
+        </div>
+      </div>`;
+    }
   }
 
   // Cambios de signo próximos
