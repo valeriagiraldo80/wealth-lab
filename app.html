@@ -4370,7 +4370,7 @@ function calcHexagono() {
     </div>`;
   }
 
-  html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>H(n) <span class="tip" data-tip="El número hexagonal de esa vuelta de la espiral — cuantas más vueltas, más lejos del pivote, en puntos de precio.">ⓘ</span></th><th>Pivote + H</th><th>Pivote − H</th></tr></thead><tbody>`;
+  html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>H(n) <span class="tip tip-below" data-tip="El número hexagonal de esa vuelta de la espiral — cuantas más vueltas, más lejos del pivote, en puntos de precio.">ⓘ</span></th><th>Pivote + H</th><th>Pivote − H</th></tr></thead><tbody>`;
   rows.forEach(r => {
     const isNear = price && (Math.abs(r.up - price) === nearestDist || Math.abs(r.down - price) === nearestDist);
     html += `<tr class="${isNear ? 'nearest' : ''}">
@@ -5069,7 +5069,7 @@ function calcMaestros() {
     const from = Math.max(0, nearIdx - 5);
     const to = Math.min(rows.length - 1, nearIdx + 5);
     html += `<div style="margin-top:20px;font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Niveles extendidos cerca del precio actual</div>`;
-    html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Grado</th><th>Vuelta <span class="tip" data-tip="Cuántas veces se completó el círculo de 360° desde el pivote — vuelta 0 es el nivel original de ese grado, vuelta 1 es una revolución más lejos, y así sucesivamente.">ⓘ</span></th><th>Nivel alcista</th><th>Nivel bajista</th><th>Distancia al precio</th></tr></thead><tbody>`;
+    html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Grado</th><th>Vuelta <span class="tip tip-below" data-tip="Cuántas veces se completó el círculo de 360° desde el pivote — vuelta 0 es el nivel original de ese grado, vuelta 1 es una revolución más lejos, y así sucesivamente.">ⓘ</span></th><th>Nivel alcista</th><th>Nivel bajista</th><th>Distancia al precio</th></tr></thead><tbody>`;
     for (let i = from; i <= to; i++) {
       const r = rows[i];
       const key = `${r.deg}-${r.ring}`;
