@@ -4237,7 +4237,7 @@ async function renderSwingChart() {
   const lastSwingHigh = [...swings].reverse().find(s => s.type === 'high');
   const currentPrice = data[data.length - 1].price;
 
-  let html = `<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+  let html = `<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
     <div class="stat-card" style="flex:1;min-width:150px">
       <div class="stat-label">Tendencia actual</div>
       <div class="stat-value ${trend === 'up' ? 'text-success' : trend === 'down' ? 'text-danger' : ''}">${trend === 'up' ? '▲ Alcista' : trend === 'down' ? '▼ Bajista' : 'Sin definir'}</div>
@@ -4252,9 +4252,24 @@ async function renderSwingChart() {
       <div class="stat-value text-danger">${lastSwingHigh ? lastSwingHigh.price.toFixed(0) : '—'}</div>
       <div class="stat-sub">${lastSwingHigh ? lastSwingHigh.date : ''}</div>
     </div>
-    <div class="stat-card" style="flex:1;min-width:150px">
-      <div class="stat-label">Hi-Lo Activator <span class="tip" data-tip="Promedio de 3 días de mínimos (en tendencia alcista) o máximos (en bajista) — línea de referencia para entrada y stop dinámico.">ⓘ</span></div>
-      <div class="stat-value text-gold">${activator ? activator.toFixed(0) : '—'}</div>
+  </div>
+  <div style="background:rgba(170,146,82,0.1);border:1px solid var(--gold-dark);border-radius:10px;padding:14px 18px;margin-bottom:20px;cursor:pointer" onclick="toggleLunaAcc('hiLoExplain')">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:0.65rem;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">Hi-Lo Activator</div>
+        <div style="font-family:Cocogoose,sans-serif;font-size:1.3rem;color:var(--gold-light);font-weight:700">${activator ? activator.toFixed(0) : '—'}</div>
+      </div>
+      <span id="hiLoExplain-icon" style="color:var(--gold-light);font-size:0.9rem">▾</span>
+    </div>
+    <div style="font-size:0.6rem;color:var(--text3);margin-top:4px">Toca para ver cómo funciona</div>
+    <div id="hiLoExplain" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(170,146,82,0.25);font-size:0.68rem;color:var(--text2);line-height:1.7">
+      Es un promedio de los <strong style="color:var(--gold-light)">últimos 3 días reales de precio</strong> — no de los últimos giros que detectó Swing Charting, sino literalmente los 3 días más recientes de tu historial guardado. Por eso se mueve solo, todos los días, junto con el precio.
+      <br><br>
+      <strong style="color:var(--gold-light)">En tendencia alcista</strong> — promedia los mínimos de esos 3 días. Mientras el precio se quede por encima de esa línea, la tendencia sigue sana. El día que el precio cierra por debajo, es la señal clásica de que algo cambió.
+      <br><br>
+      <strong style="color:var(--gold-light)">En tendencia bajista</strong> — es lo mismo pero al revés: promedia los máximos, y mientras el precio se quede por debajo, la tendencia bajista sigue viva.
+      <br><br>
+      Es, en la práctica, un stop dinámico que sube o baja contigo — no un número fijo que pones una sola vez.
     </div>
   </div>`;
 
