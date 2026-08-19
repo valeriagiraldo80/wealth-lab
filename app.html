@@ -304,6 +304,7 @@ textarea { resize: vertical; line-height: 1.5; }
 .gann-table tr:hover td { background: var(--bg3); }
 .gann-table .cardinal td { color: var(--gold-light); font-weight: 600; }
 .gann-table .nearest td { background: rgba(170,146,82,0.15) !important; color: var(--gold-light) !important; font-weight: 700; }
+.gann-table td.nearest-cell { background: rgba(170,146,82,0.35) !important; color: var(--gold-light) !important; font-weight: 700; border: 2px solid var(--gold) !important; border-radius: 6px; }
 .gann-label-bull { color: var(--success); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; }
 .gann-label-bear { color: var(--danger); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; }
 .cycle-bar { height: 32px; border-radius: 6px; display: flex; align-items: center; padding: 0 12px; margin-bottom: 8px; font-size: 0.65rem; font-family: 'Cocogoose', sans-serif; justify-content: space-between; }
@@ -697,14 +698,14 @@ textarea { resize: vertical; line-height: 1.5; }
         <!-- Selector de estudio -->
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px">
           <div class="toggle-group" id="estudioSelectorGroup">
-            <button type="button" class="toggle-btn active" onclick="switchEstudio(this,'gann')">🌀 Gann</button>
-            <button type="button" class="toggle-btn" onclick="switchEstudio(this,'luna')">🌙 Luna</button>
+            <button type="button" class="toggle-btn active" onclick="switchEstudio(this,'gann')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-2px;margin-right:3px"><path d="M12 3a9 9 0 1 0 9 9c0-3-2-6-6-6a4 4 0 1 0 3 6.5"/></svg> Gann</button>
+            <button type="button" class="toggle-btn" onclick="switchEstudio(this,'luna')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg> Luna</button>
             <button type="button" class="toggle-btn" onclick="switchEstudio(this,'astrologia')">✦ Astrología Financiera</button>
             <button type="button" class="toggle-btn" disabled style="opacity:0.4;cursor:default" title="Próximamente">Elliott Wave</button>
             <button type="button" class="toggle-btn" disabled style="opacity:0.4;cursor:default" title="Próximamente">Griegas</button>
             <button type="button" class="toggle-btn" disabled style="opacity:0.4;cursor:default" title="Próximamente">Campana de Gauss</button>
           </div>
-          <button class="ciclo-tab" style="border-color:var(--gold-dark);color:var(--gold-light)" onclick="switchEstudio(this,'observaciones')">📝 Observaciones</button>
+          <button class="ciclo-tab" style="border-color:var(--gold-dark);color:var(--gold-light)" onclick="switchEstudio(this,'observaciones')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Observaciones</button>
         </div>
 
         <!-- ===== ESTUDIO: GANN ===== -->
@@ -747,23 +748,23 @@ textarea { resize: vertical; line-height: 1.5; }
 
           <!-- Categorías -->
           <div class="toggle-group" id="ciclosCategoryGroup" style="margin-bottom:14px">
-            <button type="button" class="toggle-btn active" onclick="switchCategory(this,'precio')">🌀 Geometría del Precio</button>
-            <button type="button" class="toggle-btn" onclick="switchCategory(this,'tiempo')">⏱ Geometría del Tiempo</button>
-            <button type="button" class="toggle-btn" onclick="switchCategory(this,'tendencia')">📐 Tendencia y Confirmación</button>
+            <button type="button" class="toggle-btn active" onclick="switchCategory(this,'precio')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><path d="M12 3a9 9 0 1 0 9 9c0-3-2-6-6-6a4 4 0 1 0 3 6.5"/></svg> Geometría del Precio</button>
+            <button type="button" class="toggle-btn" onclick="switchCategory(this,'tiempo')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Geometría del Tiempo</button>
+            <button type="button" class="toggle-btn" onclick="switchCategory(this,'tendencia')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M4 20h16M4 20V4l16 16"/></svg> Tendencia y Confirmación</button>
           </div>
 
           <!-- Tab navigation -->
           <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:16px">
-            <button class="ciclo-tab active" data-cat="precio" onclick="switchTab('mapa',this)">🌀 Mapa de Ciclos</button>
-            <button class="ciclo-tab" data-cat="precio" onclick="switchTab('angulos',this)">📐 Ángulos</button>
+            <button class="ciclo-tab active" data-cat="precio" onclick="switchTab('mapa',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><path d="M12 3a9 9 0 1 0 9 9c0-3-2-6-6-6a4 4 0 1 0 3 6.5"/></svg> Mapa de Ciclos</button>
+            <button class="ciclo-tab" data-cat="precio" onclick="switchTab('angulos',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M4 20h16M4 20V4l16 16"/></svg> Ángulos</button>
             <button class="ciclo-tab" data-cat="precio" onclick="switchTab('maestros',this)">✦ Números Maestros</button>
-            <button class="ciclo-tab" data-cat="precio" onclick="switchTab('rango',this)">📊 Rango de Apertura</button>
+            <button class="ciclo-tab" data-cat="precio" onclick="switchTab('rango',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><path d="M6 20V10M12 20V4M18 20v-7"/></svg> Rango de Apertura</button>
             <button class="ciclo-tab" data-cat="precio" onclick="switchTab('vibracion',this)">〰 Vibración</button>
-            <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('temporales',this)">⏱ Ciclos Temporales</button>
-            <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('rueda',this)">☯ Rueda de <span style="font-family:'Cocogoose',sans-serif">24</span></button>
-            <button class="ciclo-tab" data-cat="tendencia" style="display:none" onclick="switchTab('swing',this)">📐 Swing Charting</button>
-            <button class="ciclo-tab" id="tabBtnHexagono" data-cat="tendencia" style="display:none" onclick="switchTab('hexagono',this)">⬡ Hexágono</button>
-            <button class="ciclo-tab" id="tabBtnMaster12" data-cat="tendencia" style="display:none" onclick="switchTab('master12',this)">⚹ Master 12</button>
+            <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('temporales',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Ciclos Temporales</button>
+            <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('rueda',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg> Rueda de <span style="font-family:'Cocogoose',sans-serif">24</span></button>
+            <button class="ciclo-tab" data-cat="tendencia" style="display:none" onclick="switchTab('swing',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M4 20h16M4 20V4l16 16"/></svg> Swing Charting</button>
+            <button class="ciclo-tab" id="tabBtnHexagono" data-cat="tendencia" style="display:none" onclick="switchTab('hexagono',this)">⬡︎ Hexágono</button>
+            <button class="ciclo-tab" id="tabBtnMaster12" data-cat="tendencia" style="display:none" onclick="switchTab('master12',this)">⚹︎ Master 12</button>
           </div>
 
           <!-- 1. MAPA DE CICLOS - Square of Nine -->
@@ -772,18 +773,24 @@ textarea { resize: vertical; line-height: 1.5; }
               <div class="form-section-title">Mapa de Ciclos — Espiral de Precio</div>
               <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:20px">
                 <div class="form-group full" style="max-width:500px;margin:0">
-                  <label>Dirección del pivote</label>
-                  <div class="toggle-group" id="gannDirectionGroup">
+                  <div style="cursor:pointer;display:flex;align-items:center;gap:6px" onclick="toggleGannPicker('gannDirectionGroup','gannDirPicker-icon')">
+                    <label style="margin:0;cursor:pointer">Dirección del pivote: <span id="gannDirLabel" style="color:var(--gold-light)">Ambas</span></label>
+                    <span id="gannDirPicker-icon" style="color:var(--gold-light);font-size:0.65rem">▾</span>
+                  </div>
+                  <div class="toggle-group" id="gannDirectionGroup" style="display:none;margin-top:8px">
                     <button type="button" class="toggle-btn active" onclick="setGannDirection(this,'ambas')">Ambas <span class="tip" data-tip="Úsalo solo si aún no sabes si este pivote fue el inicio de una tendencia o un punto de equilibrio — mientras el mercado confirma, ver las dos tablas te deja comparar ambos escenarios.">ⓘ</span></button>
                     <button type="button" class="toggle-btn" onclick="setGannDirection(this,'alcista')">▲ Alcista <span class="tip" data-tip="Úsalo cuando ya confirmaste que el pivote fue el inicio de una tendencia al alza. Solo verás la tabla alcista, con resistencias y soportes calculados sobre esa misma estructura.">ⓘ</span></button>
                     <button type="button" class="toggle-btn" onclick="setGannDirection(this,'bajista')">▼ Bajista <span class="tip" data-tip="Úsalo cuando ya confirmaste que el pivote fue el inicio de una tendencia a la baja. Solo verás la tabla bajista, con resistencias y soportes calculados sobre esa misma estructura.">ⓘ</span></button>
                   </div>
                 </div>
                 <div class="form-group full" style="max-width:340px;margin:0">
-                  <label>Vista</label>
-                  <div class="toggle-group" id="gannViewGroup">
-                    <button type="button" class="toggle-btn active" onclick="setGannView(this,'tabla')">📋 Tabla <span class="tip" data-tip="Todos los niveles, ordenados por cercanía al precio — mejor para anticipar y planear.">ⓘ</span></button>
-                    <button type="button" class="toggle-btn" onclick="setGannView(this,'espiral')">🌀 Espiral <span class="tip" data-tip="La geometría real del Square of Nine, con opción de ver el recorrido del precio.">ⓘ</span></button>
+                  <div style="cursor:pointer;display:flex;align-items:center;gap:6px" onclick="toggleGannPicker('gannViewGroup','gannViewPicker-icon')">
+                    <label style="margin:0;cursor:pointer">Vista: <span id="gannViewLabel" style="color:var(--gold-light)">Tabla</span></label>
+                    <span id="gannViewPicker-icon" style="color:var(--gold-light);font-size:0.65rem">▾</span>
+                  </div>
+                  <div class="toggle-group" id="gannViewGroup" style="display:none;margin-top:8px">
+                    <button type="button" class="toggle-btn active" onclick="setGannView(this,'tabla')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M3 15h18M9 3v18"/></svg> Tabla <span class="tip" data-tip="Todos los niveles, ordenados por cercanía al precio — mejor para anticipar y planear.">ⓘ</span></button>
+                    <button type="button" class="toggle-btn" onclick="setGannView(this,'espiral')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><path d="M12 3a9 9 0 1 0 9 9c0-3-2-6-6-6a4 4 0 1 0 3 6.5"/></svg> Espiral <span class="tip" data-tip="La geometría real del Square of Nine, con opción de ver el recorrido del precio.">ⓘ</span></button>
                   </div>
                 </div>
               </div>
@@ -876,7 +883,7 @@ textarea { resize: vertical; line-height: 1.5; }
           <!-- 8. SWING CHARTING (placeholder) -->
           <div class="ciclo-panel" id="tab-swing">
             <div class="form-section">
-              <div class="form-section-title">📐 Swing Charting</div>
+              <div class="form-section-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:4px"><path d="M4 20h16M4 20V4l16 16"/></svg>Swing Charting</div>
               <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Detección objetiva de tendencia: 2 máximos consecutivos más altos confirman un giro alcista, 2 mínimos consecutivos más bajos confirman uno bajista. Sin interpretación a ojo.</p>
               <div id="swing_result"></div>
             </div>
@@ -884,7 +891,7 @@ textarea { resize: vertical; line-height: 1.5; }
 
           <div class="ciclo-panel" id="tab-hexagono">
             <div class="form-section">
-              <div class="form-section-title">⬡ Hexágono</div>
+              <div class="form-section-title">⬡︎ Hexágono</div>
               <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Otra espiral de Gann, esta hexagonal en vez de cuadrada. Gann la usaba para <strong style="color:var(--gold-light)">confirmar</strong> — si un nivel importante en Mapa de Ciclos también sale fuerte aquí, la señal pesa más.</p>
               <div id="hexagono_result"></div>
             </div>
@@ -892,7 +899,7 @@ textarea { resize: vertical; line-height: 1.5; }
 
           <div class="ciclo-panel" id="tab-master12">
             <div class="form-section">
-              <div class="form-section-title">⚹ Master 12</div>
+              <div class="form-section-title">⚹︎ Master 12</div>
               <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Divide el círculo en 12 en vez de 8 — "12 es 9 con un tercio de 9 sumado," decía Gann. Otra herramienta de confirmación cruzada, no una nueva forma de calcular desde cero.</p>
               <div id="master12_result"></div>
             </div>
@@ -904,7 +911,7 @@ textarea { resize: vertical; line-height: 1.5; }
         <!-- ===== ESTUDIO: LUNA ===== -->
         <div class="estudio-panel" id="estudio-luna" style="display:none">
           <div class="form-section">
-            <div class="form-section-title">🌙 Luna</div>
+            <div class="form-section-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:4px"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>Luna</div>
             <p style="font-size:0.72rem;color:var(--text2);margin-bottom:12px;line-height:1.6">Gann estudiaba el ciclo lunar como uno más de sus ciclos de tiempo, y buscaba confluencias entre la fase de la luna y la posición del precio en su propia espiral. Aquí comparamos ambos ángulos — el de la luna en su ciclo de fase, y el del precio en su Square of Nine.</p>
             <div id="lunaPivotRef" style="font-size:0.65rem;color:var(--text3);background:var(--bg3);border-radius:8px;padding:8px 12px;margin-bottom:20px"></div>
             <div id="luna_result"></div>
@@ -924,7 +931,7 @@ textarea { resize: vertical; line-height: 1.5; }
         <!-- ===== OBSERVACIONES (no es un estudio — notas sobre cualquiera de ellos) ===== -->
         <div class="estudio-panel" id="estudio-observaciones" style="display:none">
           <div class="form-section">
-            <div class="form-section-title">📝 Observaciones — ¿Funciona lo que estudio?</div>
+            <div class="form-section-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:4px"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Observaciones — ¿Funciona lo que estudio?</div>
             <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Registra qué hizo el precio cuando confluyó una fecha, un ángulo, o una fase lunar — hayas tomado un trade o no. Con el tiempo, esto te dice objetivamente qué técnicas te funcionan de verdad.</p>
             <div id="obsStatsBox" style="margin-bottom:20px"></div>
 
@@ -933,13 +940,13 @@ textarea { resize: vertical; line-height: 1.5; }
               <div class="form-group">
                 <label>Tipo de fuente</label>
                 <select id="obs_tipo" onchange="autoFillObsLuna()">
-                  <option value="ciclo_temporal">⏱ Ciclo Temporal</option>
-                  <option value="angulo">📐 Ángulo de Gann</option>
-                  <option value="mapa_ciclos">🌀 Mapa de Ciclos</option>
+                  <option value="ciclo_temporal">Ciclo Temporal</option>
+                  <option value="angulo">Ángulo de Gann</option>
+                  <option value="mapa_ciclos">Mapa de Ciclos</option>
                   <option value="numero_maestro">✦ Número Maestro</option>
                   <option value="vibracion">〰 Vibración</option>
-                  <option value="luna">🌙 Luna</option>
-                  <option value="calendario">📅 Calendario</option>
+                  <option value="luna">Luna</option>
+                  <option value="calendario">Calendario</option>
                   <option value="otro">Otro</option>
                 </select>
               </div>
@@ -966,13 +973,13 @@ textarea { resize: vertical; line-height: 1.5; }
             <div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Filtrar por tipo</div>
             <div class="toggle-group" id="obsFilterGroup">
               <button type="button" class="toggle-btn active" onclick="setObsFilter(this,'todas')">Todas</button>
-              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'ciclo_temporal')">⏱ Ciclo Temporal</button>
-              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'angulo')">📐 Ángulo</button>
-              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'mapa_ciclos')">🌀 Mapa de Ciclos</button>
+              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'ciclo_temporal')"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:2px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Ciclo Temporal</button>
+              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'angulo')"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:2px"><path d="M4 20h16M4 20V4l16 16"/></svg> Ángulo</button>
+              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'mapa_ciclos')"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-1px;margin-right:2px"><path d="M12 3a9 9 0 1 0 9 9c0-3-2-6-6-6a4 4 0 1 0 3 6.5"/></svg> Mapa de Ciclos</button>
               <button type="button" class="toggle-btn" onclick="setObsFilter(this,'numero_maestro')">✦ Número Maestro</button>
               <button type="button" class="toggle-btn" onclick="setObsFilter(this,'vibracion')">〰 Vibración</button>
-              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'luna')">🌙 Luna</button>
-              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'calendario')">📅 Calendario</button>
+              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'luna')"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:2px"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg> Luna</button>
+              <button type="button" class="toggle-btn" onclick="setObsFilter(this,'calendario')">Calendario</button>
               <button type="button" class="toggle-btn" onclick="setObsFilter(this,'otro')">Otro</button>
             </div>
           </div>
@@ -3918,6 +3925,7 @@ function wrapNumbersJosefin(el) {
 
 function syncGlobalPivot() {
   // Mapa de Ciclos, Ángulos, Números Maestros, Ciclos Temporales y Luna leen directo del Pivote Global.
+  autoDetectGannDirection();
   calcGann();
   calcAngulos();
   calcVibracion();
@@ -3973,6 +3981,7 @@ async function loadCiclosPivote(todayFallback) {
     dateEl.value = todayFallback;
   }
   await loadLatestMarketPrice();
+  autoDetectGannDirection();
   calcGann();
   calcAngulos();
   calcVibracion();
@@ -4089,16 +4098,50 @@ function switchCalfin(btn, view) {
 
 // 1. MAPA DE CICLOS - Square of Nine
 let gannDirection = 'ambas';
+let gannDirectionManuallySet = false;
+
+function toggleGannPicker(groupId, iconId) {
+  const group = document.getElementById(groupId);
+  const icon = document.getElementById(iconId);
+  const open = group.style.display !== 'none';
+  group.style.display = open ? 'none' : 'block';
+  if (icon) icon.textContent = open ? '▾' : '▴';
+}
+
 function setGannDirection(btn, dir) {
   gannDirection = dir;
+  gannDirectionManuallySet = true;
   document.querySelectorAll('#gannDirectionGroup .toggle-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  const label = document.getElementById('gannDirLabel');
+  if (label) label.textContent = dir === 'ambas' ? 'Ambas' : dir === 'alcista' ? '▲ Alcista' : '▼ Bajista';
+  toggleGannPicker('gannDirectionGroup', 'gannDirPicker-icon');
   calcGann();
+}
+
+// Si el usuario todavía no eligió a mano, la dirección se deduce sola comparando el precio
+// actual contra el pivote — así no se abren dos tablas de una cuando ya se sabe cuál aplica.
+function autoDetectGannDirection() {
+  if (gannDirectionManuallySet) return;
+  const pivot = parseFloat(document.getElementById('global_pivot').value);
+  const price = parseFloat(document.getElementById('global_price').value);
+  if (!pivot || !price) return;
+  const dir = price > pivot ? 'alcista' : price < pivot ? 'bajista' : 'ambas';
+  gannDirection = dir;
+  const btns = document.querySelectorAll('#gannDirectionGroup .toggle-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  const idxMap = { ambas: 0, alcista: 1, bajista: 2 };
+  if (btns[idxMap[dir]]) btns[idxMap[dir]].classList.add('active');
+  const label = document.getElementById('gannDirLabel');
+  if (label) label.textContent = dir === 'ambas' ? 'Ambas' : dir === 'alcista' ? '▲ Alcista' : '▼ Bajista';
 }
 
 let gannView = 'tabla';
 function setGannView(btn, view) {
   gannView = view;
+  const label = document.getElementById('gannViewLabel');
+  if (label) label.textContent = view === 'tabla' ? 'Tabla' : 'Espiral';
+  toggleGannPicker('gannViewGroup', 'gannViewPicker-icon');
   document.querySelectorAll('#gannViewGroup .toggle-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   stopRecorridoPlay();
@@ -4266,7 +4309,7 @@ function proximityAlertHtml(dist, levelLabel, alertId) {
   const id = alertId || ('alert_' + Math.random().toString(36).slice(2));
   return `<div id="${id}" style="background:${bg};border:1px solid ${border};border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px">
     <div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:1.1rem">🔔</span>
+      <span style="display:inline-flex"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
       <span style="font-size:0.75rem;color:${color};font-weight:600">El precio ${verb} ${levelLabel} — a ${dist.toFixed(0)} pts${dateNote}.</span>
     </div>
     <span style="cursor:pointer;color:${color};font-size:0.9rem;padding:0 6px" onclick="document.getElementById('${id}').style.display='none'" title="Cerrar">✕</span>
@@ -4498,7 +4541,7 @@ function renderGannSpiral(bullLevels, bearLevels, showBull, showBear, nearest, p
   const showBoth = showBull && showBear;
 
   let svg = `<div style="text-align:center;margin-bottom:10px">
-    <button class="btn-secondary" style="padding:6px 14px;font-size:0.65rem" onclick="renderGannRecorrido()">🎬 Ver recorrido del precio desde el pivote</button>
+    <button class="btn-secondary" style="padding:6px 14px;font-size:0.65rem" onclick="renderGannRecorrido()"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" style="vertical-align:-1px;margin-right:3px"><path d="M8 5v14l11-7Z"/></svg> Ver recorrido del precio desde el pivote</button>
   </div>
   <div style="padding:10px 14px;background:var(--bg3);border-radius:8px;margin-bottom:12px;text-align:center">
     <span id="gannSpiralInfo" style="font-size:0.75rem;color:var(--text2)">Toca cualquier punto para ver su valor exacto</span>
@@ -4659,7 +4702,7 @@ function calcGann() {
       html += `<tr class="${rowClass}"><td>${a.label}</td><td>${a.angle}</td><td>${a.dir}</td><td>${a.type}</td>`;
       a.levels.forEach((l,i) => {
         const isNearest = price && nearest && nearest.source === 'bull' && Math.abs(l - price) < 30 && a.angle === nearest.angle;
-        html += `<td class="${isNearest ? 'nearest' : ''}">${l.toFixed(0)}</td>`;
+        html += `<td class="${isNearest ? 'nearest-cell' : ''}">${l.toFixed(0)}</td>`;
       });
       html += `</tr>`;
     });
@@ -4687,7 +4730,7 @@ function calcGann() {
       html += `<tr class="${isCardinal ? 'cardinal' : ''}"><td>${a.label}</td><td>${a.angle}</td><td>${a.dir}</td><td>${a.type}</td>`;
       a.levels.forEach((l,i) => {
         const isNearest = price && nearest && nearest.source === 'bear' && l > 0 && Math.abs(l - price) < 30 && a.angle === nearest.angle;
-        html += `<td class="${isNearest ? 'nearest' : ''}">${l > 0 ? l.toFixed(0) : '—'}</td>`;
+        html += `<td class="${isNearest ? 'nearest-cell' : ''}">${l > 0 ? l.toFixed(0) : '—'}</td>`;
       });
       html += `</tr>`;
     });
@@ -5252,7 +5295,7 @@ function autoFillObsLuna() {
   const fechaStr = document.getElementById('obs_fecha').value;
   if (tipo !== 'luna' || !fechaStr) return;
   const moon = getMoonPhase(new Date(fechaStr + 'T12:00:00'));
-  document.getElementById('obs_detalle').value = `${moon.icon} ${moon.phaseName} (${moon.illum}% iluminada)`;
+  document.getElementById('obs_detalle').value = `${moon.phaseName} (${moon.illum}% iluminada)`;
 }
 
 function setObsConfirmField(btn, val) {
@@ -5328,8 +5371,12 @@ async function deleteObs(id) {
 }
 
 const OBS_TIPO_LABELS = {
-  ciclo_temporal: '⏱ Ciclo Temporal', angulo: '📐 Ángulo de Gann', mapa_ciclos: '🌀 Mapa de Ciclos',
-  numero_maestro: '✦ Número Maestro', vibracion: '〰 Vibración', luna: '🌙 Luna', calendario: '📅 Calendario', otro: 'Otro'
+  ciclo_temporal: '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:2px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Ciclo Temporal',
+  angulo: '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:2px"><path d="M4 20h16M4 20V4l16 16"/></svg> Ángulo de Gann',
+  mapa_ciclos: '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-1px;margin-right:2px"><path d="M12 3a9 9 0 1 0 9 9c0-3-2-6-6-6a4 4 0 1 0 3 6.5"/></svg> Mapa de Ciclos',
+  numero_maestro: '✦ Número Maestro', vibracion: '〰 Vibración',
+  luna: '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:2px"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg> Luna',
+  calendario: 'Calendario', otro: 'Otro'
 };
 
 let lastObsRows = [];
@@ -5414,7 +5461,7 @@ function renderObsList(rows) {
           ${statusHtml}
           <div style="display:flex;gap:10px">
             <span style="cursor:pointer;font-size:0.65rem;color:var(--text3)" onclick="startObsEditById('${o.id}')" title="Editar">✎</span>
-            <span style="cursor:pointer;font-size:0.65rem;color:var(--text3)" onclick="deleteObs('${o.id}')" title="Eliminar">🗑</span>
+            <span style="cursor:pointer;font-size:0.65rem;color:var(--text3)" onclick="deleteObs('${o.id}')" title="Eliminar">✕</span>
           </div>
         </div>
       </div>
@@ -5432,17 +5479,17 @@ function getMoonPhase(date) {
   let age = diffDays % SYNODIC_MONTH;
   if (age < 0) age += SYNODIC_MONTH;
   const illum = Math.round((1 - Math.cos(2 * Math.PI * age / SYNODIC_MONTH)) / 2 * 100);
-  let phaseName, icon;
-  if (age < 1.84566) { phaseName = 'Luna Nueva'; icon = '🌑'; }
-  else if (age < 5.53699) { phaseName = 'Creciente'; icon = '🌒'; }
-  else if (age < 9.22831) { phaseName = 'Cuarto Creciente'; icon = '🌓'; }
-  else if (age < 12.91963) { phaseName = 'Gibosa Creciente'; icon = '🌔'; }
-  else if (age < 16.61096) { phaseName = 'Luna Llena'; icon = '🌕'; }
-  else if (age < 20.30228) { phaseName = 'Gibosa Menguante'; icon = '🌖'; }
-  else if (age < 23.99361) { phaseName = 'Cuarto Menguante'; icon = '🌗'; }
-  else if (age < 27.68493) { phaseName = 'Menguante'; icon = '🌘'; }
-  else { phaseName = 'Luna Nueva'; icon = '🌑'; }
-  return { age, illum, phaseName, icon };
+  let phaseName;
+  if (age < 1.84566) phaseName = 'Luna Nueva';
+  else if (age < 5.53699) phaseName = 'Creciente';
+  else if (age < 9.22831) phaseName = 'Cuarto Creciente';
+  else if (age < 12.91963) phaseName = 'Gibosa Creciente';
+  else if (age < 16.61096) phaseName = 'Luna Llena';
+  else if (age < 20.30228) phaseName = 'Gibosa Menguante';
+  else if (age < 23.99361) phaseName = 'Cuarto Menguante';
+  else if (age < 27.68493) phaseName = 'Menguante';
+  else phaseName = 'Luna Nueva';
+  return { age, illum, phaseName };
 }
 
 // Fechas exactas de próximas lunas nuevas/llenas dentro de una ventana — para mostrarlas solas en el calendario
@@ -5456,8 +5503,8 @@ function getMoonEvents(daysBack, daysForward) {
     const newMoonTime = KNOWN_NEW_MOON_UTC + k * SYNODIC_MONTH * 86400000;
     if (newMoonTime > endWindow) break;
     const fullMoonTime = newMoonTime + (SYNODIC_MONTH / 2) * 86400000;
-    if (newMoonTime >= startWindow && newMoonTime <= endWindow) events.push({ date: new Date(newMoonTime), type: 'Luna Nueva', icon: '🌑' });
-    if (fullMoonTime >= startWindow && fullMoonTime <= endWindow) events.push({ date: new Date(fullMoonTime), type: 'Luna Llena', icon: '🌕' });
+    if (newMoonTime >= startWindow && newMoonTime <= endWindow) events.push({ date: new Date(newMoonTime), type: 'Luna Nueva', icon: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" style="vertical-align:-2px"><circle cx="12" cy="12" r="8"/></svg>' });
+    if (fullMoonTime >= startWindow && fullMoonTime <= endWindow) events.push({ date: new Date(fullMoonTime), type: 'Luna Llena', icon: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="vertical-align:-2px"><circle cx="12" cy="12" r="8"/></svg>' });
     k++;
   }
   return events;
@@ -5689,17 +5736,18 @@ async function renderAstrologiaFinanciera() {
   </div>`;
 
   // Leyenda rápida
+  const dot = color => `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:4px;vertical-align:1px"></span>`;
   html += `<div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;font-size:0.6rem;color:var(--text3)">
-    <span>🔴 <span style="color:${ASPECT_GROUP_META.tension.color}">Tensión</span></span>
-    <span>🟢 <span style="color:${ASPECT_GROUP_META.armonia.color}">Armonía</span></span>
-    <span>🟡 <span style="color:${ASPECT_GROUP_META.neutral.color}">Neutral</span></span>
+    <span>${dot(ASPECT_GROUP_META.tension.color)}<span style="color:${ASPECT_GROUP_META.tension.color}">Tensión</span></span>
+    <span>${dot(ASPECT_GROUP_META.armonia.color)}<span style="color:${ASPECT_GROUP_META.armonia.color}">Armonía</span></span>
+    <span>${dot(ASPECT_GROUP_META.neutral.color)}<span style="color:${ASPECT_GROUP_META.neutral.color}">Neutral</span></span>
     <span style="color:var(--danger)">◐ símbolo rojo = retrógrado</span>
   </div>`;
 
   // Ciclo Júpiter-Saturno, resaltado aparte
   if (jupSat) {
     html += `<div style="background:rgba(170,146,82,0.1);border:1px solid var(--gold-dark);border-radius:10px;padding:14px 18px;margin-bottom:20px">
-      <div style="font-size:0.7rem;font-weight:700;color:var(--gold-light);margin-bottom:6px">⚡ Júpiter y Saturno están en ${jupSat.aspect.name} ahora mismo</div>
+      <div style="font-size:0.7rem;font-weight:700;color:var(--gold-light);margin-bottom:6px"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style="vertical-align:-2px;margin-right:3px"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg>Júpiter y Saturno están en ${jupSat.aspect.name} ahora mismo</div>
       <p style="font-size:0.66rem;color:var(--text2);line-height:1.6">Este es, históricamente, el ciclo más vigilado de toda la astrología financiera — se repite cada ~20 años y muchos lo asocian con cambios de era económica completos, no solo movimientos de corto plazo.</p>
     </div>`;
   }
@@ -5840,8 +5888,8 @@ async function renderMoonNodesAndEclipses() {
     const solar = Astronomy.SearchGlobalSolarEclipse(now);
     const lunar = Astronomy.SearchLunarEclipse(now);
     const eclipseList = [];
-    if (solar) eclipseList.push({ type: 'Eclipse Solar', date: solar.peak.date, icon: '🌑' });
-    if (lunar) eclipseList.push({ type: 'Eclipse Lunar', date: lunar.peak.date, icon: '🌕' });
+    if (solar) eclipseList.push({ type: 'Eclipse Solar', date: solar.peak.date, icon: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" style="vertical-align:-2px"><circle cx="12" cy="12" r="8"/></svg>' });
+    if (lunar) eclipseList.push({ type: 'Eclipse Lunar', date: lunar.peak.date, icon: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style="vertical-align:-2px"><circle cx="12" cy="12" r="8"/></svg>' });
     eclipseList.sort((a, b) => a.date - b.date);
 
     html += `<div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Próximos eclipses</div>`;
