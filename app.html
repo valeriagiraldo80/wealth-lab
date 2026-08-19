@@ -773,21 +773,21 @@ textarea { resize: vertical; line-height: 1.5; }
               <div class="form-section-title">Mapa de Ciclos — Espiral de Precio</div>
               <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:20px">
                 <div class="form-group full" style="max-width:500px;margin:0">
-                  <div style="cursor:pointer;display:flex;align-items:center;gap:6px" onclick="toggleGannPicker('gannDirectionGroup','gannDirPicker-icon')">
-                    <label style="margin:0;cursor:pointer">Dirección del pivote: <span id="gannDirLabel" style="color:var(--gold-light)">Ambas</span></label>
-                    <span id="gannDirPicker-icon" style="color:var(--gold-light);font-size:0.65rem">▾</span>
-                  </div>
+                  <button type="button" class="btn-secondary" style="padding:8px 14px;font-size:0.7rem" onclick="toggleGannPicker('gannDirectionGroup','gannDirPicker-icon')">
+                    Dirección del pivote: <span id="gannDirLabel" style="color:var(--gold-light)">Ambas</span>
+                    <span id="gannDirPicker-icon" style="color:var(--gold-light);font-size:0.65rem;margin-left:4px">▾</span>
+                  </button>
                   <div class="toggle-group" id="gannDirectionGroup" style="display:none;margin-top:8px">
                     <button type="button" class="toggle-btn active" onclick="setGannDirection(this,'ambas')">Ambas <span class="tip" data-tip="Úsalo solo si aún no sabes si este pivote fue el inicio de una tendencia o un punto de equilibrio — mientras el mercado confirma, ver las dos tablas te deja comparar ambos escenarios.">ⓘ</span></button>
-                    <button type="button" class="toggle-btn" onclick="setGannDirection(this,'alcista')">▲ Alcista <span class="tip" data-tip="Úsalo cuando ya confirmaste que el pivote fue el inicio de una tendencia al alza. Solo verás la tabla alcista, con resistencias y soportes calculados sobre esa misma estructura.">ⓘ</span></button>
-                    <button type="button" class="toggle-btn" onclick="setGannDirection(this,'bajista')">▼ Bajista <span class="tip" data-tip="Úsalo cuando ya confirmaste que el pivote fue el inicio de una tendencia a la baja. Solo verás la tabla bajista, con resistencias y soportes calculados sobre esa misma estructura.">ⓘ</span></button>
+                    <button type="button" class="toggle-btn" onclick="setGannDirection(this,'alcista')">Alcista <span class="tip" data-tip="Úsalo cuando ya confirmaste que el pivote fue el inicio de una tendencia al alza. Solo verás la tabla alcista, con resistencias y soportes calculados sobre esa misma estructura.">ⓘ</span></button>
+                    <button type="button" class="toggle-btn" onclick="setGannDirection(this,'bajista')">Bajista <span class="tip" data-tip="Úsalo cuando ya confirmaste que el pivote fue el inicio de una tendencia a la baja. Solo verás la tabla bajista, con resistencias y soportes calculados sobre esa misma estructura.">ⓘ</span></button>
                   </div>
                 </div>
                 <div class="form-group full" style="max-width:340px;margin:0">
-                  <div style="cursor:pointer;display:flex;align-items:center;gap:6px" onclick="toggleGannPicker('gannViewGroup','gannViewPicker-icon')">
-                    <label style="margin:0;cursor:pointer">Vista: <span id="gannViewLabel" style="color:var(--gold-light)">Tabla</span></label>
-                    <span id="gannViewPicker-icon" style="color:var(--gold-light);font-size:0.65rem">▾</span>
-                  </div>
+                  <button type="button" class="btn-secondary" style="padding:8px 14px;font-size:0.7rem" onclick="toggleGannPicker('gannViewGroup','gannViewPicker-icon')">
+                    Vista: <span id="gannViewLabel" style="color:var(--gold-light)">Tabla</span>
+                    <span id="gannViewPicker-icon" style="color:var(--gold-light);font-size:0.65rem;margin-left:4px">▾</span>
+                  </button>
                   <div class="toggle-group" id="gannViewGroup" style="display:none;margin-top:8px">
                     <button type="button" class="toggle-btn active" onclick="setGannView(this,'tabla')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M3 15h18M9 3v18"/></svg> Tabla <span class="tip" data-tip="Todos los niveles, ordenados por cercanía al precio — mejor para anticipar y planear.">ⓘ</span></button>
                     <button type="button" class="toggle-btn" onclick="setGannView(this,'espiral')"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><path d="M12 3a9 9 0 1 0 9 9c0-3-2-6-6-6a4 4 0 1 0 3 6.5"/></svg> Espiral <span class="tip" data-tip="La geometría real del Square of Nine, con opción de ver el recorrido del precio.">ⓘ</span></button>
@@ -4114,7 +4114,7 @@ function setGannDirection(btn, dir) {
   document.querySelectorAll('#gannDirectionGroup .toggle-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   const label = document.getElementById('gannDirLabel');
-  if (label) label.textContent = dir === 'ambas' ? 'Ambas' : dir === 'alcista' ? '▲ Alcista' : '▼ Bajista';
+  if (label) label.textContent = dir === 'ambas' ? 'Ambas' : dir === 'alcista' ? 'Alcista' : 'Bajista';
   toggleGannPicker('gannDirectionGroup', 'gannDirPicker-icon');
   calcGann();
 }
@@ -4133,7 +4133,7 @@ function autoDetectGannDirection() {
   const idxMap = { ambas: 0, alcista: 1, bajista: 2 };
   if (btns[idxMap[dir]]) btns[idxMap[dir]].classList.add('active');
   const label = document.getElementById('gannDirLabel');
-  if (label) label.textContent = dir === 'ambas' ? 'Ambas' : dir === 'alcista' ? '▲ Alcista' : '▼ Bajista';
+  if (label) label.textContent = dir === 'ambas' ? 'Ambas' : dir === 'alcista' ? 'Alcista' : 'Bajista';
 }
 
 let gannView = 'tabla';
@@ -4679,12 +4679,10 @@ function calcGann() {
   }
   
   if (price && nearest) {
-    const stopSugerido = lostMotion ? (price > nearest.price ? nearest.price - lostMotion : nearest.price + lostMotion) : null;
     html += `<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
       <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Nivel más cercano</div><div class="stat-value text-gold">${nearest.price.toFixed(0)}</div><div class="stat-sub">${nearest.angle} · Anillo <span style="font-family:Cocogoose,sans-serif">${nearest.ring}</span> · ${nearest.source === 'bull' ? 'Alcista' : 'Bajista'}</div></div>
       <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Distancia</div><div class="stat-value ${price > nearest.price ? 'text-success' : 'text-danger'}">${Math.abs(price - nearest.price).toFixed(0)} pts</div><div class="stat-sub">${price > nearest.price ? 'Por encima' : 'Por debajo'}</div></div>
       <div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Fase del ciclo</div><div class="stat-value text-gold" style="font-size:1rem">${quadrant}</div></div>
-      ${stopSugerido !== null ? `<div class="stat-card" style="flex:1;min-width:150px"><div class="stat-label">Stop sugerido <span class="tip" data-tip="Nivel más cercano ± tu colchón de lost motion, para no salir del trade por ruido normal antes de que el nivel realmente falle.">ⓘ</span></div><div class="stat-value text-danger">${stopSugerido.toFixed(0)}</div></div>` : ''}
     </div>`;
   }
 
