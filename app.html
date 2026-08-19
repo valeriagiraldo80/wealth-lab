@@ -806,9 +806,10 @@ textarea { resize: vertical; line-height: 1.5; }
               <div class="form-grid" style="max-width:340px;margin-bottom:8px">
                 <div class="form-group">
                   <label>Puntos por día <span class="tip" data-tip="Define qué tan inclinada es tu línea de equilibrio (1x1): cuántos puntos 'debería' avanzar el precio por cada día que pasa, según Gann. No hay un número universal correcto — depende del instrumento. Gann originalmente usaba 1 punto = 1 día para acciones bajo $100. Para el SPX, muchos traders lo ajustan según el rango diario promedio reciente del índice. Si no estás segura, prueba con tu propio promedio observado y ajústalo con el tiempo.">ⓘ</span></label>
-                  <input type="number" id="ang_unit" placeholder="ej. 10" oninput="calcAngulos()"/>
+                  <input type="number" id="ang_unit" placeholder="ej. 10" oninput="calcAngulos(); saveCiclosPivote();"/>
                 </div>
               </div>
+              <div id="angUnitSuggestion" style="margin-bottom:16px"></div>
               <p style="font-size:0.6rem;color:var(--text3);margin-bottom:20px">Origen y días transcurridos se toman del Pivote Global de arriba.</p>
               <div id="angulos_result"></div>
             </div>
@@ -3945,8 +3946,9 @@ function saveCiclosPivote() {
     const pivot_date = document.getElementById('global_date').value || null;
     const current_price = parseFloat(document.getElementById('global_price').value) || null;
     const lost_motion = parseFloat(document.getElementById('lost_motion').value) || null;
+    const ang_unit = parseFloat(document.getElementById('ang_unit').value) || null;
     await sb.from('ciclos_pivote').upsert({
-      user_id: currentUser.id, pivot_price, pivot_date, current_price, lost_motion, updated_at: new Date().toISOString()
+      user_id: currentUser.id, pivot_price, pivot_date, current_price, lost_motion, ang_unit, updated_at: new Date().toISOString()
     });
   }, 800);
 }
@@ -3977,6 +3979,7 @@ async function loadCiclosPivote(todayFallback) {
     dateEl.value = data.pivot_date || todayFallback;
     if (data.current_price != null) document.getElementById('global_price').value = data.current_price;
     if (data.lost_motion != null) document.getElementById('lost_motion').value = data.lost_motion;
+    if (data.ang_unit != null) document.getElementById('ang_unit').value = data.ang_unit;
   } else {
     dateEl.value = todayFallback;
   }
@@ -4840,7 +4843,38 @@ function calcGann() {
 }
 
 // 2. ÁNGULOS DE GANN
+// Sugerencia calculada de "Puntos por día" — distancia real recorrida desde el pivote, dividida
+// entre los días calendario transcurridos. Necesita al menos 5 días REALES de mercado (sin
+// fines de semana ni feriados, ya filtrados por la tabla market_snapshot) para no sugerir
+// números absurdos de los primeros 1-2 días.
+async function renderAngUnitSuggestion() {
+  const box = document.getElementById('angUnitSuggestion');
+  if (!box) return;
+  const pivot = parseFloat(document.getElementById('global_pivot').value);
+  const price = parseFloat(document.getElementById('global_price').value);
+  const dateStr = document.getElementById('global_date').value;
+  if (!pivot || !price || !dateStr) { box.innerHTML = ''; return; }
+
+  const { data } = await sb.from('market_snapshot').select('price_date').eq('ticker', 'SPX').gte('price_date', dateStr).order('price_date', { ascending: true });
+  const marketDays = data ? data.length : 0;
+
+  if (marketDays < 5) {
+    box.innerHTML = `<div style="font-size:0.65rem;color:var(--text3);background:var(--bg3);border-radius:8px;padding:8px 12px">Este pivote es muy reciente (${marketDays} día${marketDays === 1 ? '' : 's'} de mercado hasta ahora) — el número sugerido todavía no es confiable. Vuelve en unos días, o usa tu propio criterio mientras tanto.</div>`;
+    return;
+  }
+
+  const calendarDays = Math.floor((new Date() - new Date(dateStr)) / 86400000);
+  if (calendarDays <= 0) { box.innerHTML = ''; return; }
+  const suggested = Math.abs(price - pivot) / calendarDays;
+
+  box.innerHTML = `<div style="font-size:0.65rem;color:var(--text2);background:rgba(170,146,82,0.08);border:1px solid var(--gold-dark);border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <span>Número sugerido: <strong style="color:var(--gold-light);font-family:'Cocogoose',sans-serif">${suggested.toFixed(1)}</strong> puntos/día <span style="color:var(--text3)">(basado en ${marketDays} días de historial)</span></span>
+    <span style="cursor:pointer;text-decoration:underline;color:var(--gold-light);white-space:nowrap" onclick="document.getElementById('ang_unit').value=${suggested.toFixed(1)};calcAngulos();saveCiclosPivote();">Usar este número</span>
+  </div>`;
+}
+
 function calcAngulos() {
+  renderAngUnitSuggestion();
   const origin = parseFloat(document.getElementById('global_pivot').value);
   const dateStr = document.getElementById('global_date').value;
   const unit = parseFloat(document.getElementById('ang_unit').value) || 1;
