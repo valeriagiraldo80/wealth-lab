@@ -758,7 +758,7 @@ textarea { resize: vertical; line-height: 1.5; }
             <button class="ciclo-tab active" data-cat="precio" onclick="switchTab('mapa',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><path d="M12 3a9 9 0 1 0 9 9c0-3-2-6-6-6a4 4 0 1 0 3 6.5"/></svg> Mapa de Ciclos</button>
             <button class="ciclo-tab" data-cat="precio" onclick="switchTab('angulos',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M4 20h16M4 20V4l16 16"/></svg> Ángulos</button>
             <button class="ciclo-tab" data-cat="precio" onclick="switchTab('maestros',this)">✦ Números Maestros</button>
-            <button class="ciclo-tab" data-cat="precio" onclick="switchTab('rango',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><path d="M6 20V10M12 20V4M18 20v-7"/></svg> Rango de Apertura</button>
+            <button class="ciclo-tab" data-cat="precio" onclick="switchTab('rango',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><path d="M6 20V10M12 20V4M18 20v-7"/></svg> Regla del 50%</button>
             <button class="ciclo-tab" data-cat="precio" onclick="switchTab('vibracion',this)">〰 Vibración</button>
             <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('temporales',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Ciclos Temporales</button>
             <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('rueda',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg> Rueda de <span style="font-family:'Cocogoose',sans-serif">24</span></button>
@@ -837,19 +837,12 @@ textarea { resize: vertical; line-height: 1.5; }
           <!-- 5. RANGO DE APERTURA -->
           <div class="ciclo-panel" id="tab-rango">
             <div class="form-section">
-              <div class="form-section-title">Rango de Apertura</div>
-              <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">El rango del primer día del año, mes o semana proyecta el movimiento futuro según Gann.</p>
+              <div class="form-section-title">Regla del 50%</div>
+              <p style="font-size:0.72rem;color:var(--text2);margin-bottom:6px;line-height:1.6">Del propio libro de Gann, "How to Make Profits in Commodities" — toma cualquier giro real del precio (un máximo a un mínimo, o al revés) y lo divide en 8 partes iguales. El 50% es, en sus propias palabras, "el precio más importante del rango".</p>
+              <p id="rango50AutoNote" style="font-size:0.62rem;color:var(--gold-light);margin-bottom:16px;line-height:1.5"></p>
               <div class="form-grid" style="max-width:500px;margin-bottom:20px">
-                <div class="form-group"><label>Máximo del período</label><input type="number" id="rango_high" placeholder="ej. 5450" oninput="calcRango()"/></div>
-                <div class="form-group"><label>Mínimo del período</label><input type="number" id="rango_low" placeholder="ej. 5380" oninput="calcRango()"/></div>
-                <div class="form-group full">
-                  <label>Tipo de período</label>
-                  <div class="toggle-group">
-                    <button type="button" class="toggle-btn active" onclick="setRangoTipo(this,'Año')">Año</button>
-                    <button type="button" class="toggle-btn" onclick="setRangoTipo(this,'Mes')">Mes</button>
-                    <button type="button" class="toggle-btn" onclick="setRangoTipo(this,'Semana')">Semana</button>
-                  </div>
-                </div>
+                <div class="form-group"><label>Máximo del giro</label><input type="number" id="rango_high" placeholder="ej. 5450" oninput="calcRango()"/></div>
+                <div class="form-group"><label>Mínimo del giro</label><input type="number" id="rango_low" placeholder="ej. 5380" oninput="calcRango()"/></div>
               </div>
               <div id="rango_result"></div>
             </div>
@@ -3910,7 +3903,6 @@ function calcNetPnl() {
 
 
 // ===== CICLOS =====
-let rangoTipo = 'Año';
 let calEvents = [];
 
 
@@ -4002,6 +3994,7 @@ function switchTab(tab, btn) {
   if (tab === 'swing') renderSwingChart();
   if (tab === 'hexagono') calcHexagono();
   if (tab === 'master12') calcMaster12();
+  if (tab === 'rango') autoFillRango50();
 }
 
 function switchCategory(btn, cat) {
@@ -5090,10 +5083,26 @@ function calcMaestros() {
 }
 
 // 5. RANGO DE APERTURA
-function setRangoTipo(btn, tipo) {
-  document.querySelectorAll('#tab-rango .toggle-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  rangoTipo = tipo;
+// Rellena solo Máximo/Mínimo con el último giro real que Swing Charting ya detectó — la persona
+// puede sobreescribirlo en cualquier momento si ve un giro más claro que el indicador no captó.
+async function autoFillRango50() {
+  const note = document.getElementById('rango50AutoNote');
+  const pivotDate = document.getElementById('global_date').value;
+  if (!pivotDate) { if (note) note.textContent = ''; return; }
+
+  const { data } = await sb.from('market_snapshot').select('price_date,high,low,price').eq('ticker', 'SPX').gte('price_date', pivotDate).not('high', 'is', null).order('price_date', { ascending: true });
+  if (!data || data.length < 5) { if (note) note.textContent = ''; return; }
+
+  const { swings } = computeSwings(data);
+  const lastSwingLow = [...swings].reverse().find(s => s.type === 'low');
+  const lastSwingHigh = [...swings].reverse().find(s => s.type === 'high');
+  if (!lastSwingLow || !lastSwingHigh) { if (note) note.textContent = 'Todavía no hay giros confirmados por Swing Charting — escribe el máximo y mínimo a mano.'; return; }
+
+  const highInput = document.getElementById('rango_high');
+  const lowInput = document.getElementById('rango_low');
+  if (!highInput.value) highInput.value = lastSwingHigh.price.toFixed(0);
+  if (!lowInput.value) lowInput.value = lastSwingLow.price.toFixed(0);
+  if (note) note.textContent = `Sugerido desde el último giro que detectó Swing Charting: máximo ${lastSwingHigh.price.toFixed(0)} (${lastSwingHigh.date}), mínimo ${lastSwingLow.price.toFixed(0)} (${lastSwingLow.date}) — escribe encima si ves un giro distinto.`;
   calcRango();
 }
 
@@ -5105,20 +5114,26 @@ function calcRango() {
 
   const range = high - low;
   const mid = (high + low) / 2;
-  const multipliers = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3];
+  // Las 8 divisiones reales de Gann — el 50% es "el precio más importante del rango" según su
+  // propio libro; 75% y 100% son las siguientes más importantes.
+  const fractions = [
+    { pct: 0.125, label: '12.5%' }, { pct: 0.25, label: '25%' }, { pct: 0.375, label: '37.5%' },
+    { pct: 0.5, label: '50%', key: true }, { pct: 0.625, label: '62.5%' },
+    { pct: 0.75, label: '75%', key: true }, { pct: 0.875, label: '87.5%' }, { pct: 1, label: '100%', key: true },
+  ];
 
   let html = `<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-    <div class="stat-card" style="flex:1"><div class="stat-label">Rango ${rangoTipo}</div><div class="stat-value text-gold">${range.toFixed(0)} pts</div></div>
-    <div class="stat-card" style="flex:1"><div class="stat-label">Punto Medio</div><div class="stat-value text-gold">${mid.toFixed(0)}</div></div>
+    <div class="stat-card" style="flex:1"><div class="stat-label">Rango del giro</div><div class="stat-value text-gold">${range.toFixed(0)} pts</div></div>
+    <div class="stat-card" style="flex:1"><div class="stat-label">Punto Medio (50%)</div><div class="stat-value text-gold">${mid.toFixed(0)}</div></div>
   </div>`;
 
-  html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Multiplicador</th><th>Target Alcista</th><th>Target Bajista</th><th>Puntos</th></tr></thead><tbody>`;
-  multipliers.forEach(m => {
-    html += `<tr class="${m === 1 ? 'cardinal' : ''}">
-      <td style="color:var(--gold-light)">${m}x</td>
-      <td style="color:var(--success)">${(high + range * m).toFixed(0)}</td>
-      <td style="color:var(--danger)">${(low - range * m).toFixed(0)}</td>
-      <td>${(range * m).toFixed(0)}</td>
+  html += `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>% del rango</th><th>Precio</th><th>Importancia</th></tr></thead><tbody>`;
+  fractions.forEach(f => {
+    const price = high - range * f.pct;
+    html += `<tr class="${f.pct === 0.5 ? 'cardinal' : ''}">
+      <td style="color:${f.key ? 'var(--gold-light)' : 'var(--text2)'};font-weight:${f.key ? '700' : '400'}">${f.label}</td>
+      <td>${price.toFixed(0)}</td>
+      <td style="font-size:0.6rem;color:var(--text3)">${f.pct === 0.5 ? 'La más importante' : f.pct === 0.75 || f.pct === 1 ? 'Importante' : ''}</td>
     </tr>`;
   });
   html += `</tbody></table></div>`;
