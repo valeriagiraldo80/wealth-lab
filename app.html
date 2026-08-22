@@ -1078,6 +1078,7 @@ textarea { resize: vertical; line-height: 1.5; }
       <label>Archivo CSV</label>
       <input type="file" id="csvFileInput" accept=".csv" onchange="handleCsvFile(event)"/>
     </div>
+    <div id="importPreviewHeader"></div>
     <div id="importPreview"></div>
     <div class="form-actions" style="margin-top:16px">
       <button class="btn-secondary" onclick="closeImportModal()">Cancelar</button>
@@ -2450,6 +2451,7 @@ async function newTradeForm() {
     return;
   }
   editingTradeId = null;
+  editingImportIndex = null;
   resetForm();
   showPage('nuevo');
   document.getElementById('tradeSubmitBtn').textContent = 'Guardar Trade';
@@ -2478,6 +2480,7 @@ async function editTrade(id) {
   if (!t) return;
   showPage('nuevo');
   editingTradeId = id;
+  editingImportIndex = null;
   resetForm();
   renderCustomOptionsIntoForm();
 
@@ -2614,6 +2617,22 @@ async function saveTrade(e) {
     exit_price: !isOptionsCat && g('f_exit_price') ? parseFloat(g('f_exit_price')) : null,
     profit_target:g('f_target')?parseFloat(g('f_target')):null, stop_loss: isOptionsCat ? (g('f_stop')?parseFloat(g('f_stop')):null) : (g('f_stop_other')?parseFloat(g('f_stop_other')):null),
     max_risk_usd:g('f_max_risk')?parseFloat(g('f_max_risk')):null, risk_pct:g('f_risk_pct')?parseFloat(g('f_risk_pct')):null, close_type:closeType, partial_pct:g('f_partial_pct')?parseInt(g('f_partial_pct')):null, partial_pnl:g('f_partial_pnl')?parseFloat(g('f_partial_pnl')):null, pnl:g('f_pnl')?parseFloat(g('f_pnl')):null, pnl_gross:g('f_pnl_gross')?parseFloat(g('f_pnl_gross')):null, broker_fees:g('f_fees')?parseFloat(g('f_fees')):null, contracts:contracts, premium_total: isOptionsCat && g('f_premium_total') ? parseFloat(g('f_premium_total')) : null, followed_rules:g('f_followed_rules'), rules_broken:g('f_rules_broken'), execution_score:selectedScore, what_went_well:g('f_well'), what_to_improve:g('f_improve'), errors:finalErrors.length?finalErrors:null, quality_trade:selectedQuality, notes:g('f_notes') };
+
+  if (editingImportIndex !== null) {
+    const idx = editingImportIndex;
+    window._importValidRows[idx].trade = payload;
+    window._importValidRows[idx].legs = legs;
+    window._importValidRows[idx].needsReview = false;
+    window._importValidRows[idx].complexFill = false;
+    window._importValidRows[idx].summary = `${payload.trade_date || '—'} · ${payload.asset || '—'} · ${payload.strategy || payload.trade_type || 'Trade'}`;
+    editingImportIndex = null;
+    document.getElementById('tradeSubmitBtn').textContent = 'Guardar Trade';
+    showToast('✦ Cambios guardados en la fila de importación');
+    resetForm();
+    document.getElementById('importModal').style.display = 'flex';
+    renderImportPreviewList();
+    return;
+  }
 
   let tradeId = editingTradeId;
   if (editingTradeId) {
@@ -2889,6 +2908,7 @@ function openImportModal() {
     return;
   }
   document.getElementById('csvFileInput').value = '';
+  document.getElementById('importPreviewHeader').innerHTML = '';
   document.getElementById('importPreview').innerHTML = '';
   document.getElementById('confirmImportBtn').style.display = 'none';
   window._importValidRows = [];
@@ -2897,6 +2917,117 @@ function openImportModal() {
   document.getElementById('importModal').style.display = 'flex';
 }
 function closeImportModal() { document.getElementById('importModal').style.display = 'none'; }
+
+let editingImportIndex = null;
+
+// Construye la lista de revisión de forma unificada (funciona igual para thinkorswim y CSV genérico),
+// con ✎ editar y ✕ eliminar en cada fila — nada se sube a la Bitácora hasta que la persona toque Confirmar.
+function renderImportPreviewList() {
+  const rows = window._importValidRows || [];
+  const container = document.getElementById('importPreview');
+  const countEl = document.getElementById('importPreviewCount');
+  if (countEl) countEl.textContent = rows.length ? `${rows.length} trade${rows.length !== 1 ? 's' : ''} listo${rows.length !== 1 ? 's' : ''} para importar` : '';
+  document.getElementById('confirmImportBtn').style.display = rows.length ? 'inline-block' : 'none';
+
+  if (!rows.length) { container.innerHTML = '<p style="font-size:0.7rem;color:var(--text3)">No quedan trades en la lista.</p>'; return; }
+
+  container.innerHTML = '<div class="breakdown-list" style="max-height:320px;overflow-y:auto">' + rows.map((r, i) => {
+    const t = r.trade;
+    const summary = r.summary || `${t.trade_date || '—'} · ${t.asset || '—'} · ${t.strategy || t.trade_type || 'Trade'}`;
+    const badge = r.needsReview ? '<span class="metric-badge warn">Revisar</span>' : r.complexFill ? '<span class="metric-badge warn">Verificar</span>' : (t.status === 'open' ? '<span class="metric-badge neutral">Abierto</span>' : '<span class="metric-badge good">Cerrado</span>');
+    const pnlTxt = t.pnl != null ? `${t.pnl >= 0 ? '+' : ''}$${(+t.pnl).toFixed(2)}` : '—';
+    return `<div class="breakdown-row">
+      <span>${summary}</span>
+      <span style="display:flex;gap:10px;align-items:center">
+        ${badge}
+        <span class="bval ${t.pnl >= 0 ? 'text-success' : 'text-danger'}">${pnlTxt}</span>
+        <span class="item-icon-btn" style="font-size:0.85rem" onclick="editImportRow(${i})" title="Editar antes de confirmar"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+        <span class="item-icon-btn" style="font-size:0.85rem" onclick="removeImportRow(${i})" title="Quitar de la lista">✕</span>
+      </span>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+function removeImportRow(idx) {
+  window._importValidRows.splice(idx, 1);
+  renderImportPreviewList();
+}
+
+async function editImportRow(idx) {
+  const row = window._importValidRows[idx];
+  if (!row) return;
+  const t = row.trade;
+
+  closeImportModal();
+  editingImportIndex = idx;
+  editingTradeId = null;
+  showPage('nuevo');
+  resetForm();
+  renderCustomOptionsIntoForm();
+
+  const set = (fid, val) => { const el = document.getElementById(fid); if (el) el.value = val ?? ''; };
+  setTradeCategory(t.trade_category === 'other' ? 'other' : 'options');
+  set('f_status', t.status || 'closed'); toggleStatusFields();
+  set('f_date', t.trade_date); set('f_entry_time', t.entry_time); set('f_exit_time', t.exit_time);
+  set('f_asset', t.asset);
+  setSelectWithOther('f_trade_type', 'f_trade_type_other', t.trade_type);
+  if (t.trade_category !== 'other') { setSelectWithOther('f_strategy', 'f_strategy_other', t.strategy); updateOpenActionVisibility(); }
+  setSelectWithOther('f_direction', 'f_direction_other', t.direction);
+  setSelectWithOther('f_market_condition', 'f_market_condition_other', t.market_condition);
+  set('f_gex_context', t.gex_context); set('f_vix_level', t.vix_level); set('f_mag7_sentiment', t.mag7_sentiment);
+  set('f_context_notes', t.context_notes);
+  set('f_thesis', t.thesis); set('f_wing_width', t.wing_width); set('f_spot', t.spot); set('f_dte', t.dte);
+  set('f_premium', t.premium_collected); set('f_target', t.profit_target);
+  set('f_entry_price', t.entry_price); set('f_exit_price', t.exit_price);
+  if (t.trade_category === 'other') { set('f_qty_other', t.contracts); set('f_stop_other', t.stop_loss); }
+  else { set('f_stop', t.stop_loss); set('f_contracts', t.contracts); }
+  set('f_max_risk', t.max_risk_usd);
+  setSelectWithOther('f_close_type', 'f_close_type_other', t.close_type);
+  set('f_partial_pct', t.partial_pct); set('f_partial_pnl', t.partial_pnl);
+  set('f_pnl', t.pnl); set('f_pnl_gross', t.pnl_gross); set('f_fees', t.broker_fees);
+  set('f_followed_rules', t.followed_rules); set('f_rules_broken', t.rules_broken);
+  set('f_well', t.what_went_well); set('f_improve', t.what_to_improve); set('f_notes', t.notes);
+
+  await refreshRealBalanceCache();
+  calcPremiumTotal(); calcRiskPct(); calcTargetStopTotals(); calcNetPnl();
+
+  document.getElementById('legsList').innerHTML = '';
+  if (row.legs && row.legs.length) {
+    setStrikesMode('detail');
+    row.legs.forEach(leg => addLegRow({ strike: leg.strike, option_type: leg.option_type, action: leg.action, delta: leg.delta }));
+    calcNetDelta();
+  } else {
+    setStrikesMode('simple');
+    set('f_strikes_simple', t.strikes);
+  }
+
+  selectedGreeks = [];
+  document.querySelectorAll('#greeksGroup .toggle-btn').forEach(btn => {
+    const g = btn.textContent.trim();
+    if ((t.greeks_in_play || []).includes(g)) { btn.classList.add('active'); selectedGreeks.push(g); }
+  });
+  selectedConfluence = null;
+  if (t.greeks_confluence === true) setConfluence(true);
+  else if (t.greeks_confluence === false) setConfluence(false);
+  if (t.execution_score) setScore(t.execution_score);
+  if (t.quality_trade === true) setQuality(true);
+  else if (t.quality_trade === false) setQuality(false);
+  selectedErrors = [];
+  const errorBtns = Array.from(document.querySelectorAll('#errorsGroup .toggle-btn'));
+  (t.errors || []).forEach(err => {
+    const btn = errorBtns.find(b => { const m = b.getAttribute('onclick').match(/'([^']+)'/); return m && m[1] === err; });
+    if (btn) { btn.classList.add('active'); selectedErrors.push(err); }
+    else {
+      const otherBtn = errorBtns.find(b => b.textContent.trim() === 'Otro');
+      if (otherBtn) { otherBtn.classList.add('active'); }
+      const otherInput = document.getElementById('f_error_other');
+      if (otherInput) { otherInput.value = err; otherInput.style.display = 'block'; }
+    }
+  });
+
+  document.getElementById('tradeSubmitBtn').textContent = 'Guardar cambios (aún sin confirmar)';
+  document.getElementById('pageTitle').textContent = 'Editar trade importado';
+}
 
 function validateCsvRow(row, index) {
   const errors = [];
@@ -3210,19 +3341,14 @@ function handleCsvFile(event) {
         window._importValidRows = nonDup.map(r => ({ errors: [], trade: r.trade, legs: [], needsReview: r.needsReview, complexFill: r.complexFill, summary: r.summary }));
         const okCount = nonDup.filter(r => !r.needsReview).length;
         const reviewCount = nonDup.filter(r => r.needsReview).length;
-        let html = `<div style="font-size:0.7rem;color:var(--gold-light);margin-bottom:8px">Formato detectado: estado de cuenta de thinkorswim</div>
+        document.getElementById('importPreviewHeader').innerHTML = `<div style="font-size:0.7rem;color:var(--gold-light);margin-bottom:8px">Formato detectado: estado de cuenta de thinkorswim</div>
         <div style="font-size:0.75rem;color:var(--text2);margin-bottom:10px">
           Se reconstruyeron <strong style="color:var(--gold-light)">${withDup.length}</strong> trades ·
           <strong style="color:#4ade80">${okCount}</strong> con P&L calculado ${reviewCount ? `· <strong style="color:#facc15">${reviewCount}</strong> requieren revisión` : ''}
           ${dupCount ? `· <strong style="color:var(--danger)">${dupCount}</strong> posibles duplicados (no se importarán)` : ''}
-        </div>`;
-        html += '<div class="breakdown-list" style="max-height:280px;overflow-y:auto">' + withDup.map(r => {
-          const badge = r.isDuplicate ? '<span class="metric-badge bad">Duplicado</span>' : r.needsReview ? '<span class="metric-badge warn">Revisar</span>' : r.complexFill ? '<span class="metric-badge warn">Verificar</span>' : (r.trade.status==='open' ? '<span class="metric-badge neutral">Abierto</span>' : '<span class="metric-badge good">Cerrado</span>');
-          const pnlTxt = r.trade.pnl!=null ? `${r.trade.pnl>=0?'+':''}$${r.trade.pnl.toFixed(2)}` : '—';
-          return `<div class="breakdown-row" style="${r.isDuplicate?'opacity:0.5':''}"><span>${r.summary}</span><span style="display:flex;gap:8px;align-items:center">${badge}<span class="bval ${r.trade.pnl>=0?'text-success':'text-danger'}">${pnlTxt}</span></span></div>`;
-        }).join('') + '</div>';
-        document.getElementById('importPreview').innerHTML = html;
-        document.getElementById('confirmImportBtn').style.display = nonDup.length ? 'inline-block' : 'none';
+        </div>
+        <p style="font-size:0.65rem;color:var(--text3);margin-bottom:10px">Toca ✎ para editar cualquier trade antes de confirmar, o ✕ para quitarlo de la lista.</p>`;
+        renderImportPreviewList();
       });
       return;
     }
@@ -3240,19 +3366,20 @@ function handleCsvFile(event) {
           const dupCount = withDup.length - nonDup.length;
           window._importValidRows = nonDup;
 
-          let html = `<div style="font-size:0.7rem;color:var(--gold-light);margin-bottom:8px">Formato detectado: plantilla genérica</div>
+          let headerHtml = `<div style="font-size:0.7rem;color:var(--gold-light);margin-bottom:8px">Formato detectado: plantilla genérica</div>
           <div style="font-size:0.75rem;color:var(--text2);margin-bottom:10px">
             <strong style="color:var(--gold-light)">${nonDup.length}</strong> fila${nonDup.length!==1?'s':''} lista${nonDup.length!==1?'s':''} para importar
             ${invalid.length ? `· <strong style="color:var(--danger)">${invalid.length}</strong> con errores` : ''}
             ${dupCount ? `· <strong style="color:var(--danger)">${dupCount}</strong> posibles duplicados (no se importarán)` : ''}
-          </div>`;
+          </div>
+          <p style="font-size:0.65rem;color:var(--text3);margin-bottom:10px">Toca ✎ para editar cualquier trade antes de confirmar, o ✕ para quitarlo de la lista.</p>`;
           if (invalid.length) {
-            html += '<div class="breakdown-list" style="margin-bottom:12px">' + invalid.map(p =>
+            headerHtml += '<div class="breakdown-list" style="margin-bottom:12px">' + invalid.map(p =>
               `<div class="breakdown-row"><span>Fila ${p.index}</span><span style="color:var(--danger);font-size:0.65rem">${p.errors.join(', ')}</span></div>`
             ).join('') + '</div>';
           }
-          document.getElementById('importPreview').innerHTML = html;
-          document.getElementById('confirmImportBtn').style.display = nonDup.length ? 'inline-block' : 'none';
+          document.getElementById('importPreviewHeader').innerHTML = headerHtml;
+          renderImportPreviewList();
         });
       }
     });
@@ -4233,6 +4360,25 @@ async function renderSwingChart() {
   const lastSwingHigh = [...swings].reverse().find(s => s.type === 'high');
   const currentPrice = data[data.length - 1].price;
 
+  // "Ruido" — si el precio tocó algo más extremo que el giro confirmado, pero rebotó tan rápido
+  // que nunca llegó a completar las 2 confirmaciones seguidas que exige un giro real. No reemplaza
+  // al giro oficial, solo se muestra como referencia aparte para no confundir los dos conceptos.
+  function findNoise(swing, type) {
+    if (!swing) return null;
+    const afterSwing = data.filter(r => r.price_date > swing.date);
+    if (!afterSwing.length) return null;
+    if (type === 'low') {
+      const deeper = afterSwing.filter(r => r.low < swing.price).sort((a, b) => a.low - b.low)[0];
+      return deeper ? { price: deeper.low, date: deeper.price_date } : null;
+    } else {
+      const higher = afterSwing.filter(r => r.high > swing.price).sort((a, b) => b.high - a.high)[0];
+      return higher ? { price: higher.high, date: higher.price_date } : null;
+    }
+  }
+  const noiseLow = findNoise(lastSwingLow, 'low');
+  const noiseHigh = findNoise(lastSwingHigh, 'high');
+  const fmtNoiseDate = d => new Date(d + 'T12:00:00').toLocaleDateString('es', { day: 'numeric', month: 'short' });
+
   let html = `<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
     <div class="stat-card" style="flex:1;min-width:150px">
       <div class="stat-label">Tendencia actual</div>
@@ -4242,11 +4388,13 @@ async function renderSwingChart() {
       <div class="stat-label">Soporte (último giro bajo)</div>
       <div class="stat-value text-success">${lastSwingLow ? lastSwingLow.price.toFixed(0) : '—'}</div>
       <div class="stat-sub">${lastSwingLow ? lastSwingLow.date : ''}</div>
+      ${noiseLow ? `<div style="font-size:0.58rem;color:var(--text3);margin-top:6px;line-height:1.5">Tocó ${noiseLow.price.toFixed(0)} el ${fmtNoiseDate(noiseLow.date)}, pero rebotó sin cambiar la tendencia — es ruido, no un giro real. El giro confirmado sigue siendo ${lastSwingLow.price.toFixed(0)}.</div>` : ''}
     </div>
     <div class="stat-card" style="flex:1;min-width:150px">
       <div class="stat-label">Resistencia (último giro alto)</div>
       <div class="stat-value text-danger">${lastSwingHigh ? lastSwingHigh.price.toFixed(0) : '—'}</div>
       <div class="stat-sub">${lastSwingHigh ? lastSwingHigh.date : ''}</div>
+      ${noiseHigh ? `<div style="font-size:0.58rem;color:var(--text3);margin-top:6px;line-height:1.5">Tocó ${noiseHigh.price.toFixed(0)} el ${fmtNoiseDate(noiseHigh.date)}, pero rebotó sin cambiar la tendencia — es ruido, no un giro real. El giro confirmado sigue siendo ${lastSwingHigh.price.toFixed(0)}.</div>` : ''}
     </div>
   </div>
   <div style="background:rgba(170,146,82,0.1);border:1px solid var(--gold-dark);border-radius:10px;padding:14px 18px;margin-bottom:20px;cursor:pointer" onclick="toggleLunaAcc('hiLoExplain')">
