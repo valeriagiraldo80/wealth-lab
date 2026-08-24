@@ -5989,6 +5989,9 @@ async function renderVibracion() {
   </div>`;
 
   // ===== Lectura en Conjunto — solo destaca cuando de verdad hay algo que decir =====
+  const noTrendSignal = trendFlexMode === null; // TrendFlex mismo dice "no hay tendencia sostenida" — eso ya es una respuesta, no un vacío
+  const conflict = trendFlexMode !== null && trendFlexMode !== mamaMode; // sí hay tendencia según TrendFlex, pero MAMA/FAMA no coincide en la dirección
+
   let conjuntoTitle, conjuntoBody, conjuntoColor, conjuntoBg;
   if (agree && isExtreme && isReversing) {
     conjuntoColor = 'var(--gold)'; conjuntoBg = 'rgba(170,146,82,0.12)';
@@ -5998,14 +6001,18 @@ async function renderVibracion() {
     conjuntoColor = trendFlexMode === 'alcista' ? 'var(--success)' : 'var(--danger)'; conjuntoBg = trendFlexMode === 'alcista' ? 'rgba(74,222,128,0.1)' : 'rgba(248,113,113,0.08)';
     conjuntoTitle = `TrendFlex y MAMA/FAMA coinciden — tendencia ${trendFlexMode}`;
     conjuntoBody = `Dos formas de medir la tendencia, completamente distintas entre sí, dicen lo mismo ahora mismo. Eso hace la lectura más confiable que si solo tuvieras una.`;
-  } else if (isExtreme) {
+  } else if (noTrendSignal) {
+    conjuntoColor = 'var(--text3)'; conjuntoBg = 'var(--bg3)';
+    conjuntoTitle = `El mercado parece estar en ciclo, no en tendencia`;
+    conjuntoBody = `TrendFlex no muestra una tendencia sostenida ahora mismo (${currentFlex.trendflex.toFixed(2)}, dentro del rango normal) — y esa es justamente la respuesta que da cuando el mercado se está moviendo de lado, en vaivén, en vez de una dirección firme.${isExtreme ? ` Además, el precio sí está en una zona extrema según Fisher Transform${isReversing ? ', y ya empezó a devolverse' : ''} — vale la pena prestarle atención dentro de ese ciclo.` : ''}`;
+  } else if (conflict) {
+    conjuntoColor = 'var(--gold)'; conjuntoBg = 'rgba(170,146,82,0.08)';
+    conjuntoTitle = `TrendFlex y MAMA/FAMA no coinciden en la dirección`;
+    conjuntoBody = `TrendFlex sí detecta una tendencia ${trendFlexMode}, pero MAMA/FAMA todavía apunta al lado contrario. Cuando los dos métodos se contradicen así, es más prudente esperar a que se alineen antes de confiar en la dirección.${isExtreme ? ` El precio sí está en zona extrema según Fisher Transform mientras tanto${isReversing ? ', y ya empezó a devolverse' : ''}.` : ''}`;
+  } else {
     conjuntoColor = 'var(--gold)'; conjuntoBg = 'rgba(170,146,82,0.1)';
     conjuntoTitle = `Precio en zona extrema${isReversing ? ', ya devolviéndose' : ''}`;
-    conjuntoBody = `TrendFlex y MAMA/FAMA todavía no coinciden entre sí sobre la tendencia, pero el precio sí está en una zona poco común según Fisher Transform${isReversing ? ', y ya empezó a devolverse' : ''}. Vale la pena prestarle atención aunque la tendencia no esté clara todavía.`;
-  } else {
-    conjuntoColor = 'var(--text3)'; conjuntoBg = 'var(--bg3)';
-    conjuntoTitle = `Sin señal clara todavía`;
-    conjuntoBody = `TrendFlex y MAMA/FAMA no coinciden entre sí, y el precio no está en ninguna zona extrema. No hay una lectura fuerte que sacar de este estudio ahora mismo — y eso también es información: mejor esperar.`;
+    conjuntoBody = `El precio está en una zona poco común según Fisher Transform${isReversing ? ', y ya empezó a devolverse' : ''}. Vale la pena prestarle atención.`;
   }
 
   html += `<div style="background:${conjuntoBg};border:1px solid ${conjuntoColor};border-radius:12px;padding:18px 20px">
