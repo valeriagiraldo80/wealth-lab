@@ -5907,43 +5907,56 @@ async function renderVibracion() {
   let html = '';
 
   // ===== Ciclo Dominante =====
-  html += `<div class="stat-card" style="margin-bottom:16px">
-    <div class="stat-label">Ciclo Dominante <span class="tip" data-tip="El número de días que el mercado está tardando, ahora mismo, en completar un vaivén completo (de un extremo al otro y de regreso). Sirve para saber si el mercado se está moviendo rápido (ciclos cortos) o lento (ciclos largos) en este momento — información real, medida del precio, no una suposición ni un número fijo.">ⓘ</span></div>
+  html += `<div class="stat-card" style="margin-bottom:16px;cursor:pointer" onclick="toggleLunaAcc('vibCicloExplain')">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div class="stat-label">Ciclo Dominante</div>
+      <span style="font-size:0.58rem;color:var(--gold-light);white-space:nowrap">Toca para ver cómo funciona</span>
+    </div>
     <div class="stat-value text-gold">${current ? current.period.toFixed(1) : '—'} días</div>
+    <div id="vibCicloExplain" style="display:none;font-size:0.62rem;color:var(--text2);margin-top:10px;line-height:1.6">Es el número de días que el mercado está tardando, ahora mismo, en completar un vaivén completo — de un extremo al otro y de regreso. Sirve para saber si el mercado se está moviendo rápido (ciclos cortos) o lento (ciclos largos) en este momento. El número va cambiando solo, a medida que cambia el precio.</div>
   </div>
   <div style="height:160px;margin-bottom:8px"><canvas id="vibHistoryCanvas"></canvas></div>
   <p style="font-size:0.62rem;color:var(--text3);margin-bottom:24px;line-height:1.6">Esta línea muestra cómo ha cambiado el Ciclo Dominante día a día. Cuando sube, el mercado se está moviendo más lento (ciclos más largos); cuando baja, se está moviendo más rápido (ciclos más cortos). No busques un número "bueno" o "malo" — solo muestra el ritmo real de cada momento.</p>`;
 
-  // ===== Indicador de Modo =====
+  // ===== Indicador de Modo — dos tarjetas separadas =====
   const trendFlexMode = Math.abs(currentFlex.trendflex) >= 1.5 ? (currentFlex.trendflex > 0 ? 'alcista' : 'bajista') : null;
   const mamaMode = currentMama.bullish ? 'alcista' : 'bajista';
   const agree = trendFlexMode === mamaMode;
 
-  html += `<div style="background:${agree ? 'rgba(74,222,128,0.08)' : 'rgba(170,146,82,0.08)'};border:1px solid ${agree ? 'rgba(74,222,128,0.3)' : 'var(--gold-dark)'};border-radius:10px;padding:16px 18px;margin-bottom:16px">
-    <div style="font-size:0.65rem;color:${agree ? 'var(--success)' : 'var(--gold)'};text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">Indicador de Modo ${agree ? '· Las dos formas coinciden' : '· Todavía no coinciden'}</div>
-    <div style="display:flex;gap:16px;flex-wrap:wrap">
-      <div style="flex:1;min-width:140px;cursor:pointer" onclick="toggleLunaAcc('vibTrendFlexExplain')">
-        <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
-          <span style="font-size:0.6rem;color:var(--gold-light)">TrendFlex</span>
-          <span id="vibTrendFlexExplain-icon" style="font-size:0.6rem;color:var(--gold-light)">▾</span>
-        </div>
-        <div style="font-family:Cocogoose,sans-serif;font-size:1.1rem;font-weight:700;color:${trendFlexMode === 'alcista' ? 'var(--success)' : trendFlexMode === 'bajista' ? 'var(--danger)' : 'var(--text3)'}">${currentFlex.trendflex.toFixed(2)}</div>
-        <div style="font-size:0.6rem;color:var(--text3)">${trendFlexMode ? (trendFlexMode === 'alcista' ? 'Tendencia alcista' : 'Tendencia bajista') : 'Sin tendencia clara — ciclo'}</div>
-        <div id="vibTrendFlexExplain" style="display:none;font-size:0.6rem;color:var(--text2);margin-top:8px;line-height:1.6">Mide si hay una tendencia sostenida activa, comparando el precio suavizado de hoy contra el de los últimos 20 días. Positivo y grande = tendencia alcista fuerte; negativo y grande = tendencia bajista fuerte; cerca de cero = no hay tendencia clara, probablemente el mercado esté en ciclo (subiendo y bajando sin dirección firme).</div>
+  html += `<div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">Indicador de Modo ${agree ? '· Las dos formas coinciden' : '· Todavía no coinciden'}</div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+    <div class="stat-card" style="flex:1;min-width:150px;cursor:pointer" onclick="toggleLunaAcc('vibTrendFlexExplain')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="stat-label">TrendFlex</div>
       </div>
-      <div style="flex:1;min-width:140px;cursor:pointer" onclick="toggleLunaAcc('vibMamaExplain')">
-        <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px">
-          <span style="font-size:0.6rem;color:var(--gold-light)">MAMA / FAMA</span>
-          <span id="vibMamaExplain-icon" style="font-size:0.6rem;color:var(--gold-light)">▾</span>
-        </div>
-        <div style="font-family:Cocogoose,sans-serif;font-size:1.1rem;font-weight:700;color:${mamaMode === 'alcista' ? 'var(--success)' : 'var(--danger)'}">${currentMama.mama.toFixed(0)} / ${currentMama.fama.toFixed(0)}</div>
-        <div style="font-size:0.6rem;color:var(--text3)">${mamaMode === 'alcista' ? 'MAMA por encima — alcista' : 'MAMA por debajo — bajista'}</div>
-        <div id="vibMamaExplain" style="display:none;font-size:0.6rem;color:var(--text2);margin-top:8px;line-height:1.6">Son dos promedios del precio que se ajustan solos, más rápido o más lento según el ritmo real del mercado. MAMA reacciona rápido, FAMA lo sigue más despacio. Cuando MAMA está por encima de FAMA, el promedio rápido ya giró hacia arriba antes que el lento — señal alcista. Cuando está por debajo, es al revés — señal bajista.</div>
-      </div>
+      <div class="stat-value" style="color:${trendFlexMode === 'alcista' ? 'var(--success)' : trendFlexMode === 'bajista' ? 'var(--danger)' : 'var(--text3)'}">${currentFlex.trendflex.toFixed(2)}</div>
+      <div style="font-size:0.6rem;color:var(--text3);margin-bottom:6px">${trendFlexMode ? (trendFlexMode === 'alcista' ? 'Tendencia alcista' : 'Tendencia bajista') : 'Sin tendencia clara — ciclo'}</div>
+      <div style="font-size:0.58rem;color:var(--gold-light)">Toca para ver qué significa</div>
+      <div id="vibTrendFlexExplain" style="display:none;font-size:0.6rem;color:var(--text2);margin-top:8px;line-height:1.6">Mide si hay una tendencia sostenida activa, comparando el precio suavizado de hoy contra el de los últimos 20 días. Positivo y grande = tendencia alcista fuerte; negativo y grande = tendencia bajista fuerte; cerca de cero = no hay tendencia clara, probablemente el mercado esté en ciclo (subiendo y bajando sin dirección firme).</div>
     </div>
-    <p style="font-size:0.6rem;color:var(--text3);margin-top:10px;line-height:1.6">${agree
-      ? 'Son dos formas de medir la tendencia, completamente distintas entre sí, y ahora mismo dicen lo mismo — eso hace la señal más confiable que si solo tuvieras una.'
-      : 'TrendFlex y MAMA/FAMA todavía no están de acuerdo entre sí. Cuando esto pasa, lo más prudente es esperar a que las dos coincidan antes de tomar una decisión basada en esto — una sola de las dos, sin la otra confirmando, es una señal más débil.'}</p>
+    <div class="stat-card" style="flex:1;min-width:150px;cursor:pointer" onclick="toggleLunaAcc('vibMamaExplain')">
+      <div class="stat-label">MAMA / FAMA</div>
+      <div class="stat-value" style="color:${mamaMode === 'alcista' ? 'var(--success)' : 'var(--danger)'}">${currentMama.mama.toFixed(0)} / ${currentMama.fama.toFixed(0)}</div>
+      <div style="font-size:0.6rem;color:var(--text3);margin-bottom:6px">${mamaMode === 'alcista' ? 'MAMA por encima — alcista' : 'MAMA por debajo — bajista'}</div>
+      <div style="font-size:0.58rem;color:var(--gold-light)">Toca para ver qué significa</div>
+      <div id="vibMamaExplain" style="display:none;font-size:0.6rem;color:var(--text2);margin-top:8px;line-height:1.6">Son dos promedios del precio que se ajustan solos, más rápido o más lento según el ritmo real del mercado. MAMA reacciona rápido, FAMA lo sigue más despacio. Cuando MAMA está por encima de FAMA, el promedio rápido ya giró hacia arriba antes que el lento — señal alcista. Cuando está por debajo, es al revés — señal bajista.</div>
+    </div>
+  </div>
+  <p style="font-size:0.62rem;color:var(--text3);margin-bottom:24px;line-height:1.6">${agree
+    ? 'Son dos formas de medir la tendencia, completamente distintas entre sí, y ahora mismo dicen lo mismo — eso hace la señal más confiable que si solo tuvieras una.'
+    : 'TrendFlex y MAMA/FAMA todavía no están de acuerdo entre sí. Cuando esto pasa, lo más prudente es esperar a que las dos coincidan antes de tomar una decisión basada en esto — una sola de las dos, sin la otra confirmando, es una señal más débil.'}</p>`;
+
+  // ===== Key Takeaways =====
+  html += `<div style="background:rgba(40,63,50,0.4);border:1px solid var(--gold-dark);border-radius:12px;padding:20px">
+    <div style="font-size:0.65rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:14px">✦ Key Takeaways</div>
+    <div style="font-size:0.68rem;color:var(--text2);line-height:1.7">
+      <strong style="color:var(--gold-light)">Ciclo Dominante ${current ? current.period.toFixed(0) : '—'} días</strong> — así de rápido o lento se está moviendo el mercado ahora mismo.<br><br>
+      <strong style="color:${trendFlexMode === 'alcista' ? 'var(--success)' : trendFlexMode === 'bajista' ? 'var(--danger)' : 'var(--gold-light)'}">TrendFlex dice ${trendFlexMode ? trendFlexMode : 'sin tendencia clara'}</strong>${trendFlexMode ? ' — hay una tendencia sostenida activa.' : ' — el mercado parece estar en ciclo, sin una dirección firme.'}<br><br>
+      <strong style="color:${mamaMode === 'alcista' ? 'var(--success)' : 'var(--danger)'}">MAMA/FAMA dice ${mamaMode}</strong> — mismo mensaje visto desde otro cálculo.<br><br>
+      ${agree
+        ? `<strong style="color:var(--success)">Las dos coinciden</strong> — es la lectura más confiable que este estudio puede darte hoy.`
+        : `<strong style="color:var(--gold)">Las dos todavía no coinciden</strong> — mejor esperar a que se alineen antes de confiar en esta lectura.`}
+    </div>
   </div>`;
 
   el.innerHTML = html;
