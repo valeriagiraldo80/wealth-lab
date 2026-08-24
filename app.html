@@ -4074,7 +4074,7 @@ function saveCiclosPivote() {
 
 async function loadLatestMarketPrice() {
   const label = document.getElementById('marketPriceLabel');
-  const { data } = await sb.from('market_snapshot').select('*').eq('ticker', 'SPX').order('fetched_at', { ascending: false }).limit(1).maybeSingle();
+  const { data } = await sb.from('market_snapshot').select('*').eq('ticker', 'SPX').order('price_date', { ascending: false }).limit(1).maybeSingle();
   if (data && data.price != null) {
     document.getElementById('global_price').value = data.price;
     window.lastPriceDate = data.price_date || null;
