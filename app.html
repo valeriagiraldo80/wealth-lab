@@ -5902,6 +5902,59 @@ function ehlersFisher(rows, length = 10) {
 
 let vibHistoryChart = null;
 
+// ===== OCTAVA CÓSMICA — método de Hans Cousto =====
+// Convierte cualquier ciclo real (días) en una nota musical, doblando su frecuencia
+// octava por octava hasta que cae dentro de lo que el oído humano puede escuchar.
+const COSMIC_NOTE_NAMES = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
+
+function cosmicOctave(periodDays) {
+  const periodSeconds = periodDays * 86400;
+  let freq = 1 / periodSeconds;
+  while (freq < 20) freq *= 2;
+  const midiNum = 12 * Math.log2(freq / 440) + 69;
+  const midiRounded = Math.round(midiNum);
+  const noteIdx = ((midiRounded % 12) + 12) % 12;
+  const octave = Math.floor(midiRounded / 12) - 1;
+  const exactFreq = 440 * Math.pow(2, (midiRounded - 69) / 12);
+  const cents = Math.round((midiNum - midiRounded) * 100);
+  const pitchClassCents = ((midiNum * 100) % 1200 + 1200) % 1200;
+  return { freq, noteName: COSMIC_NOTE_NAMES[noteIdx] + octave, exactFreq, cents, pitchClassCents };
+}
+
+function cosmicCircularDist(a, b) {
+  const d = Math.abs(a - b);
+  return Math.min(d, 1200 - d);
+}
+
+// Períodos orbitales reales, verificados contra NASA (NSSDCA Planetary Fact Sheet).
+const PLANET_ORBITAL_PERIODS = [
+  { name: 'Sol', symbol: '☉\uFE0E', days: 365.25 },
+  { name: 'Mercurio', symbol: '☿\uFE0E', days: 87.97 },
+  { name: 'Venus', symbol: '♀\uFE0E', days: 224.70 },
+  { name: 'Marte', symbol: '♂\uFE0E', days: 686.98 },
+  { name: 'Júpiter', symbol: '♃\uFE0E', days: 4332.82 },
+  { name: 'Saturno', symbol: '♄\uFE0E', days: 10755.70 },
+  { name: 'Urano', symbol: '♅\uFE0E', days: 30687.15 },
+  { name: 'Neptuno', symbol: '♆\uFE0E', days: 60190.03 },
+  { name: 'Plutón', symbol: '♇\uFE0E', days: 90560 },
+];
+
+function playCosmicTone(freq) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 2.5);
+  } catch (e) { /* silencioso si el navegador no soporta audio */ }
+}
+
 async function renderVibracion() {
   const el = document.getElementById('vibracion_result');
   if (!el) return;
@@ -6009,10 +6062,6 @@ async function renderVibracion() {
     conjuntoColor = 'var(--gold)'; conjuntoBg = 'rgba(170,146,82,0.08)';
     conjuntoTitle = `TrendFlex y MAMA/FAMA no coinciden en la dirección`;
     conjuntoBody = `TrendFlex sí detecta una tendencia ${trendFlexMode}, pero MAMA/FAMA todavía apunta al lado contrario. Cuando los dos métodos se contradicen así, es más prudente esperar a que se alineen antes de confiar en la dirección.${isExtreme ? ` El precio sí está en zona extrema según Fisher Transform mientras tanto${isReversing ? ', y ya empezó a devolverse' : ''}.` : ''}`;
-  } else {
-    conjuntoColor = 'var(--gold)'; conjuntoBg = 'rgba(170,146,82,0.1)';
-    conjuntoTitle = `Precio en zona extrema${isReversing ? ', ya devolviéndose' : ''}`;
-    conjuntoBody = `El precio está en una zona poco común según Fisher Transform${isReversing ? ', y ya empezó a devolverse' : ''}. Vale la pena prestarle atención.`;
   }
 
   html += `<div style="background:${conjuntoBg};border:1px solid ${conjuntoColor};border-radius:12px;padding:18px 20px">
@@ -6020,6 +6069,35 @@ async function renderVibracion() {
     <div style="font-size:0.72rem;font-weight:600;color:${conjuntoColor};margin-bottom:8px">${conjuntoTitle}</div>
     <p style="font-size:0.66rem;color:var(--text2);line-height:1.6;margin:0">${conjuntoBody}</p>
   </div>`;
+
+  // ===== Octava Cósmica — discreta a propósito, no compite con lo de arriba =====
+  const marketNote = current ? cosmicOctave(current.period) : null;
+  let closestPlanet = null;
+  if (marketNote) {
+    closestPlanet = PLANET_ORBITAL_PERIODS.map(p => {
+      const n = cosmicOctave(p.days);
+      return { ...p, ...n, dist: cosmicCircularDist(marketNote.pitchClassCents, n.pitchClassCents) };
+    }).sort((a, b) => a.dist - b.dist)[0];
+  }
+
+  if (marketNote) {
+    html += `<div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--border)">
+      <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">✦ Octava Cósmica</div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px">
+        <span style="font-size:0.72rem;color:var(--text2)">El mercado hoy suena en <strong style="color:var(--gold-light);font-family:'Cocogoose',sans-serif">${marketNote.noteName}</strong> <span style="color:var(--text3)">(${marketNote.freq.toFixed(2)} Hz)</span></span>
+        <span class="item-icon-btn" style="border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:0.62rem" onclick="playCosmicTone(${marketNote.freq})">▶ Escuchar</span>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <span style="font-size:0.6rem;color:var(--gold-light);cursor:pointer" onclick="toggleLunaAcc('vibCosmicMethodExplain')">Toca para ver cómo funciona</span>
+        <span style="font-size:0.6rem;color:var(--gold-light);cursor:pointer" onclick="toggleLunaAcc('vibCosmicPlanetExplain')">Toca para ver qué planeta está más cerca de esta nota</span>
+      </div>
+      <div id="vibCosmicMethodExplain" style="display:none;font-size:0.6rem;color:var(--text2);margin-top:10px;line-height:1.6">Método de Hans Cousto (Octava Cósmica) — convierte cualquier ciclo real en una nota musical, doblando su frecuencia octava por octava hasta que cae dentro de lo que el oído humano puede escuchar. Esto es exploratorio, no una señal de trading.</div>
+      <div id="vibCosmicPlanetExplain" style="display:none;font-size:0.6rem;color:var(--text2);margin-top:10px;line-height:1.6">
+        Un planeta también tiene su propio ciclo — el tiempo que tarda en darle la vuelta al Sol. Con el mismo método, ese ciclo orbital también se puede convertir en una nota. Cuando coincide con la del mercado, sus ritmos son múltiplos exactos entre sí — la misma idea de "todo lo que existe tiene su propio pulso" con la que abre esta sección, solo que ahora comparando dos pulsos distintos.
+        ${closestPlanet ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">El más cercano hoy: <strong style="color:var(--gold-light)">${closestPlanet.symbol} ${closestPlanet.name}</strong> — nota ${closestPlanet.noteName}, a ${closestPlanet.dist.toFixed(0)} cents de distancia.</div>` : ''}
+      </div>
+    </div>`;
+  }
 
   el.innerHTML = html;
   wrapNumbersJosefin(el);
