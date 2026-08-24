@@ -5955,6 +5955,38 @@ function playCosmicTone(freq) {
   } catch (e) { /* silencioso si el navegador no soporta audio */ }
 }
 
+// Reproduce una nota por cada día del Ciclo Dominante en el rango que la persona elija —
+// window._vibCycleHistory se llena en renderVibracion() con los datos ya calculados.
+function playCosmicMelody() {
+  const history = window._vibCycleHistory || [];
+  const input = document.getElementById('vibMelodyDays');
+  let days = parseInt(input ? input.value : 10, 10);
+  if (!days || days < 1) days = 1;
+  if (days > history.length) days = history.length;
+  const slice = history.slice(-days);
+  if (!slice.length) return;
+
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const noteDuration = 0.45;
+    slice.forEach((r, i) => {
+      const { freq } = cosmicOctave(r.period);
+      const startTime = ctx.currentTime + i * noteDuration;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.001, startTime);
+      gain.gain.linearRampToValueAtTime(0.18, startTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + noteDuration * 0.95);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + noteDuration);
+    });
+  } catch (e) { /* silencioso si el navegador no soporta audio */ }
+}
+
 async function renderVibracion() {
   const el = document.getElementById('vibracion_result');
   if (!el) return;
@@ -6080,18 +6112,41 @@ async function renderVibracion() {
     }).sort((a, b) => a.dist - b.dist)[0];
   }
 
+  // Sugerencia inicial de rango: desde el último giro confirmado por Swing Charting,
+  // con un mínimo de 10 días para que la melodía nunca suene casi vacía.
+  window._vibCycleHistory = readyCycle;
+  const { swings } = computeSwings(rowsHL);
+  const lastSwing = swings.length ? swings[swings.length - 1] : null;
+  let suggestedDays = 10;
+  if (lastSwing) {
+    const daysSinceSwing = readyCycle.filter(r => r.date >= lastSwing.date).length;
+    suggestedDays = Math.max(daysSinceSwing, 10);
+  }
+  suggestedDays = Math.min(suggestedDays, readyCycle.length);
+  const rangeStart = readyCycle.length >= suggestedDays ? readyCycle[readyCycle.length - suggestedDays].date : readyCycle[0].date;
+
   if (marketNote) {
     html += `<div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--border)">
       <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">✦ Octava Cósmica</div>
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px">
         <span style="font-size:0.72rem;color:var(--text2)">El mercado hoy suena en <strong style="color:var(--gold-light);font-family:'Cocogoose',sans-serif">${marketNote.noteName}</strong> <span style="color:var(--text3)">(${marketNote.freq.toFixed(2)} Hz)</span></span>
-        <span class="item-icon-btn" style="border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:0.62rem" onclick="playCosmicTone(${marketNote.freq})">▶ Escuchar</span>
+        <span class="item-icon-btn" style="border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:0.62rem" onclick="playCosmicTone(${marketNote.freq})">▶ Escuchar solo hoy</span>
+      </div>
+      <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;margin-bottom:12px">
+        <div style="font-size:0.6rem;color:var(--text3);margin-bottom:8px">Escucha varios días seguidos como una melodía — tú eliges cuántos</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:0.62rem;color:var(--text2)">Últimos</span>
+          <input type="number" id="vibMelodyDays" value="${suggestedDays}" min="1" max="${readyCycle.length}" style="width:60px;padding:6px 8px;font-size:0.65rem;text-align:center"/>
+          <span style="font-size:0.62rem;color:var(--text2)">días de mercado</span>
+          <span class="item-icon-btn" style="border:1px solid var(--gold-dark);border-radius:6px;padding:4px 10px;font-size:0.62rem;color:var(--gold-light)" onclick="playCosmicMelody()">▶ Escuchar melodía</span>
+        </div>
+        <div style="font-size:0.56rem;color:var(--text3);margin-top:8px">Sugerido: desde ${rangeStart} (${lastSwing ? 'tu último giro confirmado en Swing Charting' : 'mínimo de 10 días'}) hasta hoy — cámbialo si quieres escuchar otro tramo.</div>
       </div>
       <div style="display:flex;gap:16px;flex-wrap:wrap">
         <span style="font-size:0.6rem;color:var(--gold-light);cursor:pointer" onclick="toggleLunaAcc('vibCosmicMethodExplain')">Toca para ver cómo funciona</span>
         <span style="font-size:0.6rem;color:var(--gold-light);cursor:pointer" onclick="toggleLunaAcc('vibCosmicPlanetExplain')">Toca para ver qué planeta está más cerca de esta nota</span>
       </div>
-      <div id="vibCosmicMethodExplain" style="display:none;font-size:0.6rem;color:var(--text2);margin-top:10px;line-height:1.6">Método de Hans Cousto (Octava Cósmica) — convierte cualquier ciclo real en una nota musical, doblando su frecuencia octava por octava hasta que cae dentro de lo que el oído humano puede escuchar. Esto es exploratorio, no una señal de trading.</div>
+      <div id="vibCosmicMethodExplain" style="display:none;font-size:0.6rem;color:var(--text2);margin-top:10px;line-height:1.6">Método de Hans Cousto (Octava Cósmica) — convierte cualquier ciclo real en una nota musical, doblando su frecuencia octava por octava hasta que cae dentro de lo que el oído humano puede escuchar. La melodía es una nota por cada día real del Ciclo Dominante en el rango que elijas. Esto es exploratorio, no una señal de trading.</div>
       <div id="vibCosmicPlanetExplain" style="display:none;font-size:0.6rem;color:var(--text2);margin-top:10px;line-height:1.6">
         Un planeta también tiene su propio ciclo — el tiempo que tarda en darle la vuelta al Sol. Con el mismo método, ese ciclo orbital también se puede convertir en una nota. Cuando coincide con la del mercado, sus ritmos son múltiplos exactos entre sí — la misma idea de "todo lo que existe tiene su propio pulso" con la que abre esta sección, solo que ahora comparando dos pulsos distintos.
         ${closestPlanet ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">El más cercano hoy: <strong style="color:var(--gold-light)">${closestPlanet.symbol} ${closestPlanet.name}</strong> — nota ${closestPlanet.noteName}, a ${closestPlanet.dist.toFixed(0)} cents de distancia.</div>` : ''}
