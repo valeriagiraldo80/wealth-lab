@@ -5877,6 +5877,29 @@ function ehlersReflexTrendFlex(closes, length = 20) {
   return results;
 }
 
+// Fisher Transform — fórmula completa de Ehlers, con el suavizado recursivo real
+// (verificada contra código fuente completo, no la versión resumida sin ese paso).
+function ehlersFisher(rows, length = 10) {
+  const hl2 = rows.map(r => (r.high + r.low) / 2);
+  let prevValue = 0, prevFisher = 0;
+  const results = [];
+  rows.forEach((row, idx) => {
+    if (idx < length - 1) { results.push({ date: row.date, fisher: 0, ready: false }); return; }
+    const window = hl2.slice(idx - length + 1, idx + 1);
+    const hhigh = Math.max(...window);
+    const llow = Math.min(...window);
+    const range = Math.max(hhigh - llow, 0.001);
+    let value = 0.66 * ((hl2[idx] - llow) / range - 0.5) + 0.67 * prevValue;
+    if (value > 0.999) value = 0.999;
+    if (value < -0.999) value = -0.999;
+    prevValue = value;
+    const fisher = 0.5 * Math.log((1 + value) / Math.max(1 - value, 0.001)) + 0.5 * prevFisher;
+    prevFisher = fisher;
+    results.push({ date: row.date, fisher, ready: idx >= length + 5 });
+  });
+  return results;
+}
+
 let vibHistoryChart = null;
 
 async function renderVibracion() {
@@ -5898,11 +5921,15 @@ async function renderVibracion() {
   const cycleResults = ehlersDominantCycle(rowsHL);
   const mamaResults = ehlersMAMA(rowsHL, cycleResults);
   const flexResults = ehlersReflexTrendFlex(rowsClose);
+  const fisherResults = ehlersFisher(rowsHL);
 
   const readyCycle = cycleResults.filter(r => r.ready);
   const current = readyCycle[readyCycle.length - 1];
   const currentMama = mamaResults[mamaResults.length - 1];
   const currentFlex = flexResults[flexResults.length - 1];
+  const readyFisher = fisherResults.filter(r => r.ready);
+  const currentFisher = readyFisher[readyFisher.length - 1];
+  const prevFisher = readyFisher[readyFisher.length - 2];
 
   let html = '';
 
@@ -5916,14 +5943,18 @@ async function renderVibracion() {
     <div id="vibCicloExplain" style="display:none;font-size:0.62rem;color:var(--text2);margin-top:10px;line-height:1.6">Es el número de días que el mercado está tardando, ahora mismo, en completar un vaivén completo — de un extremo al otro y de regreso. Sirve para saber si el mercado se está moviendo rápido (ciclos cortos) o lento (ciclos largos) en este momento. El número va cambiando solo, a medida que cambia el precio.</div>
   </div>
   <div style="height:160px;margin-bottom:8px"><canvas id="vibHistoryCanvas"></canvas></div>
-  <p style="font-size:0.62rem;color:var(--text3);margin-bottom:24px;line-height:1.6">Esta línea muestra cómo ha cambiado el Ciclo Dominante día a día. Cuando sube, el mercado se está moviendo más lento (ciclos más largos); cuando baja, se está moviendo más rápido (ciclos más cortos). No busques un número "bueno" o "malo" — solo muestra el ritmo real de cada momento.</p>`;
+  <p style="font-size:0.62rem;color:var(--text3);margin-bottom:28px;line-height:1.6">Esta línea muestra cómo ha cambiado el Ciclo Dominante día a día. Cuando sube, el mercado se está moviendo más lento (ciclos más largos); cuando baja, se está moviendo más rápido (ciclos más cortos). No busques un número "bueno" o "malo" — solo muestra el ritmo real de cada momento.</p>`;
 
   // ===== Indicador de Modo — dos tarjetas separadas =====
   const trendFlexMode = Math.abs(currentFlex.trendflex) >= 1.5 ? (currentFlex.trendflex > 0 ? 'alcista' : 'bajista') : null;
   const mamaMode = currentMama.bullish ? 'alcista' : 'bajista';
   const agree = trendFlexMode === mamaMode;
 
-  html += `<div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">Indicador de Modo ${agree ? '· Las dos formas coinciden' : '· Todavía no coinciden'}</div>
+  html += `<div style="margin-bottom:12px">
+    <div style="font-size:0.68rem;font-weight:700;color:var(--gold-light)">Indicador de Modo</div>
+    <div style="font-size:0.62rem;color:var(--text3);font-style:italic">¿Hay tendencia o estamos en ciclo — y hacia dónde?</div>
+  </div>
+  <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">${agree ? '· Las dos formas coinciden' : '· Todavía no coinciden'}</div>
   <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
     <div class="stat-card" style="flex:1;min-width:150px;cursor:pointer" onclick="toggleLunaAcc('vibTrendFlexExplain')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
@@ -5942,9 +5973,30 @@ async function renderVibracion() {
       <div id="vibMamaExplain" style="display:none;font-size:0.6rem;color:var(--text2);margin-top:8px;line-height:1.6">Son dos promedios del precio que se ajustan solos, más rápido o más lento según el ritmo real del mercado. MAMA reacciona rápido, FAMA lo sigue más despacio. Cuando MAMA está por encima de FAMA, el promedio rápido ya giró hacia arriba antes que el lento — señal alcista. Cuando está por debajo, es al revés — señal bajista.</div>
     </div>
   </div>
-  <p style="font-size:0.62rem;color:var(--text3);margin-bottom:24px;line-height:1.6">${agree
+  <p style="font-size:0.62rem;color:var(--text3);margin-bottom:28px;line-height:1.6">${agree
     ? 'Son dos formas de medir la tendencia, completamente distintas entre sí, y ahora mismo dicen lo mismo — eso hace la señal más confiable que si solo tuvieras una.'
     : 'TrendFlex y MAMA/FAMA todavía no están de acuerdo entre sí. Cuando esto pasa, lo más prudente es esperar a que las dos coincidan antes de tomar una decisión basada en esto — una sola de las dos, sin la otra confirmando, es una señal más débil.'}</p>`;
+
+  // ===== Extremos del Precio (Fisher Transform) =====
+  const fisherVal = currentFisher ? currentFisher.fisher : 0;
+  const isExtreme = Math.abs(fisherVal) >= 2;
+  const isReversing = currentFisher && prevFisher && Math.abs(prevFisher.fisher) >= 1.5 && Math.abs(fisherVal) < Math.abs(prevFisher.fisher);
+  const fisherDir = fisherVal > 0 ? 'arriba' : 'abajo';
+
+  html += `<div style="margin-bottom:12px">
+    <div style="font-size:0.68rem;font-weight:700;color:var(--gold-light)">Extremos del Precio</div>
+    <div style="font-size:0.62rem;color:var(--text3);font-style:italic">¿Estamos en un punto tan extremo que podría estar por girar?</div>
+  </div>
+  <div class="stat-card" style="margin-bottom:16px;cursor:pointer" onclick="toggleLunaAcc('vibFisherExplain')">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div class="stat-label">Fisher Transform</div>
+      <span style="font-size:0.58rem;color:var(--gold-light);white-space:nowrap">Toca para ver qué significa</span>
+    </div>
+    <div class="stat-value" style="color:${isExtreme ? 'var(--gold)' : 'var(--text2)'}">${fisherVal.toFixed(2)}</div>
+    <div style="font-size:0.6rem;color:var(--text3)">${isExtreme ? `Extremo hacia ${fisherDir} — zona rara, poco común` : 'Rango normal — nada extremo ahora mismo'}${isReversing ? ' · ya empezó a devolverse' : ''}</div>
+    <div id="vibFisherExplain" style="display:none;font-size:0.6rem;color:var(--text2);margin-top:8px;line-height:1.6">Mide qué tan lejos está el precio de su propio rango reciente (10 días), pero de una forma que hace que los extremos de verdad resalten — en vez de una curva redondeada, un pico agudo y raro. Cuando el valor pasa de 2 (o -2), el precio está en una zona poco común, que históricamente antecede a giros. La señal real no es tocar el extremo — es cuando el valor empieza a devolverse después de haberlo tocado.</div>
+  </div>
+  <p style="font-size:0.62rem;color:var(--text3);margin-bottom:28px;line-height:1.6">Esta pregunta es distinta a la del Indicador de Modo de arriba — ahí preguntamos si hay tendencia; aquí preguntamos si el precio ya se estiró tanto que podría estar cerca de un giro, sin importar si hay tendencia o no.</p>`;
 
   // ===== Key Takeaways =====
   html += `<div style="background:rgba(40,63,50,0.4);border:1px solid var(--gold-dark);border-radius:12px;padding:20px">
@@ -5954,8 +6006,9 @@ async function renderVibracion() {
       <strong style="color:${trendFlexMode === 'alcista' ? 'var(--success)' : trendFlexMode === 'bajista' ? 'var(--danger)' : 'var(--gold-light)'}">TrendFlex dice ${trendFlexMode ? trendFlexMode : 'sin tendencia clara'}</strong>${trendFlexMode ? ' — hay una tendencia sostenida activa.' : ' — el mercado parece estar en ciclo, sin una dirección firme.'}<br><br>
       <strong style="color:${mamaMode === 'alcista' ? 'var(--success)' : 'var(--danger)'}">MAMA/FAMA dice ${mamaMode}</strong> — mismo mensaje visto desde otro cálculo.<br><br>
       ${agree
-        ? `<strong style="color:var(--success)">Las dos coinciden</strong> — es la lectura más confiable que este estudio puede darte hoy.`
-        : `<strong style="color:var(--gold)">Las dos todavía no coinciden</strong> — mejor esperar a que se alineen antes de confiar en esta lectura.`}
+        ? `<strong style="color:var(--success)">Las dos del Indicador de Modo coinciden</strong> — es la lectura más confiable que este estudio puede darte hoy sobre la tendencia.`
+        : `<strong style="color:var(--gold)">Las dos del Indicador de Modo todavía no coinciden</strong> — mejor esperar a que se alineen antes de confiar en esa lectura.`}<br><br>
+      <strong style="color:${isExtreme ? 'var(--gold)' : 'var(--text3)'}">Extremos del Precio: ${isExtreme ? `en zona extrema hacia ${fisherDir}` : 'sin nada extremo ahora mismo'}</strong>${isReversing ? ' — y ya empezó a devolverse, señal real de giro.' : isExtreme ? ' — vigila si empieza a devolverse.' : '.'}
     </div>
   </div>`;
 
