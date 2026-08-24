@@ -5907,10 +5907,16 @@ let vibHistoryChart = null;
 // octava por octava hasta que cae dentro de lo que el oído humano puede escuchar.
 const COSMIC_NOTE_NAMES = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
 
-function cosmicOctave(periodDays) {
+function cosmicOctave(periodDays, fixedDoublings) {
   const periodSeconds = periodDays * 86400;
-  let freq = 1 / periodSeconds;
-  while (freq < 20) freq *= 2;
+  const rawFreq = 1 / periodSeconds;
+  let freq;
+  if (fixedDoublings != null) {
+    freq = rawFreq * Math.pow(2, fixedDoublings);
+  } else {
+    freq = rawFreq;
+    while (freq < 20) freq *= 2;
+  }
   const midiNum = 12 * Math.log2(freq / 440) + 69;
   const midiRounded = Math.round(midiNum);
   const noteIdx = ((midiRounded % 12) + 12) % 12;
@@ -5919,6 +5925,15 @@ function cosmicOctave(periodDays) {
   const cents = Math.round((midiNum - midiRounded) * 100);
   const pitchClassCents = ((midiNum * 100) % 1200 + 1200) % 1200;
   return { freq, noteName: COSMIC_NOTE_NAMES[noteIdx] + octave, exactFreq, cents, pitchClassCents };
+}
+
+// Cuántas veces duplicar para que un período caiga cerca de una frecuencia de referencia
+// cómoda para el oído (registro medio, ~220 Hz) — usar la MISMA cantidad de duplicaciones
+// para toda una melodía evita que un cambio mínimo en el dato dispare un salto de octava.
+function cosmicDoublingsForTarget(periodDays, targetFreq = 220) {
+  const periodSeconds = periodDays * 86400;
+  const rawFreq = 1 / periodSeconds;
+  return Math.round(Math.log2(targetFreq / rawFreq));
 }
 
 function cosmicCircularDist(a, b) {
@@ -5939,24 +5954,45 @@ const PLANET_ORBITAL_PERIODS = [
   { name: 'Plutón', symbol: '♇\uFE0E', days: 90560 },
 ];
 
-function playCosmicTone(freq) {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+// Suma varios armónicos suaves sobre la frecuencia base para que suene a instrumento
+// (piano/campana) en vez de una onda pura y un golpe seco.
+function cosmicScheduleNote(ctx, freq, startTime, duration) {
+  const partials = [
+    { mult: 1, gain: 0.22 },
+    { mult: 2, gain: 0.09 },
+    { mult: 3, gain: 0.045 },
+    { mult: 4, gain: 0.02 },
+  ];
+  partials.forEach(p => {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'sine';
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0.2, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5);
+    osc.frequency.value = freq * p.mult;
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(p.gain, startTime + 0.02);
+    gain.gain.linearRampToValueAtTime(p.gain * 0.5, startTime + duration * 0.35);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration * 0.92);
     osc.connect(gain);
     gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 2.5);
+    osc.start(startTime);
+    osc.stop(startTime + duration);
+  });
+}
+
+function playCosmicTone(periodDays) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const doublings = cosmicDoublingsForTarget(periodDays);
+    const { freq } = cosmicOctave(periodDays, doublings);
+    cosmicScheduleNote(ctx, freq, ctx.currentTime, 2.2);
   } catch (e) { /* silencioso si el navegador no soporta audio */ }
 }
 
 // Reproduce una nota por cada día del Ciclo Dominante en el rango que la persona elija —
 // window._vibCycleHistory se llena en renderVibracion() con los datos ya calculados.
+// Todas las notas comparten la misma octava de referencia (basada en el ciclo típico del
+// rango), para que los saltos que se escuchen reflejen cambios reales, no un accidente
+// de redondeo de octava.
 function playCosmicMelody() {
   const history = window._vibCycleHistory || [];
   const input = document.getElementById('vibMelodyDays');
@@ -5968,21 +6004,13 @@ function playCosmicMelody() {
 
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const noteDuration = 0.45;
+    const medianPeriod = slice[Math.floor(slice.length / 2)].period;
+    const doublings = cosmicDoublingsForTarget(medianPeriod);
+    const noteDuration = 0.5;
     slice.forEach((r, i) => {
-      const { freq } = cosmicOctave(r.period);
+      const { freq } = cosmicOctave(r.period, doublings);
       const startTime = ctx.currentTime + i * noteDuration;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.001, startTime);
-      gain.gain.linearRampToValueAtTime(0.18, startTime + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + noteDuration * 0.95);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(startTime);
-      osc.stop(startTime + noteDuration);
+      cosmicScheduleNote(ctx, freq, startTime, noteDuration);
     });
   } catch (e) { /* silencioso si el navegador no soporta audio */ }
 }
@@ -6103,7 +6131,7 @@ async function renderVibracion() {
   </div>`;
 
   // ===== Octava Cósmica — discreta a propósito, no compite con lo de arriba =====
-  const marketNote = current ? cosmicOctave(current.period) : null;
+  const marketNote = current ? cosmicOctave(current.period, cosmicDoublingsForTarget(current.period)) : null;
   let closestPlanet = null;
   if (marketNote) {
     closestPlanet = PLANET_ORBITAL_PERIODS.map(p => {
@@ -6130,7 +6158,7 @@ async function renderVibracion() {
       <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">✦ Octava Cósmica</div>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px">
         <span style="font-size:0.72rem;color:var(--text2)">El mercado hoy suena en <strong style="color:var(--gold-light);font-family:'Cocogoose',sans-serif">${marketNote.noteName}</strong> <span style="color:var(--text3)">(${marketNote.freq.toFixed(2)} Hz)</span></span>
-        <span class="item-icon-btn" style="border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:0.62rem" onclick="playCosmicTone(${marketNote.freq})">▶ Escuchar solo hoy</span>
+        <span class="item-icon-btn" style="border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:0.62rem" onclick="playCosmicTone(${current.period})">▶ Escuchar solo hoy</span>
       </div>
       <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;margin-bottom:12px">
         <div style="font-size:0.6rem;color:var(--text3);margin-bottom:8px">Escucha varios días seguidos como una melodía — tú eliges cuántos</div>
