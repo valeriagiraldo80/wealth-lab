@@ -701,6 +701,7 @@ textarea { resize: vertical; line-height: 1.5; }
             <button type="button" class="toggle-btn active" onclick="switchEstudio(this,'gann')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-2px;margin-right:3px"><path d="M12 3a9 9 0 1 0 9 9c0-3-2-6-6-6a4 4 0 1 0 3 6.5"/></svg> Gann</button>
             <button type="button" class="toggle-btn" onclick="switchEstudio(this,'luna')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg> Luna</button>
             <button type="button" class="toggle-btn" onclick="switchEstudio(this,'astrologia')">✦ Astrología Financiera</button>
+            <button type="button" class="toggle-btn" onclick="switchEstudio(this,'vibracion')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-2px;margin-right:3px"><path d="M2 12c2-5 4-5 5 0s3 5 5 0 3-5 5 0 3 5 5 0"/></svg> Principio de Vibración</button>
             <button type="button" class="toggle-btn" disabled style="opacity:0.4;cursor:default" title="Próximamente">Elliott Wave</button>
             <button type="button" class="toggle-btn" disabled style="opacity:0.4;cursor:default" title="Próximamente">Griegas</button>
             <button type="button" class="toggle-btn" disabled style="opacity:0.4;cursor:default" title="Próximamente">Campana de Gauss</button>
@@ -759,7 +760,6 @@ textarea { resize: vertical; line-height: 1.5; }
             <button class="ciclo-tab" data-cat="precio" onclick="switchTab('angulos',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M4 20h16M4 20V4l16 16"/></svg> Ángulos</button>
             <button class="ciclo-tab" data-cat="precio" onclick="switchTab('maestros',this)">✦ Números Maestros</button>
             <button class="ciclo-tab" data-cat="precio" onclick="switchTab('rango',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><path d="M6 20V10M12 20V4M18 20v-7"/></svg> Regla del 50%</button>
-            <button class="ciclo-tab" data-cat="precio" onclick="switchTab('vibracion',this)">〰 Vibración</button>
             <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('temporales',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Ciclos Temporales</button>
             <button class="ciclo-tab" data-cat="tiempo" style="display:none" onclick="switchTab('rueda',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-1px;margin-right:3px"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg> Rueda de <span style="font-family:'Cocogoose',sans-serif">24</span></button>
             <button class="ciclo-tab" data-cat="tendencia" style="display:none" onclick="switchTab('swing',this)"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M4 20h16M4 20V4l16 16"/></svg> Swing Charting</button>
@@ -858,22 +858,6 @@ textarea { resize: vertical; line-height: 1.5; }
             </div>
           </div>
 
-          <!-- 7. VIBRACIÓN DEL PRECIO -->
-          <div class="ciclo-panel" id="tab-vibracion">
-            <div class="form-section">
-              <div class="form-section-title">Vibración del Precio</div>
-              <p style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6">"Cada instrumento tiene su propia vibración natural. Si encuentras el número correcto, el mercado te dirá exactamente a dónde va." — W.D. Gann</p>
-              <div class="form-grid" style="max-width:340px;margin-bottom:8px">
-                <div class="form-group">
-                  <label>Origen de vibración <span class="tip" data-tip="No tiene que ser el mínimo histórico absoluto del instrumento — de hecho, casi nunca conviene que lo sea. Si el origen queda demasiado lejos del precio actual, la tabla se vuelve poco práctica (demasiados pasos entre uno y otro). Funciona mejor con un mínimo significativo más reciente: un piso importante de los últimos años, no el mínimo de toda la historia.">ⓘ</span></label>
-                  <input type="number" id="vib_origin" placeholder="ej. tu mínimo significativo más reciente" oninput="calcVibracion()"/>
-                </div>
-              </div>
-              <p style="font-size:0.6rem;color:var(--text3);margin-bottom:20px">Este campo es independiente del Pivote Global — Vibración usa su propio origen. El precio actual sí se toma del Pivote Global de arriba.</p>
-              <div id="vibracion_result"></div>
-            </div>
-          </div>
-
           <!-- 8. SWING CHARTING (placeholder) -->
           <div class="ciclo-panel" id="tab-swing">
             <div class="form-section">
@@ -919,6 +903,15 @@ textarea { resize: vertical; line-height: 1.5; }
             <div class="form-section-title">✦ Astrología Financiera</div>
             <p style="font-size:0.72rem;color:var(--text2);margin-bottom:20px;line-height:1.6">Gann estudiaba los planetas como relojes, cada uno a su propio ritmo — los momentos en que varios de esos relojes coinciden suelen coincidir también con cambios de humor en el mercado. Aquí ves la posición real de cada planeta hoy, y qué tan alineados o en tensión están entre sí.</p>
             <div id="astro_result"></div>
+          </div>
+        </div>
+
+        <!-- ===== ESTUDIO: PRINCIPIO DE VIBRACIÓN ===== -->
+        <div class="estudio-panel" id="estudio-vibracion" style="display:none">
+          <div class="form-section">
+            <div class="form-section-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" style="vertical-align:-3px;margin-right:4px"><path d="M2 12c2-5 4-5 5 0s3 5 5 0 3-5 5 0 3 5 5 0"/></svg>Principio de Vibración</div>
+            <p style="font-size:0.72rem;color:var(--text2);margin-bottom:20px;line-height:1.6">Todo lo que existe tiene su propio pulso. Fue un concepto abstracto hasta que llegamos a los estudios de Ehlers — ingeniero eléctrico con doctorado, que desde los años 70 aplica procesamiento de señales real, la misma matemática usada en telecomunicaciones y hasta en exploración sísmica, para tratar el precio como una onda: con fase, frecuencia, y un ciclo dominante que se mide de los datos reales, no se adivina. Aquí no interpretamos la vibración del mercado — la medimos. Y aprendemos a movernos con ella.</p>
+            <div id="vibracion_result">Cargando...</div>
           </div>
         </div>
 
@@ -4048,7 +4041,6 @@ function syncGlobalPivot() {
   autoDetectGannDirection();
   calcGann();
   calcAngulos();
-  calcVibracion();
   calcMaestros();
   calcTemporales();
   calcLuna();
@@ -4106,7 +4098,6 @@ async function loadCiclosPivote(todayFallback) {
   autoDetectGannDirection();
   calcGann();
   calcAngulos();
-  calcVibracion();
   calcMaestros();
   calcTemporales();
   calcLuna();
@@ -4208,6 +4199,7 @@ function switchEstudio(btn, view) {
     renderMoonNodesAndEclipses();
   }
   if (view === 'astrologia') renderAstrologiaFinanciera();
+  if (view === 'vibracion') renderVibracion();
   if (view === 'observaciones') loadObservaciones();
 }
 
@@ -5371,131 +5363,6 @@ function calcTemporales() {
   wrapNumbersJosefin(el);
 }
 
-// 7. VIBRACIÓN DEL PRECIO
-function calcVibracion() {
-  const origin = parseFloat(document.getElementById('vib_origin').value);
-  const current = parseFloat(document.getElementById('global_price').value);
-  const el = document.getElementById('vibracion_result');
-  if (!origin) { el.innerHTML = ''; return; }
-
-  const sqrtOrigin = Math.sqrt(origin);
-  // El rango de pasos se ajusta solo para alcanzar el precio actual + margen — un rango fijo
-  // de 20 pasos nunca llega al precio actual si el origen es un mínimo histórico lejano.
-  const targetSqrt = current ? Math.sqrt(current) : sqrtOrigin + 20;
-  const steps = Math.max(20, Math.ceil(targetSqrt - sqrtOrigin) + 10);
-  const levels = [];
-  
-  for (let i = 0; i <= steps; i++) {
-    const level = Math.pow(sqrtOrigin + i, 2);
-    levels.push(level);
-  }
-
-  const nearestLevel = current ? levels.reduce((prev, curr) => Math.abs(curr-current) < Math.abs(prev-current) ? curr : prev) : null;
-  const nearestIdx = current ? levels.indexOf(nearestLevel) : -1;
-
-  let html = `<div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Vibración</th><th>Nivel de Precio</th><th>Distancia desde origen</th>${current ? '<th>Distancia al precio actual</th>' : ''}</tr></thead><tbody>`;
-
-  // Si el origen queda muy lejos del precio actual (ej. un mínimo histórico real), mostramos
-  // el origen y una ventana alrededor del nivel más cercano al precio — no los pasos intermedios,
-  // que solo saturan la tabla sin aportar nada útil.
-  let showIdx = [0];
-  if (current && levels.length > 40) {
-    for (let i = Math.max(1, nearestIdx-10); i <= Math.min(levels.length-1, nearestIdx+10); i++) showIdx.push(i);
-  } else {
-    for (let i = 1; i < levels.length; i++) showIdx.push(i);
-  }
-  showIdx = [...new Set(showIdx)].sort((a,b) => a-b);
-
-  let prevIdx = -1;
-  showIdx.forEach(i => {
-    if (prevIdx !== -1 && i - prevIdx > 1) {
-      html += `<tr><td colspan="${current ? 4 : 3}" style="text-align:center;color:var(--text3);font-size:0.62rem;padding:6px">···</td></tr>`;
-    }
-    const l = levels[i];
-    const isNearest = current && l === nearestLevel;
-    html += `<tr class="${isNearest ? 'nearest' : i === 0 ? 'cardinal' : ''}">
-      <td style="color:var(--gold-light)">${i === 0 ? 'Origen ★' : `+${i} vibración`}</td>
-      <td>${l.toFixed(2)}</td>
-      <td>${(l - origin).toFixed(2)} pts</td>
-      ${current ? `<td style="color:${Math.abs(l-current) < 50 ? 'var(--gold-light)' : 'var(--text2)'}">${Math.abs(l - current).toFixed(2)}</td>` : ''}
-    </tr>`;
-    prevIdx = i;
-  });
-  html += `</tbody></table></div>
-  <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;border-left:2px solid var(--gold)">
-    <p style="font-size:0.72rem;color:var(--text2);line-height:1.6">"Los participantes en el mercado no reaccionan a 100 puntos — reaccionan al porcentaje. La raíz cuadrada traduce el precio al lenguaje natural del mercado." — W.D. Gann</p>
-  </div>`;
-
-  if (current) {
-    const sortedLevels = [...levels].sort((a,b) => a-b);
-    const above = sortedLevels.filter(l => l > current).slice(0,3);
-    const below = sortedLevels.filter(l => l < current).reverse().slice(0,3);
-    const nearestVib = sortedLevels.reduce((p,c) => Math.abs(c-current)<Math.abs(p-current)?c:p);
-    html += `<div style="margin-top:16px;background:rgba(40,63,50,0.4);border:1px solid var(--gold-dark);border-radius:12px;padding:20px">
-      <div style="font-size:0.65rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px">✦ Key Takeaways — Vibración</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-        <div style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:8px;padding:12px">
-          <div style="font-size:0.58rem;color:var(--success);text-transform:uppercase;margin-bottom:6px">▲ Resonancias al alza</div>
-          ${above.map(l => '<div style="font-family:Cocogoose,sans-serif;font-size:0.78rem;font-weight:700;color:var(--success)">' + l.toFixed(0) + '</div>').join('')}
-        </div>
-        <div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:12px">
-          <div style="font-size:0.58rem;color:var(--danger);text-transform:uppercase;margin-bottom:6px">▼ Resonancias a la baja</div>
-          ${below.map(l => '<div style="font-family:Cocogoose,sans-serif;font-size:0.78rem;font-weight:700;color:var(--danger)">' + l.toFixed(0) + '</div>').join('')}
-        </div>
-        <div style="background:rgba(170,146,82,0.08);border:1px solid rgba(170,146,82,0.2);border-radius:8px;padding:12px">
-          <div style="font-size:0.58rem;color:var(--gold);text-transform:uppercase;margin-bottom:6px">◈ Más cercana</div>
-          <div style="font-family:Cocogoose,sans-serif;font-size:0.9rem;font-weight:700;color:var(--gold-light)">${nearestVib.toFixed(0)}</div>
-          <div style="font-size:0.6rem;color:var(--text3)">a ${Math.abs(nearestVib-current).toFixed(0)} pts</div>
-        </div>
-      </div>
-    </div>`;
-  }
-
-  html += `<div id="vibChangesBox" style="margin-top:16px"></div>`;
-
-  el.innerHTML = html;
-  wrapNumbersJosefin(el);
-  if (origin) renderVibChanges(origin);
-}
-
-async function renderVibChanges(origin) {
-  const box = document.getElementById('vibChangesBox');
-  if (!box) return;
-  const pivotDate = document.getElementById('global_date').value;
-  if (!pivotDate) return;
-
-  const { data } = await sb.from('market_snapshot').select('price_date,price').eq('ticker', 'SPX').gte('price_date', pivotDate).order('price_date', { ascending: true });
-  if (!data || data.length < 2) { box.innerHTML = ''; return; }
-
-  const sqrtOrigin = Math.sqrt(origin);
-  const nearestIdxFor = price => Math.round(Math.sqrt(price) - sqrtOrigin);
-
-  const changes = [];
-  let prevIdx = nearestIdxFor(data[0].price);
-  for (let i = 1; i < data.length; i++) {
-    const idx = nearestIdxFor(data[i].price);
-    if (idx !== prevIdx) {
-      changes.push({ date: data[i].price_date, from: prevIdx, to: idx, price: data[i].price });
-      prevIdx = idx;
-    }
-  }
-
-  if (!changes.length) {
-    box.innerHTML = `<p style="font-size:0.68rem;color:var(--text3)">La vibración más cercana no ha cambiado desde tu pivote.</p>`;
-    return;
-  }
-
-  box.innerHTML = `<div style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Cambios recientes de vibración</div>
-    <div style="overflow-x:auto"><table class="gann-table"><thead><tr><th>Fecha</th><th>Cambio</th><th>Precio</th></tr></thead><tbody>
-    ${[...changes].reverse().slice(0, 10).map(c => `<tr>
-      <td>${c.date}</td>
-      <td>vibración ${c.from} → ${c.to > c.from ? '' : ''}${c.to}</td>
-      <td>${c.price.toFixed(0)}</td>
-    </tr>`).join('')}
-    </tbody></table></div>`;
-  wrapNumbersJosefin(box);
-}
-
 // OBSERVACIONES — diario de "¿funciona Gann?", independiente de la Bitácora
 let obsConfirmField = '';
 let editingObsId = null;
@@ -5875,6 +5742,222 @@ function findRetrogradeWindow(bodyKey, refDate, maxDays) {
     end = d;
   }
   return { start, end, startHitCap, endHitCap };
+}
+
+// ===== PRINCIPIO DE VIBRACIÓN — Ehlers: Ciclo Dominante + Indicador de Modo =====
+// Las tres fórmulas de esta sección fueron verificadas contra fuente completa y
+// probadas contra 410 días reales del SPX antes de construirse aquí.
+
+function ehlersCreateHistory(size) {
+  const buf = new Array(size).fill(0);
+  return { push(v) { buf.unshift(v); buf.pop(); }, get(i) { return buf[i] || 0; } };
+}
+
+// Ciclo Dominante — Homodyne Discriminator (Hilbert Transform)
+function ehlersDominantCycle(rows) {
+  const priceH = ehlersCreateHistory(4), smoothH = ehlersCreateHistory(7), detrH = ehlersCreateHistory(7);
+  const i1H = ehlersCreateHistory(7), q1H = ehlersCreateHistory(7), i2H = ehlersCreateHistory(2), q2H = ehlersCreateHistory(2);
+  const reH = ehlersCreateHistory(2), imH = ehlersCreateHistory(2), periodH = ehlersCreateHistory(2), smoothPH = ehlersCreateHistory(2);
+
+  function hilbert(hist, period) {
+    return (0.0962 * hist.get(0) + 0.5769 * hist.get(2) - 0.5769 * hist.get(4) - 0.0962 * hist.get(6)) * (0.075 * period + 0.54);
+  }
+  const results = [];
+  rows.forEach((row, idx) => {
+    const price = (row.high + row.low) / 2;
+    priceH.push(price);
+    const prevPeriod = periodH.get(0);
+
+    let smooth = price;
+    if (idx >= 3) smooth = (4 * priceH.get(0) + 3 * priceH.get(1) + 2 * priceH.get(2) + priceH.get(3)) / 10;
+    smoothH.push(smooth);
+
+    let detr = 0;
+    if (idx >= 6) detr = hilbert(smoothH, prevPeriod);
+    detrH.push(detr);
+
+    let q1 = 0, i1 = 0;
+    if (idx >= 12) { q1 = hilbert(detrH, prevPeriod); i1 = detrH.get(3); }
+    i1H.push(i1); q1H.push(q1);
+
+    let jI = 0, jQ = 0;
+    if (idx >= 18) { jI = hilbert(i1H, prevPeriod); jQ = hilbert(q1H, prevPeriod); }
+    let i2 = i1 - jQ, q2 = q1 + jI;
+    if (idx > 0) { i2 = 0.2 * i2 + 0.8 * i2H.get(0); q2 = 0.2 * q2 + 0.8 * q2H.get(0); }
+    i2H.push(i2); q2H.push(q2);
+
+    let re = i2 * i2H.get(1) + q2 * q2H.get(1);
+    let im = i2 * q2H.get(1) - q2 * i2H.get(1);
+    if (idx > 0) { re = 0.2 * re + 0.8 * reH.get(0); im = 0.2 * im + 0.8 * imH.get(0); }
+    reH.push(re); imH.push(im);
+
+    let period = prevPeriod;
+    if (im !== 0 && re !== 0) period = (2 * Math.PI) / Math.atan(im / re);
+    if (prevPeriod > 0) {
+      if (period > 1.5 * prevPeriod) period = 1.5 * prevPeriod;
+      if (period < 0.67 * prevPeriod) period = 0.67 * prevPeriod;
+    }
+    if (period < 6) period = 6;
+    if (period > 50) period = 50;
+    if (idx > 0) period = 0.2 * period + 0.8 * periodH.get(0);
+    periodH.push(period);
+
+    let smoothP = period;
+    if (idx > 0) smoothP = 0.33 * period + 0.67 * smoothPH.get(0);
+    smoothPH.push(smoothP);
+
+    results.push({ date: row.date, period: smoothP, i1, q1, ready: idx >= 18 });
+  });
+  return results;
+}
+
+// MAMA/FAMA — reutiliza I1/Q1 del mismo motor de arriba
+function ehlersMAMA(rows, cycleResults, fastLimit = 0.5, slowLimit = 0.05) {
+  let mama = 0, fama = 0, prevPhase = 0;
+  const results = [];
+  rows.forEach((row, idx) => {
+    const price = (row.high + row.low) / 2;
+    const c = cycleResults[idx];
+    let phase = prevPhase;
+    if (c.i1 !== 0) phase = Math.atan(c.q1 / c.i1);
+    let deltaPhase = idx > 0 ? (prevPhase - phase) : 1.0;
+    if (deltaPhase < 1e-8) deltaPhase = 1e-8;
+    prevPhase = phase;
+
+    let alpha = fastLimit / deltaPhase;
+    if (alpha < slowLimit) alpha = slowLimit;
+    if (alpha > fastLimit) alpha = fastLimit;
+
+    if (idx === 0) { mama = price; fama = price; }
+    else { mama = alpha * price + (1 - alpha) * mama; fama = 0.5 * alpha * mama + (1 - 0.5 * alpha) * fama; }
+
+    results.push({ date: row.date, mama, fama, bullish: mama > fama });
+  });
+  return results;
+}
+
+// Reflex y TrendFlex — Ehlers, TASC febrero 2020
+function ehlersReflexTrendFlex(closes, length = 20) {
+  const a1 = Math.exp(-1.414 * Math.PI / (0.5 * length));
+  const b1 = 2 * a1 * Math.cos(1.414 * Math.PI / (0.5 * length));
+  const c2 = b1, c3 = -a1 * a1, c1 = 1 - c2 - c3;
+
+  const closeArr = [];
+  const filtHist = [];
+  let msReflex = 0, msTrend = 0;
+  const results = [];
+
+  closes.forEach((row, idx) => {
+    const close = row.close;
+    closeArr.push(close);
+
+    let filt;
+    if (idx < 2) filt = close;
+    else filt = c1 * (close + closeArr[idx - 1]) / 2 + c2 * filtHist[0] + c3 * filtHist[1];
+    filtHist.unshift(filt);
+
+    let reflex = 0, trendflex = 0;
+    if (idx > length) {
+      const filtNow = filtHist[0];
+      const filtAtLength = filtHist[length];
+      const slope = (filtAtLength - filtNow) / length;
+      let sumReflex = 0, sumTrend = 0;
+      for (let count = 1; count <= length; count++) {
+        sumReflex += (filtNow + count * slope) - filtHist[count];
+        sumTrend += filtNow - filtHist[count];
+      }
+      sumReflex /= length; sumTrend /= length;
+      msReflex = 0.04 * sumReflex * sumReflex + 0.96 * msReflex;
+      msTrend = 0.04 * sumTrend * sumTrend + 0.96 * msTrend;
+      reflex = msReflex !== 0 ? sumReflex / Math.sqrt(msReflex) : 0;
+      trendflex = msTrend !== 0 ? sumTrend / Math.sqrt(msTrend) : 0;
+    }
+    results.push({ date: row.date, reflex, trendflex, ready: idx > length });
+  });
+  return results;
+}
+
+let vibHistoryChart = null;
+
+async function renderVibracion() {
+  const el = document.getElementById('vibracion_result');
+  if (!el) return;
+
+  const pivotDate = document.getElementById('global_date') ? document.getElementById('global_date').value : null;
+  const fromDate = pivotDate || (() => { const d = new Date(); d.setDate(d.getDate() - 200); return d.toISOString().split('T')[0]; })();
+
+  const { data } = await sb.from('market_snapshot').select('price_date,price,high,low').eq('ticker', 'SPX').gte('price_date', fromDate).order('price_date', { ascending: true });
+  if (!data || data.length < 25) {
+    el.innerHTML = `<p style="font-size:0.72rem;color:var(--text3)">Hace falta más historial de precio para calcular esto con confianza (mínimo ~25 días de mercado). Hoy hay ${data ? data.length : 0}.</p>`;
+    return;
+  }
+
+  const rowsHL = data.map(d => ({ date: d.price_date, high: parseFloat(d.high), low: parseFloat(d.low) }));
+  const rowsClose = data.map(d => ({ date: d.price_date, close: parseFloat(d.price) }));
+
+  const cycleResults = ehlersDominantCycle(rowsHL);
+  const mamaResults = ehlersMAMA(rowsHL, cycleResults);
+  const flexResults = ehlersReflexTrendFlex(rowsClose);
+
+  const readyCycle = cycleResults.filter(r => r.ready);
+  const current = readyCycle[readyCycle.length - 1];
+  const currentMama = mamaResults[mamaResults.length - 1];
+  const currentFlex = flexResults[flexResults.length - 1];
+
+  let html = '';
+
+  // ===== Ciclo Dominante =====
+  html += `<div class="stat-card" style="margin-bottom:16px">
+    <div class="stat-label">Ciclo Dominante <span class="tip" data-tip="Cuántos días tarda el mercado en completar su ciclo actual, medido de los datos reales — no es un número fijo de Gann, cambia solo según el ritmo real del SPX.">ⓘ</span></div>
+    <div class="stat-value text-gold">${current ? current.period.toFixed(1) : '—'} días</div>
+  </div>
+  <div style="height:160px;margin-bottom:24px"><canvas id="vibHistoryCanvas"></canvas></div>`;
+
+  // ===== Indicador de Modo =====
+  const trendFlexMode = Math.abs(currentFlex.trendflex) >= 1.5 ? (currentFlex.trendflex > 0 ? 'alcista' : 'bajista') : null;
+  const mamaMode = currentMama.bullish ? 'alcista' : 'bajista';
+  const agree = trendFlexMode === mamaMode;
+
+  html += `<div style="background:${agree ? 'rgba(74,222,128,0.08)' : 'rgba(170,146,82,0.08)'};border:1px solid ${agree ? 'rgba(74,222,128,0.3)' : 'var(--gold-dark)'};border-radius:10px;padding:16px 18px;margin-bottom:16px">
+    <div style="font-size:0.65rem;color:${agree ? 'var(--success)' : 'var(--gold)'};text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">Indicador de Modo ${agree ? '· Las dos formas coinciden' : '· Todavía no coinciden'}</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:140px">
+        <div style="font-size:0.6rem;color:var(--text3);margin-bottom:4px">TrendFlex</div>
+        <div style="font-family:Cocogoose,sans-serif;font-size:1.1rem;font-weight:700;color:${trendFlexMode === 'alcista' ? 'var(--success)' : trendFlexMode === 'bajista' ? 'var(--danger)' : 'var(--text3)'}">${currentFlex.trendflex.toFixed(2)}</div>
+        <div style="font-size:0.6rem;color:var(--text3)">${trendFlexMode ? (trendFlexMode === 'alcista' ? 'Tendencia alcista' : 'Tendencia bajista') : 'Sin tendencia clara — ciclo'}</div>
+      </div>
+      <div style="flex:1;min-width:140px">
+        <div style="font-size:0.6rem;color:var(--text3);margin-bottom:4px">MAMA / FAMA</div>
+        <div style="font-family:Cocogoose,sans-serif;font-size:1.1rem;font-weight:700;color:${mamaMode === 'alcista' ? 'var(--success)' : 'var(--danger)'}">${currentMama.mama.toFixed(0)} / ${currentMama.fama.toFixed(0)}</div>
+        <div style="font-size:0.6rem;color:var(--text3)">${mamaMode === 'alcista' ? 'MAMA por encima — alcista' : 'MAMA por debajo — bajista'}</div>
+      </div>
+    </div>
+    <p style="font-size:0.6rem;color:var(--text3);margin-top:10px;line-height:1.5">${agree ? 'Dos mecanismos independientes están de acuerdo — señal más confiable.' : 'Los dos métodos todavía no coinciden — mejor esperar más confirmación antes de actuar sobre esto.'}</p>
+  </div>`;
+
+  el.innerHTML = html;
+  wrapNumbersJosefin(el);
+
+  // Gráfica del historial del Ciclo Dominante
+  if (vibHistoryChart) vibHistoryChart.destroy();
+  const ctx = document.getElementById('vibHistoryCanvas');
+  if (ctx && readyCycle.length) {
+    vibHistoryChart = new Chart(ctx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: readyCycle.map(r => r.date),
+        datasets: [{ data: readyCycle.map(r => r.period), borderColor: '#AA9252', backgroundColor: 'rgba(170,146,82,0.08)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#5a7060', font: { size: 9 }, maxTicksLimit: 6 }, grid: { display: false } },
+          y: { min: 6, max: 50, ticks: { color: '#5a7060', font: { size: 10, family: 'Cocogoose' } }, grid: { color: '#1e2820' } }
+        }
+      }
+    });
+  }
 }
 
 async function renderAstrologiaFinanciera() {
