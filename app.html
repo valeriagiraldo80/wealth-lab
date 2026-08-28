@@ -521,7 +521,7 @@ textarea { resize: vertical; line-height: 1.5; }
                 </optgroup>
                 <option value="Otra">Otra</option>
               </select><input type="text" id="f_strategy_other" placeholder="Especifica la estrategia..." style="display:none;margin-top:8px"/></div>
-              <div class="form-group" id="openActionGroup" style="display:none"><label>¿Compraste o vendiste al abrir? <span class="tip" data-tip="Esta estrategia no deja claro por su nombre si fue una compra o una venta — dínoslo para calcular bien el P&L.">ⓘ</span></label><select id="f_open_action" onchange="calcOptionsPnlFromClosePremium()"><option value="">Seleccionar...</option><option value="venta">Vendí</option><option value="compra">Compré</option></select></div>
+              <div class="form-group" id="openActionGroup" style="display:none"><label>¿Compraste o vendiste al abrir? <span class="tip" data-tip="Esta estrategia no deja claro por su nombre si fue una compra o una venta — dínoslo para calcular bien el P&L.">ⓘ</span></label><select id="f_open_action" onchange="calcOptionsPnlFromClosePremium(); calcAutoRisk();"><option value="">Seleccionar...</option><option value="venta">Vendí</option><option value="compra">Compré</option></select></div>
               <div class="form-group"><label>Dirección</label><select id="f_direction" onchange="toggleOtherField(this,'f_direction_other')"><option>Neutral</option><option>Alcista</option><option>Bajista</option><option>Largo</option><option>Corto</option><option>Otra</option></select><input type="text" id="f_direction_other" placeholder="Especifica la dirección..." style="display:none;margin-top:8px"/></div>
             </div>
           </div>
@@ -569,7 +569,7 @@ textarea { resize: vertical; line-height: 1.5; }
                 <button type="button" class="btn-secondary" id="addStrikeBtn" style="margin-top:8px;display:none" onclick="addLegRow()">+ Agregar Strike</button>
               </div>
               <div class="form-group" id="netDeltaGroup" style="display:none"><label>Delta Neto de la Posición <span class="tip" data-tip="Suma de los deltas de tus patas (ajustando signo por compra/venta). Cerca de 0 = estrategias neutrales. Lejos de 0 = estrategias direccionales.">ⓘ</span></label><input type="text" id="f_net_delta" placeholder="Auto" style="background:var(--bg4);color:var(--gold-light)" readonly/></div>
-              <div class="form-group"><label>Ancho / Distancia entre strikes (pts) <span class="tip" data-tip="Aplica a cualquier estructura con más de un strike: verticales, mariposas, cóndores, etc. Déjalo vacío si es un solo contrato (single). Soporte para estructuras asimétricas (broken wing) llega en una próxima actualización.">ⓘ</span></label><input type="number" id="f_wing_width" placeholder="ej. 20"/></div>
+              <div class="form-group"><label>Ancho / Distancia entre strikes (pts) <span class="tip" data-tip="Aplica a cualquier estructura con más de un strike: verticales, mariposas, cóndores, etc. Déjalo vacío si es un solo contrato (single). Soporte para estructuras asimétricas (broken wing) llega en una próxima actualización.">ⓘ</span></label><input type="number" id="f_wing_width" placeholder="ej. 20" oninput="calcAutoRisk()"/></div>
               <div class="form-group"><label>Spot <span class="tip" data-tip="Precio del subyacente (ej. SPX, SPY) en el momento en que entraste al trade.">ⓘ</span></label><input type="number" step="0.01" id="f_spot" placeholder="ej. 5820.50"/></div>
               <div class="form-group"><label>Cantidad de contratos</label><input type="number" id="f_contracts" placeholder="ej. 1" min="1" oninput="calcPremiumTotal();calcTargetStopTotals();calcOptionsPnlFromClosePremium()"/></div>
               <div class="form-group"><label>DTE</label><input type="number" id="f_dte" placeholder="ej. 0"/></div>
@@ -592,7 +592,7 @@ textarea { resize: vertical; line-height: 1.5; }
           <div class="form-section">
             <div class="form-section-title"><span style="font-family:'Cocogoose',sans-serif">4</span> · Gestión de riesgo</div>
             <div class="form-grid">
-              <div class="form-group"><label>Riesgo máximo ($) <span class="tip" data-tip="El monto total en dólares que estás dispuesta a perder en este trade completo, sumando todos los contratos (no por contrato individual).">ⓘ</span></label><input type="number" step="0.01" id="f_max_risk" placeholder="ej. 150" oninput="calcRiskPct()"/></div>
+              <div class="form-group"><label>Riesgo máximo ($) <span class="tip" data-tip="Se calcula solo a partir del ancho de alas, la prima, y los contratos — pero puedes escribirlo tú si lo prefieres, y ya no se te pisará.">ⓘ</span></label><input type="number" step="0.01" id="f_max_risk" placeholder="Se calcula solo" oninput="this.dataset.manualEdit='1'; calcRiskPct();"/></div>
               <div class="form-group"><label>Riesgo (% de cuenta) <span class="tip" data-tip="Se calcula automáticamente: Riesgo máximo ÷ Balance actual de la cuenta activa × 100.">ⓘ</span></label><input type="text" id="f_risk_pct" placeholder="Auto" style="background:var(--bg4);color:var(--gold-light)" readonly/></div>
             </div>
           </div>
@@ -2660,6 +2660,7 @@ function resetForm() {
   toggleStatusFields();
   setTradeCategory('options');
   updateOpenActionVisibility();
+  if (document.getElementById('f_max_risk')) delete document.getElementById('f_max_risk').dataset.manualEdit;
   ['f_entry_price','f_exit_price','f_qty_other','f_stop_other'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
   if(document.getElementById('f_premium_total')) document.getElementById('f_premium_total').value='';
   if(document.getElementById('f_pnl_gross')) document.getElementById('f_pnl_gross').value='';
@@ -3888,6 +3889,7 @@ function calcPremiumTotal() {
   if (contracts && premium) {
     document.getElementById('f_premium_total').value = (contracts * premium).toFixed(2);
   }
+  calcAutoRisk();
 }
 
 // Estrategias cuyo propio nombre ya dice si fue compra o venta al abrir — no hace falta preguntar nada aparte.
@@ -3906,12 +3908,42 @@ function updateOpenActionVisibility() {
   group.style.display = isKnown ? 'none' : 'block';
   if (isKnown) { const sel = document.getElementById('f_open_action'); if (sel) sel.value = ''; }
   calcOptionsPnlFromClosePremium();
+  calcAutoRisk();
 }
 
 function getOpenActionForPnl() {
   const strategyVal = document.getElementById('f_strategy')?.value;
   if (STRATEGY_OPEN_ACTION_MAP.hasOwnProperty(strategyVal)) return STRATEGY_OPEN_ACTION_MAP[strategyVal];
   return document.getElementById('f_open_action')?.value || null;
+}
+
+// Mismo cálculo que ya usa la importación de CSV (tosComputeRisk), aplicado al formulario
+// manual — para que el riesgo se calcule solo sin importar cómo se agregue el trade.
+// Nunca pisa un número que la persona ya haya escrito a mano en este mismo trade.
+function calcAutoRisk() {
+  const riskField = document.getElementById('f_max_risk');
+  if (!riskField || riskField.dataset.manualEdit === '1') return;
+
+  const wingWidth = parseFloat(document.getElementById('f_wing_width')?.value);
+  const contracts = parseFloat(document.getElementById('f_contracts')?.value);
+  const premiumTotal = parseFloat(document.getElementById('f_premium_total')?.value);
+  const openAction = getOpenActionForPnl();
+
+  if (!openAction || !contracts || isNaN(premiumTotal)) return;
+
+  let maxRisk = null;
+  if (!isNaN(wingWidth) && wingWidth > 0) {
+    maxRisk = openAction === 'venta' ? Math.max(0, wingWidth * 100 * contracts - premiumTotal) : premiumTotal;
+  } else if (openAction === 'compra') {
+    maxRisk = premiumTotal;
+  }
+  // Venta sin ancho definido (naked, sin cobertura) no tiene riesgo máximo matemáticamente
+  // definido — se deja vacío a propósito, para que la persona lo complete si aplica.
+
+  if (maxRisk !== null) {
+    riskField.value = maxRisk.toFixed(2);
+    calcRiskPct();
+  }
 }
 
 // Calcula el P&L Bruto solo, a partir del precio de apertura y de cierre (por contrato),
@@ -5902,119 +5934,6 @@ function ehlersFisher(rows, length = 10) {
 
 let vibHistoryChart = null;
 
-// ===== OCTAVA CÓSMICA — método de Hans Cousto =====
-// Convierte cualquier ciclo real (días) en una nota musical, doblando su frecuencia
-// octava por octava hasta que cae dentro de lo que el oído humano puede escuchar.
-const COSMIC_NOTE_NAMES = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
-
-function cosmicOctave(periodDays, fixedDoublings) {
-  const periodSeconds = periodDays * 86400;
-  const rawFreq = 1 / periodSeconds;
-  let freq;
-  if (fixedDoublings != null) {
-    freq = rawFreq * Math.pow(2, fixedDoublings);
-  } else {
-    freq = rawFreq;
-    while (freq < 20) freq *= 2;
-  }
-  const midiNum = 12 * Math.log2(freq / 440) + 69;
-  const midiRounded = Math.round(midiNum);
-  const noteIdx = ((midiRounded % 12) + 12) % 12;
-  const octave = Math.floor(midiRounded / 12) - 1;
-  const exactFreq = 440 * Math.pow(2, (midiRounded - 69) / 12);
-  const cents = Math.round((midiNum - midiRounded) * 100);
-  const pitchClassCents = ((midiNum * 100) % 1200 + 1200) % 1200;
-  return { freq, noteName: COSMIC_NOTE_NAMES[noteIdx] + octave, exactFreq, cents, pitchClassCents };
-}
-
-// Cuántas veces duplicar para que un período caiga cerca de una frecuencia de referencia
-// cómoda para el oído (registro medio, ~220 Hz) — usar la MISMA cantidad de duplicaciones
-// para toda una melodía evita que un cambio mínimo en el dato dispare un salto de octava.
-function cosmicDoublingsForTarget(periodDays, targetFreq = 220) {
-  const periodSeconds = periodDays * 86400;
-  const rawFreq = 1 / periodSeconds;
-  return Math.round(Math.log2(targetFreq / rawFreq));
-}
-
-function cosmicCircularDist(a, b) {
-  const d = Math.abs(a - b);
-  return Math.min(d, 1200 - d);
-}
-
-// Períodos orbitales reales, verificados contra NASA (NSSDCA Planetary Fact Sheet).
-const PLANET_ORBITAL_PERIODS = [
-  { name: 'Sol', symbol: '☉\uFE0E', days: 365.25 },
-  { name: 'Mercurio', symbol: '☿\uFE0E', days: 87.97 },
-  { name: 'Venus', symbol: '♀\uFE0E', days: 224.70 },
-  { name: 'Marte', symbol: '♂\uFE0E', days: 686.98 },
-  { name: 'Júpiter', symbol: '♃\uFE0E', days: 4332.82 },
-  { name: 'Saturno', symbol: '♄\uFE0E', days: 10755.70 },
-  { name: 'Urano', symbol: '♅\uFE0E', days: 30687.15 },
-  { name: 'Neptuno', symbol: '♆\uFE0E', days: 60190.03 },
-  { name: 'Plutón', symbol: '♇\uFE0E', days: 90560 },
-];
-
-// Suma varios armónicos suaves sobre la frecuencia base para que suene a instrumento
-// (piano/campana) en vez de una onda pura y un golpe seco.
-function cosmicScheduleNote(ctx, freq, startTime, duration) {
-  const partials = [
-    { mult: 1, gain: 0.22 },
-    { mult: 2, gain: 0.09 },
-    { mult: 3, gain: 0.045 },
-    { mult: 4, gain: 0.02 },
-  ];
-  partials.forEach(p => {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = freq * p.mult;
-    gain.gain.setValueAtTime(0, startTime);
-    gain.gain.linearRampToValueAtTime(p.gain, startTime + 0.02);
-    gain.gain.linearRampToValueAtTime(p.gain * 0.5, startTime + duration * 0.35);
-    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration * 0.92);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(startTime);
-    osc.stop(startTime + duration);
-  });
-}
-
-function playCosmicTone(periodDays) {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const doublings = cosmicDoublingsForTarget(periodDays);
-    const { freq } = cosmicOctave(periodDays, doublings);
-    cosmicScheduleNote(ctx, freq, ctx.currentTime, 2.2);
-  } catch (e) { /* silencioso si el navegador no soporta audio */ }
-}
-
-// Reproduce una nota por cada día del Ciclo Dominante en el rango que la persona elija —
-// window._vibCycleHistory se llena en renderVibracion() con los datos ya calculados.
-// Todas las notas comparten la misma octava de referencia (basada en el ciclo típico del
-// rango), para que los saltos que se escuchen reflejen cambios reales, no un accidente
-// de redondeo de octava.
-function playCosmicMelody() {
-  const history = window._vibCycleHistory || [];
-  const input = document.getElementById('vibMelodyDays');
-  let days = parseInt(input ? input.value : 10, 10);
-  if (!days || days < 1) days = 1;
-  if (days > history.length) days = history.length;
-  const slice = history.slice(-days);
-  if (!slice.length) return;
-
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const medianPeriod = slice[Math.floor(slice.length / 2)].period;
-    const doublings = cosmicDoublingsForTarget(medianPeriod);
-    const noteDuration = 0.5;
-    slice.forEach((r, i) => {
-      const { freq } = cosmicOctave(r.period, doublings);
-      const startTime = ctx.currentTime + i * noteDuration;
-      cosmicScheduleNote(ctx, freq, startTime, noteDuration);
-    });
-  } catch (e) { /* silencioso si el navegador no soporta audio */ }
-}
-
 async function renderVibracion() {
   const el = document.getElementById('vibracion_result');
   if (!el) return;
@@ -6130,57 +6049,6 @@ async function renderVibracion() {
     <p style="font-size:0.66rem;color:var(--text2);line-height:1.6;margin:0">${conjuntoBody}</p>
   </div>`;
 
-  // ===== Octava Cósmica — discreta a propósito, no compite con lo de arriba =====
-  const marketNote = current ? cosmicOctave(current.period, cosmicDoublingsForTarget(current.period)) : null;
-  let closestPlanet = null;
-  if (marketNote) {
-    closestPlanet = PLANET_ORBITAL_PERIODS.map(p => {
-      const n = cosmicOctave(p.days);
-      return { ...p, ...n, dist: cosmicCircularDist(marketNote.pitchClassCents, n.pitchClassCents) };
-    }).sort((a, b) => a.dist - b.dist)[0];
-  }
-
-  // Sugerencia inicial de rango: desde el último giro confirmado por Swing Charting,
-  // con un mínimo de 10 días para que la melodía nunca suene casi vacía.
-  window._vibCycleHistory = readyCycle;
-  const { swings } = computeSwings(rowsHL);
-  const lastSwing = swings.length ? swings[swings.length - 1] : null;
-  let suggestedDays = 10;
-  if (lastSwing) {
-    const daysSinceSwing = readyCycle.filter(r => r.date >= lastSwing.date).length;
-    suggestedDays = Math.max(daysSinceSwing, 10);
-  }
-  suggestedDays = Math.min(suggestedDays, readyCycle.length);
-  const rangeStart = readyCycle.length >= suggestedDays ? readyCycle[readyCycle.length - suggestedDays].date : readyCycle[0].date;
-
-  if (marketNote) {
-    html += `<div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--border)">
-      <div style="font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px">✦ Octava Cósmica</div>
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px">
-        <span style="font-size:0.72rem;color:var(--text2)">El mercado hoy suena en <strong style="color:var(--gold-light);font-family:'Cocogoose',sans-serif">${marketNote.noteName}</strong> <span style="color:var(--text3)">(${marketNote.freq.toFixed(2)} Hz)</span></span>
-        <span class="item-icon-btn" style="border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:0.62rem" onclick="playCosmicTone(${current.period})">▶ Escuchar solo hoy</span>
-      </div>
-      <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;margin-bottom:12px">
-        <div style="font-size:0.6rem;color:var(--text3);margin-bottom:8px">Escucha varios días seguidos como una melodía — tú eliges cuántos</div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span style="font-size:0.62rem;color:var(--text2)">Últimos</span>
-          <input type="number" id="vibMelodyDays" value="${suggestedDays}" min="1" max="${readyCycle.length}" style="width:60px;padding:6px 8px;font-size:0.65rem;text-align:center"/>
-          <span style="font-size:0.62rem;color:var(--text2)">días de mercado</span>
-          <span class="item-icon-btn" style="border:1px solid var(--gold-dark);border-radius:6px;padding:4px 10px;font-size:0.62rem;color:var(--gold-light)" onclick="playCosmicMelody()">▶ Escuchar melodía</span>
-        </div>
-        <div style="font-size:0.56rem;color:var(--text3);margin-top:8px">Sugerido: desde ${rangeStart} (${lastSwing ? 'tu último giro confirmado en Swing Charting' : 'mínimo de 10 días'}) hasta hoy — cámbialo si quieres escuchar otro tramo.</div>
-      </div>
-      <div style="display:flex;gap:16px;flex-wrap:wrap">
-        <span style="font-size:0.6rem;color:var(--gold-light);cursor:pointer" onclick="toggleLunaAcc('vibCosmicMethodExplain')">Toca para ver cómo funciona</span>
-        <span style="font-size:0.6rem;color:var(--gold-light);cursor:pointer" onclick="toggleLunaAcc('vibCosmicPlanetExplain')">Toca para ver qué planeta está más cerca de esta nota</span>
-      </div>
-      <div id="vibCosmicMethodExplain" style="display:none;font-size:0.6rem;color:var(--text2);margin-top:10px;line-height:1.6">Método de Hans Cousto (Octava Cósmica) — convierte cualquier ciclo real en una nota musical, doblando su frecuencia octava por octava hasta que cae dentro de lo que el oído humano puede escuchar. La melodía es una nota por cada día real del Ciclo Dominante en el rango que elijas. Esto es exploratorio, no una señal de trading.</div>
-      <div id="vibCosmicPlanetExplain" style="display:none;font-size:0.6rem;color:var(--text2);margin-top:10px;line-height:1.6">
-        Un planeta también tiene su propio ciclo — el tiempo que tarda en darle la vuelta al Sol. Con el mismo método, ese ciclo orbital también se puede convertir en una nota. Cuando coincide con la del mercado, sus ritmos son múltiplos exactos entre sí — la misma idea de "todo lo que existe tiene su propio pulso" con la que abre esta sección, solo que ahora comparando dos pulsos distintos.
-        ${closestPlanet ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">El más cercano hoy: <strong style="color:var(--gold-light)">${closestPlanet.symbol} ${closestPlanet.name}</strong> — nota ${closestPlanet.noteName}, a ${closestPlanet.dist.toFixed(0)} cents de distancia.</div>` : ''}
-      </div>
-    </div>`;
-  }
 
   el.innerHTML = html;
   wrapNumbersJosefin(el);
