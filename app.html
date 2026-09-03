@@ -570,7 +570,7 @@ textarea { resize: vertical; line-height: 1.5; }
                 <button type="button" class="btn-secondary" id="addStrikeBtn" style="margin-top:8px;display:none" onclick="addLegRow()">+ Agregar Strike</button>
               </div>
               <div class="form-group" id="netDeltaGroup" style="display:none"><label>Delta Neto de la Posición <span class="tip" data-tip="Suma de los deltas de tus patas (ajustando signo por compra/venta). Cerca de 0 = estrategias neutrales. Lejos de 0 = estrategias direccionales.">ⓘ</span></label><input type="text" id="f_net_delta" placeholder="Auto" style="background:var(--bg4);color:var(--gold-light)" readonly/></div>
-              <div class="form-group"><label>Ancho / Distancia entre strikes (pts) <span class="tip" data-tip="Aplica a cualquier estructura con más de un strike: verticales, mariposas, cóndores, etc. Déjalo vacío si es un solo contrato (single). Soporte para estructuras asimétricas (broken wing) llega en una próxima actualización.">ⓘ</span></label><input type="number" id="f_wing_width" placeholder="ej. 20" oninput="calcAutoRisk()"/></div>
+              <div class="form-group"><label>Ancho / Distancia entre strikes (pts) <span class="tip" data-tip="Aplica a cualquier estructura con más de un strike: verticales, mariposas, cóndores, etc. Déjalo vacío si es un solo contrato (single). Soporte para estructuras asimétricas (broken wing) llega en una próxima actualización.">ⓘ</span></label><input type="number" step="0.5" id="f_wing_width" placeholder="ej. 20 o 7.5" oninput="calcAutoRisk()"/></div>
               <div class="form-group"><label>Spot <span class="tip" data-tip="Precio del subyacente (ej. SPX, SPY) en el momento en que entraste al trade.">ⓘ</span></label><input type="number" step="0.01" id="f_spot" placeholder="ej. 5820.50"/></div>
               <div class="form-group"><label>Cantidad de contratos</label><input type="number" id="f_contracts" placeholder="ej. 1" min="1" oninput="calcPremiumTotal();calcTargetStopTotals();calcOptionsPnlFromClosePremium()"/></div>
               <div class="form-group"><label>DTE</label><input type="number" id="f_dte" placeholder="ej. 0"/></div>
@@ -2603,7 +2603,7 @@ async function saveTrade(e) {
     greeks_confluence: isOptionsCat ? selectedConfluence : null,
     context_notes: isOptionsCat ? g('f_context_notes') : null,
     thesis:g('f_thesis'),
-    wing_width: isOptionsCat && g('f_wing_width') ? parseInt(g('f_wing_width')) : null,
+    wing_width: isOptionsCat && g('f_wing_width') ? parseFloat(g('f_wing_width')) : null,
     spot: isOptionsCat && g('f_spot') ? parseFloat(g('f_spot')) : null,
     dte: isOptionsCat && g('f_dte') ? parseInt(g('f_dte')) : null,
     premium_collected: isOptionsCat && g('f_premium') ? parseFloat(g('f_premium')) : null,
@@ -3065,7 +3065,7 @@ function validateCsvRow(row, index) {
     contracts: contracts || null, premium_collected: isNaN(premium) ? null : premium,
     premium_total: (!isNaN(premium) && contracts) ? premium*contracts : null,
     dte: row.dte !== undefined && row.dte !== '' ? parseInt(row.dte) : null,
-    wing_width: row.ancho !== undefined && row.ancho !== '' ? parseInt(row.ancho) : null,
+    wing_width: row.ancho !== undefined && row.ancho !== '' ? parseFloat(row.ancho) : null,
     spot: row.spot !== undefined && row.spot !== '' ? parseFloat(row.spot) : null,
     max_risk_usd: row.riesgo_maximo !== undefined && row.riesgo_maximo !== '' ? parseFloat(row.riesgo_maximo) : null,
     close_type: (row.tipo_cierre||'').trim() || null,
@@ -3128,7 +3128,7 @@ function tosComputeRisk(strategyKw, strikes, openingSold, premiumTotal, contract
   let wing_width = null, max_risk_usd = null, note = null, detectedButterfly = false;
 
   if (strategyKw === 'VERTICAL' && strikes.length === 2) {
-    wing_width = Math.round(Math.abs(strikes[1]-strikes[0]));
+    wing_width = Math.round(Math.abs(strikes[1]-strikes[0]) * 100) / 100;
     max_risk_usd = openingSold
       ? Math.max(0, wing_width*mult*contracts - premiumTotal)  // Crédito: ancho - prima recibida
       : premiumTotal;                                          // Débito: riesgo = prima pagada
@@ -3138,7 +3138,7 @@ function tosComputeRisk(strategyKw, strikes, openingSold, premiumTotal, contract
     const putWidth = sorted[1]-sorted[0];
     const callWidth = sorted[3]-sorted[2];
     detectedButterfly = Math.abs(sorted[1]-sorted[2]) < 0.01; // strike de venta call = strike de venta put
-    wing_width = Math.round(Math.max(putWidth, callWidth));
+    wing_width = Math.round(Math.max(putWidth, callWidth) * 100) / 100;
     max_risk_usd = openingSold ? Math.max(0, wing_width*mult*contracts - premiumTotal) : premiumTotal;
     const asymmetric = Math.abs(putWidth-callWidth) > 0.01;
     if (detectedButterfly && asymmetric) {
@@ -3151,7 +3151,7 @@ function tosComputeRisk(strategyKw, strikes, openingSold, premiumTotal, contract
   } else if (strategyKw === 'BUTTERFLY' && strikes.length === 3) {
     const sorted = [...strikes].sort((a,b)=>a-b);
     const leftWidth = sorted[1]-sorted[0], rightWidth = sorted[2]-sorted[1];
-    wing_width = Math.round(Math.max(leftWidth, rightWidth));
+    wing_width = Math.round(Math.max(leftWidth, rightWidth) * 100) / 100;
     max_risk_usd = openingSold ? Math.max(0, wing_width*mult*contracts - premiumTotal) : premiumTotal;
     if (Math.abs(leftWidth-rightWidth) > 0.01) note = 'Butterfly con alas desiguales (broken wing) — el riesgo usa el ala más ancha como escenario conservador.';
   } else if (!strategyKw && strikes.length === 1) {
